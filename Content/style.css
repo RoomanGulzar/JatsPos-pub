@@ -1,0 +1,304 @@
+﻿@media print {
+    table {
+        border: 1pt solid #000000;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 11pt;
+        width: 100%;
+    }
+}
+.active, .active td {
+    background-color: #3379b5;
+}
+.imgZoom:hover {
+    transform: scale(3.5);
+    -ms-transform: scale(3.5); /* IE 9 */
+    -moz-transform: scale(3.5); /* Firefox */
+    -webkit-transform: scale(3.5); /* Safari and Chrome */
+    -o-transform: scale(3.5); /* Opera */
+}
+
+.btn {
+    margin-left: 5px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter: alpha(opacity=50);
+    -moz-opacity: 0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+    z-index: 10000;
+    display: none;
+    background: url('/Content/Images/loading.gif') no-repeat center center;
+}
+
+#cus-history {
+    float: left;
+    padding: 15px;
+    width: 60%;
+}
+
+#sup-history {
+    float: left;
+    padding: 15px;
+    width: 60%;
+}
+
+.modal-body table {
+    margin-bottom: 20px;
+    max-width: 100%;
+    width: 100%;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
+    min-height: 0.01%;
+    overflow-x: auto;
+}
+
+.ui-autocomplete {
+    height: 190px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    z-index: 100009;
+}
+
+.navbar-nav > li > a {
+    padding: 15px 5px !important;
+}
+
+.modal {
+    z-index: 1000010;
+}
+/*#prem-result {
+float:left;
+}*/
+.total-count {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.com-name {
+    float: left;
+    margin: 5px;
+}
+
+.green {
+    padding: 2px;
+    width: 100%;
+    float: left;
+    color: green;
+}
+
+.red {
+    padding: 2px;
+    width: 100%;
+    float: left;
+    color: maroon;
+}
+
+.cus-modal-dialog {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+}
+
+h3 {
+    padding-left: 15px;
+}
+
+.panel {
+    margin-top: 10px;
+}
+
+.ui-autocomplete {
+    min-height: 350px;
+}
+
+.measuring-unit {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.custombtn {
+    border-radius: 0 !important;
+    margin-top: 25px !important;
+    min-width: 100px !important;
+    float: left;
+}
+
+.form-row {
+    width: 33.3%;
+    float: left;
+    padding: 5px;
+}
+
+#tra-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#tra-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#tra-form td:nth-child(3) {
+    width: 50%;
+}
+
+#po-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#po-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#po-form td:nth-child(3) {
+    width: 50%;
+}
+
+#quo-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#quo-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#quo-form td:nth-child(3) {
+    width: 50%;
+}
+
+#quo-form-u .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#quo-form-u .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#quo-form-u td:nth-child(3) {
+    width: 50%;
+}
+
+#salec-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#salec-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#salec-items td:nth-child(3) {
+    width: 50%;
+}
+
+#salem-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#salem-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#salem-items td:nth-child(3) {
+    width: 50%;
+}
+
+#sale-form .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#sale-form .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#sale-form-u .form-row {
+    width: 20%;
+    float: left;
+    padding: 5px;
+}
+
+#sale-form-u .totla-rows .form-row {
+    width: 12%;
+    float: left;
+    padding: 5px;
+}
+
+#sale-items td:nth-child(3) {
+    width: 40%;
+}
+
+#PO-items td:nth-child(3) {
+    width: 40%;
+}
+
+.form-lable {
+}
+
+.form-input {
+}
+
+.add-div {
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    float: left;
+    margin: 10px;
+    padding: 10px;
+    display: none;
+    width: 100%;
+}
+
+input.valid {
+    border: 1px solid Green;
+}
+
+input.input-validation-error {
+    border: 1px solid maroon;
+}
+
+select.valid {
+    border: 1px solid Green;
+}
+
+select.input-validation-error {
+    border: 1px solid maroon;
+}
+
+.nav a:hover {
+    color: #fff !important;
+    background: #337AB7 !important;
+}

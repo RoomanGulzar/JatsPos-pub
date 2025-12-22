@@ -1,0 +1,307 @@
+﻿@model List<DataAccessLayer.Entities.Permission>
+
+<div class="collapse navbar-collapse" id="bs-menu-navbar-collapse-1">
+    <ul class="nav navbar-nav  change-bg-nav">
+
+        @if (Model.Where(c => c.Name == "Sales").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.Sales <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+
+                    <li>
+                        <a href="#" onclick="getSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.Sale</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getCreditSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.CreditSale</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getMaintenanceSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.MaintenanceSale</a>
+                    </li>*@
+
+                    <li>
+                        <a href="#" onclick="getAllSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.AllSales</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getReturnSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.ReturnSales</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getDueSales()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.CreditSales</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getSaleHistory()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.PaymentHistory</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getAddPayment()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.AddPayment</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getWishlist()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.Wishlist</a>
+                    </li>*@
+                    @if (Model.Where(c => c.Name == "Stock").Select(c => c.CanView).FirstOrDefault())
+                    {
+                        <li>
+                            <a href="#" onclick="getStockData()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.UpdateStock</a>
+                        </li>
+    <li>
+        <a href="#" onclick="getStockHistoryData()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.UpdateStockHistory</a>
+    </li>
+                         
+                    }
+                </ul>
+
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Users").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user fa-fw"></i>@POS.Resources.Resource.Users <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="getUsers()"><i class="fa fa-user fa-fw"></i>@POS.Resources.Resource.Users</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getUsersPerm()"><i class="fa fa-user fa-fw"></i>@POS.Resources.Resource.UserPermissions</a>
+                    </li>
+                </ul>
+
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Users").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li>
+                <a href="#" onclick="getLocationData()"><i class="fa fa-map-marker fa-fw"></i>@POS.Resources.Resource.Locations</a>
+
+            </li>
+        }
+
+        @if (Model.Where(c => c.Name == "Suppliers").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li>
+                <a href="#" onclick="getSuppliers()"><i class="fa fa-truck fa-fw"></i>@POS.Resources.Resource.Supplier</a>
+
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Customers").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li>
+                <a href="#" onclick="getCustomers()"><i class="fa fa-users fa-fw"></i>@POS.Resources.Resource.Customers</a>
+            </li>
+        }
+
+        @if (Model.Where(c => c.Name == "Inventory").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Inventory <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+
+                    <li>
+                        <a href="#" onclick="getItemData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Products</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getItemBarcodeData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Barcodes</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getServicesData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Services</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getGroupData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Categories</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getConditionData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Conditions</a>
+                    </li>*@
+                    <li>
+                        <a href="#" onclick="getUnitGroupData()"><i class="fa fa-briefcase fa-fw"></i>Unit Group</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getImportData()"><i class="fa fa-briefcase fa-fw"></i>@POS.Resources.Resource.Import</a>
+                    </li>*@
+                    @*<li>
+                        <a href="#" onclick="getItemUnitData()"><i class="fa fa-briefcase fa-fw"></i>Unit of Measures</a>
+                    </li>*@
+                    @*<li>
+                        <a href="#" onclick="getGroupMeasureinUnit()"><i class="fa fa-briefcase fa-fw"></i>Group Of Unit</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getMesureingUnit()"><i class="fa fa-briefcase fa-fw"></i>Base Unit</a>
+                    </li>*@
+                </ul>
+
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Transfer").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown-transfer">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-plane fa-fw"></i>@POS.Resources.Resource.Transfer <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="getAllTransferData()"><i class="fa fa-plane fa-fw"></i>@POS.Resources.Resource.AllTransfers</a>
+
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="getAcceptTransferData()"><i class="fa fa-plane fa-fw"></i>@POS.Resources.Resource.AcceptTransfers</a>
+                    </li>
+                </ul>
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Purchase Order").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.PurchaseOrder<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+
+                    <li>
+                        <a href="#" onclick="getAutoPO()"><i class="fa fa-file-text fa-fw"></i>Reorder Low Inventory</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getPurchaseOrder()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.All</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getPendingPO()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.Pending</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getCompletedPO()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.Completed</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="addSupplierPayment()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.AddPayments</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="addPOPayments()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.AddPayments</a>
+                    </li>*@
+                    <li>
+                        <a href="#" onclick="getPaymentHistory()"><i class="fa fa-file-text fa-fw"></i>@POS.Resources.Resource.PaymentsHistory</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getAllPo()"><i class="fa fa-file-text fa-fw"></i>Suppliers Purchase Order</a>
+                    </li>
+                </ul>
+
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Quotes").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li>
+                <a href="#" onclick="getQuotations()"><i class="fa fa-filter fa-fw"></i>@POS.Resources.Resource.Quotations</a>
+            </li>
+        }
+
+        @if (Model.Where(c => c.Name == "Reports").Select(c => c.CanView).FirstOrDefault())
+        {
+
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.Reports<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="getBarcode()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.Barcodes</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getInventoryReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.Inventory</a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getProfitLossStatement()"><i class="fa fa-wrench fa-fw"></i>Profit Loss Statement</a>
+                    </li>*@
+                    <li>
+                        <a href="#" onclick="getPurchaseReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.PurchaseHistory </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getPurchaseTaxReport()"><i class="fa fa-bar-chart-o fa-fw"></i>Purchase Tax</a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getSaleReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.SaleHistory </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getFNTSaleReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.FNTSales </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getSaleTaxReport()"><i class="fa fa-bar-chart-o fa-fw"></i> Sale Tax </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getItemwiseProfitLoss()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.ProfitLossStatementItems </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getItemwiseSH()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.SaleHistoryItems </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getExpenseReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.ExpenseHistory</a>
+                    </li>                                                   
+                    <li>
+                        
+                        <a href="#" onclick="getCustomerReport()"><i class="fa  fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.CustomerDetail </a>
+                    </li>   
+                    <li>
+
+                        <a href="#" onclick="getSupplierReport()"><i class="fa  fa-bar-chart-o fa-fw"></i> Supplier Detail </a>
+                    </li>                                                 
+                    @*<li>
+                      
+                        <a href="#" onclick="getTransferReport()"><i class="fa fa-bar-chart-o fa-fw"></i>@POS.Resources.Resource.TransferReport </a>
+                    </li>*@
+                    <li>
+                        <a href="#" onclick="getCashDrawerReport()"><i class="fa  fa-bar-chart-o fa-fw"></i> Cash Drawer </a>
+                    </li>
+                    @*<li>
+                        <a href="#" onclick="getClose()"><i class="fa fa-usd fa-fw"></i>@POS.Resources.Resource.CloseLocation </a>
+                    </li>*@
+                   
+                </ul>
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Sales").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown-transfer">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-suitcase  fa-fw"></i>@POS.Resources.Resource.Accounts <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="getExpenseHeadData()"><i class="fa fa-suitcase  fa-fw"></i>@POS.Resources.Resource.ExpenseHead </a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="getExpenseData()"><i class="fa fa-suitcase  fa-fw"></i>@POS.Resources.Resource.Expense</a>
+                    </li>
+                </ul>
+            </li>
+        }
+        @if (Model.Where(c => c.Name == "Settings").Select(c => c.CanView).FirstOrDefault())
+        {
+            <li class="dropdown-transfer">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gears  fa-fw"></i>Settings <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="getTaxSettingsData()"><i class="fa fa-gear  fa-fw"></i>@POS.Resources.Resource.Tax </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getEmailToCsvData()"><i class="fa fa-gear  fa-fw"></i>@POS.Resources.Resource.Email To </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getStoreInformationData()"><i class="fa fa-gear  fa-fw"></i>Store Information </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="getBarcodePrintSettingData()"><i class="fa fa-gear  fa-fw"></i>@POS.Resources.Resource.Barcode Print </a>
+                    </li>
+                </ul>
+            </li>
+        }
+        @*<li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-language fa-fw"></i>@POS.Resources.Resource.Language<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="@Url.Action("ChangeLanguage", "Language", new { langabb = "en-AU" })"><span class="lang-sm lang-lbl" lang="en" onclick="changeCulture('en-AU', 'd/MM/yyy')"></span></a>
+                </li>
+                <li>
+                    <a href="@Url.Action("ChangeLanguage", "Language", new { langabb = "ar-AE" })"><span class="lang-sm lang-lbl" lang="ar" onclick="changeCulture('ar-AE', 'd/MM/yyy')"></span></a>
+                </li>
+            </ul>
+        </li>*@
+        <li>
+            @*<a href="@Html.Action("LogOff", "Login")"><i class="fa fa-lock"></i>@POS.Resources.Resource.LogOut<span class="caret"></span></a>*@
+            @Html.ActionLink(@POS.Resources.Resource.LogOut, "LogOff", "Login")
+        </li>
+
+    </ul>
+</div>
+@if (true)
+{
+    <script>
+    //$(document).ready(getSales);
+    </script>
+}

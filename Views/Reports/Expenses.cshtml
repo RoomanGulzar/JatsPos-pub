@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Expenses";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Expenses</h2>
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.ExpenseReport
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("Expenses", "Reports", FormMethod.Post, new { @id = "ex-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.FromDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ToDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Head
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.ExpenseHeadID, Model.getAllHeads(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.LocationID, Model.getAllLocations(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                    <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SerialNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Description
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Head
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var sn = 0;
+                            decimal total = 0;
+                            decimal rec = 0;
+                            decimal due = 0;
+                        }
+                        @foreach (var sl in Model.ExpenseReport)
+                        {
+                            sn = sn + 1;
+                            <tr>
+                                <td>
+                                    @sn
+                                </td>
+                                <td>
+                                    @sl.Description
+                                </td>
+
+                                <td>
+                                    @sl.pHead.Name
+                                </td>
+                                <td>
+                                    @sl.pLocation.SiteName
+                                </td>
+
+                                <td>
+                                    @sl.Date
+                                </td>
+                                <td>
+                                    @sl.Amount
+                                </td>
+
+                                @{
+                            total = total + sl.Amount;
+
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-count">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>@total</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+<script>
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Expense History</title>';
+        html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>";
+        html += "<div style='font-size:large;'>Expense History</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Expense-History";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Expense History</title>');
+        docprint.document.write('' +
+    '<style type="text/css">' +
+     'table {width:100%;font-size:8px;!important; }' +
+    'table th, table td {' +
+    'border:1px solid #000;' +
+    'padding;0.5em;' +
+    '}' +
+    '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:170px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:12px;'>TechCity</div>");
+        docprint.document.write("<div style='font-size:10px;'>Expense History</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';font-size:8px;>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#pr-form').ajaxForm(options);
+</script>

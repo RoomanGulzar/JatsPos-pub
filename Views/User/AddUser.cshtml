@@ -1,0 +1,119 @@
+﻿@model POS.Models.UserVM
+@using (Html.BeginForm("AddUser", "User", FormMethod.Post, new { @id = "user-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.FirstName
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.User.FirstName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+
+        <div class="form-lable">
+            @POS.Resources.Resource.LastName
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.User.LastName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.DOB
+        </div>
+        <div class="form-input">
+            @*@Html.TextBoxFor(c => c.User.DOB, new { @class = "form-control datepicker" ,@style="width: 100%" })*@
+            <input type="text" id="User.DOB" class="form-control datepicker" />
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Login
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.User.Login, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+
+        <div class="form-lable">
+            @POS.Resources.Resource.Password
+        </div>
+        <div class="form-input">
+            @Html.PasswordFor(c => c.User.Password, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+
+        <div class="form-lable">
+            @POS.Resources.Resource.DiscountAllowed %
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.User.DiscountAllowed, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Location
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(model => model.User.LocationID, Model.getAllSites(), new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Role
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(model => model.User.RoleID, Model.getAllRoles(), new { @class = "form-control" })
+
+        </div>
+    </div>
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+     <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<script>
+
+    $(document).ready(function () {
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        //$(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getUsers();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#user-form').ajaxForm(options);
+    });
+    $('#User_LocationID,#User_RoleID').selectize({
+        create: function (input, callback) {
+
+        },
+        sortField: 'text'
+    });
+</script>

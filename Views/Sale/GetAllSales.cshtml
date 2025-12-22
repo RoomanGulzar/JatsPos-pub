@@ -1,0 +1,225 @@
+﻿
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Sales
+    </div>
+    <div class=" container-fluid   container-fixed-lg bg-white">
+        <div class="card card-transparent">
+            <div class="card-block">
+                <div class="row">
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Search
+                        </div>
+                        <div class="form-input">
+                            <input id="searchQuery" type="text" class="form-control" onkeyup="searchSaleList(0)" />
+                        </div>
+                    </div>
+                    <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+                </div>
+                <div class="sr-tab-div">
+                    <div id="salesGrid">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    var salesSearch = "";
+
+    function searchSaleList() {
+        salesSearch = $("#searchQuery").val();
+        var grid = $("#salesGrid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    $(document).ready(function () {
+        $("#salesGrid").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: {
+                        url: "/Sale/GetSaleList",
+                        type: "post",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json"
+                    },
+                    parameterMap: function (e, type) {
+                        if (type === "read") return JSON.stringify({
+                            GridFilters: e,
+                            Search: salesSearch,
+
+                        })
+                    }
+                },
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    model: {
+                        id: "SaleID",
+                        fields: {
+                            SaleID: {
+                                editable: false
+                            }
+                        }
+                    }
+                },
+                serverPaging: true,
+                serverSorting: true,
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(jqXHR.status);
+                }
+            },
+            sortable: true,
+            scrollable: true,
+            pageable: {
+                messages: {
+                    display: "{0}-{1} of {2} @POS.Resources.Resource.Sales",
+                    empty: "@POS.Resources.Resource.NoSaleFound"
+                }
+            },
+            columns: [
+                {
+                    field: "SaleNo",
+                    title: "@POS.Resources.Resource.SaleNo",
+                    width: "7%"
+                },
+                {
+                    field: "Type",
+                    title: "@POS.Resources.Resource.Type",
+                    width: "12%"
+                },
+                {
+                    field: "Location",
+                    title: "@POS.Resources.Resource.Location",
+                    width: "12%"
+                },
+                {
+                    field: "Date",
+                    title: "@POS.Resources.Resource.SaleDate",
+                    template: function (n) {
+                        return dateTimeFactory.dateTimeFormat(kendo.parseDate(n.Date))
+                    },
+                    width: "15%"
+                },
+                {
+                    field: "Customer",
+                    title: "@POS.Resources.Resource.Customer",
+                    width: "12%"
+                },
+                {
+                    field: "Total",
+                    title: "@POS.Resources.Resource.Total",
+                    width: "10%"
+                },
+                 {
+                     field: "Due",
+                     title: "@POS.Resources.Resource.Due",
+                     width: "10%"
+                 },
+                {
+                    field: "LastModifiedBy",
+                    title: "@POS.Resources.Resource.SoldBy",
+                    width: "12%"
+                },
+                {
+                    title: "@POS.Resources.Resource.Action",
+                    template: function (n) {
+                        return "<a href='#'  onclick='getDetail(\"" + n.SaleID + "\")'>@POS.Resources.Resource.Detail</a>|"
+                            + " | <a href='#' onclick='getUpdate(\"" + n.SaleID + "\")'>@POS.Resources.Resource.Update</a>"
+                            + " | <a href='#' onclick='deleteSale(\"" + n.SaleID + "\")'>@POS.Resources.Resource.Delete</a>";
+                    },
+                    width: "15%"
+                }
+            ]
+        });
+    });
+        function deleteSale(id) {
+            if (confirm("Deleting Sales will rollback all the payments and stock. Do you want to continue ?")) {
+                blockUI();
+                $.ajax({
+                    type: "GET",
+                    contentType: "html",
+                    url: '/Sale/DeleteSale?sale=' + id,
+                    async: true,
+                    success: function (data) {
+                        if (data == "true") {
+                            getAllSales();
+                            unblockUI();
+                        }
+                        else {
+                            unblockUI();
+                            return $().toastmessage('showToast', {
+                                text: data,
+                                sticky: false,
+                                position: 'bottom-right',
+                                type: 'error'
+
+                            });
+                        }
+
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        handleErrors(textStatus);
+                    }
+                });
+            }
+
+        }
+        function getDetail(id) {
+            blockUI();
+            $.ajax({
+                type: "GET",
+                contentType: "html",
+                url: '/Sale/GetSale?id=' + id,
+                async: true,
+                success: function (data) {
+                    $("#detailModal .modal-body").html(data);
+                    $("#detailModal").modal("show");
+                    unblockUI();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(textStatus);
+                }
+            });
+        }
+        function getUpdate(id) {
+            blockUI();
+            $.ajax({
+                type: "GET",
+                contentType: "html",
+                url: '/Sale/Update?id=' + id,
+                async: true,
+                success: function (data) {
+                    $("#main-content").html("");
+                    $("#main-content").html(data);
+                    unblockUI();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(textStatus);
+                }
+            });
+        }
+
+</script>

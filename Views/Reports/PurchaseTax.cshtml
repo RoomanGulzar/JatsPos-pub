@@ -1,0 +1,230 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Purchase Tax Report
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("PurchaseTax", "Reports", FormMethod.Post, new { @id = "pr-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="form-row">
+                        <div class="form-lable">
+                            From Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            To Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Supplier
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.SupplierID, Model.getAllSupplier(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.LocationID, Model.getAllLocations(), "Please Select....", new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="VIEW" />
+                    <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="PRINT" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                Sn
+                            </th>
+                            <th>
+                                Invoice
+                            </th>
+                            <th>
+                                Date
+                            </th>
+                            <th>
+                                Supplier
+                            </th>
+                            <th>
+                                Sub Total
+                            </th>
+                            <th>
+                                Tax
+                            </th>
+                            <th>
+                                Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var sn = 0;
+                            decimal subtotal = 0;
+                            decimal totaltax = 0;
+                            decimal total = 0;
+                        }
+                        @foreach (var sl in Model.PurchaseReport)
+                        {
+                            sn = sn + 1;
+
+                            var tax = sl.SubTotal * (sl.Tax / 100);
+                            
+                            var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                            var dumpSubTotal = sl.SubTotal * dumpValue;
+                            var dumpTax = tax * dumpValue;
+                            var dumpTotal = sl.Total * dumpValue;
+
+                            <tr>
+                                <td>
+                                    @sn
+                                </td>
+                                <td>
+                                    @sl.ReferenceNumberPO
+                                </td>
+                                <td>
+                                    @sl.PurchaseOrderDate
+                                </td>
+                                <td>
+                                    @sl.Suppliers.SupplierName
+                                </td>
+                                <td>
+                                    @dumpSubTotal
+                                </td>
+                                <td>
+                                    @dumpTax.ToString("F")
+                                </td>
+                                <td>
+                                    @dumpTotal
+                                </td>
+                                @{
+                            subtotal = subtotal + dumpSubTotal;
+                            totaltax = totaltax + dumpTax;
+                            total = total + dumpTotal;
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-count">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td align="right">Total</td>
+                            <td>@subtotal</td>
+                            <td>@totaltax.ToString("F")</td>
+                            <td>@total</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Purchase History</title>';
+        html += '<style type="text/css"> table {width:100%;  border-collapse:collapse; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:large'>Total Air Conditioning Solution</div>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:small'>VAT No 300523577400003 </div>";
+        html += "<div style='font-size:large;'>Purchase History</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Purchase-History";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Purchase History</title>');
+        docprint.document.write('' +
+      '<style type="text/css">' +
+       'table {width:100%;  border-collapse:collapse; font-size:7px; }' +
+      'table th, table td {' +
+      'border:1px solid #000;' +
+      'padding;0.5em;' +
+      '}' +
+      '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:170px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:12px;'>Total Air Conditioning Solution</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:12px;'>VAT No 300523577400003</div>");
+        docprint.document.write("<div style='font-size:10px;'>Purchase History</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    var $select2 = $("#RC_LocationID").selectize();
+    $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+        }
+    };
+    $('#pr-form').ajaxForm(options);
+</script>

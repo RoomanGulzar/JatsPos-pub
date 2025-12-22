@@ -1,0 +1,105 @@
+﻿@model POS.Models.UserVM
+
+@{
+    ViewBag.Title = "USERS";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Users
+    </div>
+    <div class="panel-body">
+       
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAdd(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+            <div id="user-div" class="add-div">
+@Html.Action("AddUser","User")
+            </div>
+   
+        <div class="tab-div user-tab-div">
+            <table  class="display table" id="userTable" >
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.FirstName
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.LastName
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.DOB
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Login
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Password
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.IsActive
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.IsDeleted
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RoleID
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Users)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FirstName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.LastName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DOB)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Login)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Password)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IsActive)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IsDeleted)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Role.Name)
+                            </td>
+                            <td>
+                                <a href="#" onclick="editUser('@item.UserID.ToString()')">@POS.Resources.Resource.Update</a> | <a href="#" onclick="deleteUser('@item.UserID.ToString()')">@POS.Resources.Resource.Delete</a> 
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+    $(document).ready(function () {
+
+        $('#userTable').dataTable({
+            responsive: true
+        });
+       
+    });
+
+
+</script>
+

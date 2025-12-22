@@ -1,0 +1,34 @@
+﻿
+@model POS.Models.CustomerRepair.CustomerRepairVM
+@{
+    ViewBag.Title = "Repair Managment";
+    Layout = "~/Views/Shared/_LayoutCustomerRepair.cshtml";
+}
+
+
+<div class="page-header navbar navbar-fixed-top">
+    <div class="page-header-inner ">
+        <div class="page-logo" style=" font-size: 25px; font-weight: bold; padding-top: 25px;">
+            TechCity
+        </div>
+        <div class="location-name">
+            <b>@Model.LocationName</b>
+        </div>
+
+        <div class="page-actions" style="float:right;">
+            <div style="float:left;margin:5px;">
+                <a href="@Url.Action("LogOff", "Login")" 
+                   class="btn btn-circle red btn-menu-lg" 
+                   onclick="keyPressBeep()"><i class="fa fa-sign-out"></i> @POS.Resources.Resource.LogOut </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="update_customer_info_screen" class="not_main_screen content-screen">
+</div>
+<div class="content-screen" id="main_screen">
+    <div style="display:flex;justify-content:center;padding:20px"><h3>Waiting for repair order request</h3></div>
+</div>
+
+

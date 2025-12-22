@@ -1,0 +1,104 @@
+﻿@model POS.Models.PurchaseOrderVM
+@{
+    ViewBag.Title = "PurchaseOrder";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.All Purchase Order
+    </div>
+    <div class="panel-body">
+        @try
+        {
+            <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddPurchaseOrder(this)" />
+            <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="quo-div" class="add-div">
+            @Html.Action("Create", "PurchaseOrder")
+        </div>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="POTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderInvoiceNumber 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Supplier
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RequiredbyDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Total
+                        </th>
+                        @*<th>
+                            @POS.Resources.Resource.Paid
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Due
+                        </th>*@
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Purchaseorders)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumberPO)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PurchaseOrderDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Suppliers.SupplierName)
+                            </td>
+                            <td>@Html.DisplayFor(modelitem => item.RequiredbyDate)</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Total)
+                            </td>
+                            @*<td>
+                                @Html.DisplayFor(modelItem => item.Paid)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Due)
+                            </td>*@
+                            <td>
+                             <a href="#" onclick="editPurchaseOrder('@item.PurchaseOrderID.ToString()')">@POS.Resources.Resource.Update/Return</a>  | <a href="#" onclick="returnPurchaseOrder('@item.PurchaseOrderID.ToString()')">@POS.Resources.Resource.ReturnFull </a>                      
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+        catch(Exception eee)
+        {
+            var msg = eee.Message;
+        }
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('select').selectize();
+        try {
+            var $select1 = $("#Purchaseorder_FKSupplierID").selectize();
+            @*$("#Purchaseorder_FKSupplierID").val('@Model.getAllSupplier().Where(x=>x.Text.ToLower()=="cash").First().Value');
+            $select1[0].selectize.setValue('@Model.getAllSupplier().Where(x=>x.Text.ToLower()=="cash").First().Value');*@
+        } catch (e) {
+            //alert(e.message);
+        }
+
+        $('#POTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

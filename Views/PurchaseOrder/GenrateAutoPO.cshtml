@@ -1,0 +1,241 @@
+﻿@model POS.Models.PurchaseOrderVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.AutoPurchaseOrder
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("Create", "PurchaseOrder", FormMethod.Post, new { @id = "po-form-auto" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(c => c.Purchaseorder.PurchaseOrderID)
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.PurchaseOrderDate
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.PurchaseOrderDate, new { @class = "form-control" })
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Location
+                </div>
+                <div class="form-input">
+                    @Html.DropDownListFor(c => c.Purchaseorder.FKLocationID, Model.getAllLocations(Model.User), new { @class = "form-control", @id="Sale_FKLocationID"})
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.RequiredbyDate
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.RequiredbyDate, new { @class = "form-control" })
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.ReferenceNumber
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.ReferenceNumberPO, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.PaymentTerms
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.PaymentTerms, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.ShipmentMethod
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.ShippinMethod, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Supplier
+                </div>
+                <div class="form-input">
+                    @Html.DropDownListFor(c => c.Purchaseorder.FKSupplierID, Model.getAllSupplier(), new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="quo-item-main">
+                <div style="clear:both;">
+
+                </div>
+
+                <table class="table table-responsive" id="PO-items">
+                    <thead>
+                        <tr>
+                            <th>@POS.Resources.Resource.SaleNo</th>
+                            <th>@POS.Resources.Resource.Item #</th>
+                            <th>@POS.Resources.Resource.Product</th>
+                            <th>@POS.Resources.Resource.Quantity</th>
+                            <th>@POS.Resources.Resource.Cost</th>
+                            <th>@POS.Resources.Resource.SalePrice</th>
+                            <th>@POS.Resources.Resource.Total</th>
+                            @*<th>@POS.Resources.Resource.MeasuringUnit</th>*@
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{var sn = 0;}
+                        @for (int i = 0; i < Model.Purchaseorder.Items.Count(); i++)
+                        {
+                            sn++;
+                                <tr>
+                                    <td>
+                                        @sn
+                                    </td>
+                                    <td><input type="text" class="form-control item-search" value="@Model.Purchaseorder.Items[i].Item.ItemNoStr" readonly /></td>
+                                    <td>
+                                        <input id="Po-item-0" value="@Model.Purchaseorder.Items[i].Item.Name @Model.Purchaseorder.Items[i].Item.Description " class="sale-items form-control" readonly /> <input type='hidden' class="item-id-hdn" value="@Model.Purchaseorder.Items[i].FKItemID" name='PurchaseOrder.Items[@i].FKItemID' />
+                                        <input type='hidden' 
+                                               class="item-id-hdn" 
+                                               value="@Model.Purchaseorder.Items[i].PurchaseItemID" name='PurchaseOrder.Items[@i].PurchaseItemID' />
+                                    </td>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control sale-item-quantity"
+                                               onblur='setItemTotalPO(this)'
+                                               value="@Model.Purchaseorder.Items[i].Quantity"
+                                               name="PurchaseOrder.Items[@i].Quantity" />
+                                    </td>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control sale-item-cost"
+                                               onblur='setItemTotalPO(this)'
+                                               value="@Model.Purchaseorder.Items[i].UnitPrice"
+                                               name="PurchaseOrder.Items[@i].UnitPrice" />
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control sale-price" 
+                                               value="@Model.Purchaseorder.Items[i].SalePrice" 
+                                               name="PurchaseOrder.Items[@i].SalePrice" />
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control sale-item-total" 
+                                               value="@Model.Purchaseorder.Items[i].Total" 
+                                               name="PurchaseOrder.Items[@i].Total" readonly />
+                                    </td>
+                                    <td><a href='#' onclick='removeRowPO(this)'>Remove</a></td>
+                                </tr>
+                        }
+
+
+                    </tbody>
+                </table>
+                <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowPO()" value="@POS.Resources.Resource.AddNewRow " />
+            </div>
+
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.SubTotal
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.SubTotal,
+                    new
+                    {
+                        @class = "form-control quo-sub",
+                        @readonly = "readonly"
+                    })
+
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Total
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Purchaseorder.Total,
+                    new
+                    {
+                        @class = "form-control quo-total",
+                        @readonly = "readonly"
+                    })
+
+                </div>
+            </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="Create PO" />
+    <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="getPurchaseOrder()" />
+
+        }
+    </div>
+</div>
+<div class="modal fade image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    //function calculateRemaining(ref) {
+    //    var total = parseInt($(ref).parent().parent().find(".sale-item-rem").val());
+    //    var rec = parseInt($(ref).parent().parent().find(".sale-item-rec").val());
+    //    $(ref).parent().parent().find(".sale-item-rem").val(total - rec);
+    //}
+    $(document).ready(function () {
+
+        var $select2 = $("#Sale_FKLocationID").selectize();
+        $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+        //$(".datepicker").datepicker();
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                if ($("#PO-items tr").length < 1)
+                {
+                    errorToast();
+                    return false;
+                }
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+
+                $(".btn").prop("disabled", false);
+                unblockUI();
+
+                if (msg == false) {
+                    return errorToast();
+                }
+                successToast();
+                getPurchaseOrder();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#po-form-auto').ajaxForm(options);
+
+        //addNewRowPO();
+    });
+</script>

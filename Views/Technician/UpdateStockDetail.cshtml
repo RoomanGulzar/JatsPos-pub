@@ -1,0 +1,152 @@
+﻿@model POS.Models.StockVM
+<div class="row">
+    <div class="col-sm-12">
+        <div class="portlet light">
+            <div class="panel-body">
+
+                @using (Html.BeginForm("UpdateStock", "Technician", FormMethod.Post, new { @id = "stock-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Stock.FKLocationID, Model.getAllLocations(Model.User), new { @class = "form-control", @id = "Stock_FKLocationID" })
+                        </div>
+                        <div class="form-lable">
+                            @POS.Resources.Resource.InvoiceNumber
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Stock.RefNo, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="sale-item-main">
+                        <div style="clear:both;"></div>
+                        <table class="table table-responsive" id="stock-items">
+                            <thead>
+                                <tr>
+                                    <th style="width:5%;">@POS.Resources.Resource.SaleNo</th>
+                                    <th style="width:7%;">@POS.Resources.Resource.ItemNo</th>
+                                    <th>@POS.Resources.Resource.Product</th>
+                                    <th style="width:15%;">@POS.Resources.Resource.Quantity</th>
+                                    <th style="width:15%;">@POS.Resources.Resource.Price</th>
+                                    <th style="width:15%;">@POS.Resources.Resource.Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var sn = 0;
+                                }
+                                @for (var i = 0; i < Model.Stock.uItem.Count; i++)
+                                {
+                                    <tr>
+                                        @{
+                                    sn = sn + 1;
+                                        }
+                                        <td>
+                                            @sn
+                                        </td>
+                                        <td>
+                                            <input name="Stock.uItem[0].ItemNo" type="text" value="@Model.Stock.uItem[i].ItemNo" class="form-control item-search" onchange="getItemDetailByNumber(this)" readonly />
+                                        </td>
+                                        <td>
+                                            <input id="ST-item-0" name="Stock.uItem[0].Desc" value="@Model.Stock.uItem[i].Desc" class="sale-items form-control" readonly /> <input type='hidden' class="item-id-hdn" name='Stock.uItem[0].ItemID' />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control sale-item-quantity" value="@Model.Stock.uItem[i].Quantity" name="Stock.uItem[0].Quantity" readonly />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control sale-item-price" value="@Model.Stock.uItem[i].SalePrice" name="Stock.uItem[0].SalePrice" readonly />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control sale-item-total" value="@Model.Stock.uItem[i].Total" name="Stock.uItem[0].Total" readonly />
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                        @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowStock()" value="@POS.Resources.Resource.AddNewRow" />*@
+                    </div>
+                    <div class="totla-rows">
+                        <div class="form-row">
+                            <div class="form-lable">
+                                @POS.Resources.Resource.Quantity
+                            </div>
+                            <div class="form-input">
+                                @Html.TextBoxFor(c => c.Stock.TotalAmount, new { @class = "form-control", @readonly = "readonly", @id = "stockQuantity" })
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-lable">
+                                @POS.Resources.Resource.Total
+                            </div>
+                            <div class="form-input">
+                                @Html.TextBoxFor(c => c.Stock.Quantity, new { @class = "form-control", @readonly = "readonly", @id = "stockTotal" })
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Print" onclick="printReceipt()" />
+                            <input type="button" 
+                                   class="btn btn-primary custombtn" 
+                                   value="Close" onclick="closeThis()" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        $("select").selectize();
+        var $select1 = $("#Location").selectize();
+        // $select1[0].selectize.setValue("f66a3a73-0c03-4bf9-ac32-5d637b45caca");
+        var $select2 = $("#Stock_FKLocationID").selectize();
+        $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+
+    });
+    function printReceipt() {
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write('<div style="width:800px;padding:20px;float:left;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>ET POS TRADING EST.</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>Imports & Whole Sales of Electronics Spare Parts. Kingdom Of Saudi Arabia - Riaydh - Deera - Thormairy St. P.o. Box 330022-Riyadh 11373 - Tel.:2872326 - Fax: 2865558 </div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Update Stock </div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'>Invoice No : " + $("#Stock_RefNo").val() + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Location : " + $("#Stock_FKLocationID :selected").text() + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:medium;margin-top:10px;'><span style='float:left;width:10%;'>SN</span><span style='float:left;width:15%;'>ITEM NO</span><span style='float:left;width:25%'>DESCRIPTION</span><span style='float:left;width:15%'>QUANTITY</span><span style='float:left;width:15%'>PRICE</span><span style='float:left;width:15%'>TOTAL</span></div>");
+        $("#stock-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            sn = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;width:10%;'>" + sn + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:25%'>" + desc + "</span><span style='float:left;width:15%'>" + qty + "</span><span style='float:left;width:15%'>" + price + "</span><span style='float:left;width:15%'>" + total + "</span></div>");
+
+        });
+        var items = $("#stockQuantity").val();
+        var amount = $("#stockTotal").val();
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium;margin-top:10px;'>Total Items: " + items + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium;'>Total Amount: " + amount + "</div>");
+        docprint.document.write('</div>');
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+    function closeThis() {
+
+        $("#detailModal").modal("hide");
+        UpdateStockHistoryScreen(false)
+    }
+</script>

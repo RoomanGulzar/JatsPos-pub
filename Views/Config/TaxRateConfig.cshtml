@@ -1,0 +1,122 @@
+﻿@model BusinessLayer.ViewModels.Config.TaxRateConfigModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Tax
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("TaxRateConfig", "Config", FormMethod.Post, new { enctype = "multipart/form-data", @id = "tax-rates-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(c => c.ConfigID)
+            @Html.HiddenFor(c => c.Name)
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card card-transparent">
+                        <div class="card-block">
+                            @{
+            if (Model.TaxRates != null)
+            {
+                <table class="table table-responsive" id="tax-rates">
+                    <thead>
+                        <tr>
+                            <th>@POS.Resources.Resource.Name</th>
+                            <th>Tax Rate</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TaxRates.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(c => c.TaxRates[i].TaxRateID, new { @class = "form-control tax-rate-id" })
+                                    @Html.TextBoxFor(c => c.TaxRates[i].Name, new { @class = "form-control tax-rate-name" })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(c => c.TaxRates[i].TaxRate, new { @class = "form-control tax-rate-value" })
+                                </td>
+                                <td>
+                                    <a href='#' onclick='removeTaxRateRow(this,@i)'><i class='fa fa-trash fa-fw'></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                                @*<input type="button" class="btn btn-warning custombtn" onclick="addNewRowTaxRate()" value="Add new Tax Rate" />*@
+            }
+                            }
+                        </div>
+                    </div>
+                    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script>
+
+    function addNewRowTaxRate() {
+        var rowCount = parseInt($('#tax-rates >tbody >tr').length);
+        var row = "<tr>";
+        row += "<td> <input name='TaxRates[" + rowCount + "].Name' class='tax-rate-name form-control' />";
+        row += "<input type='hidden' class='tax-rate-id' name='TaxRates[" + rowCount + "].TaxRateID' value='" + kendo.guid() + "' /></td>";
+        row += "<td> <input name='TaxRates[" + rowCount + "].TaxRate' class='tax-rate-value form-control' /></td>";
+        row += "<td><a href='#' onclick='removeTaxRateRow(this," + rowCount + ")'><i class='fa fa-trash fa-fw'></i></a></td>";
+        row += "</tr>";
+        $('#tax-rates >tbody').append(row);
+
+    }
+    function removeTaxRateRow(ref, index) {
+
+        $(ref).parent().parent().remove();
+        setSnTaxRate(index);
+    }
+    function setSnTaxRate(startIndex) {
+        var rowCount = 0;
+        $("#tax-rates tr:gt(0)").each(function () {
+            if (startIndex <= rowCount) {
+                $(this).find('td').each(function () {
+                    $(this).find('input').each(function (index, obj) {
+                        var inputName = obj.name;
+                        if (inputName) {
+                            var replace = 'TaxRates[' + (rowCount + 1) + ']';
+                            var replaceWith = 'TaxRates[' + rowCount + ']';
+                            inputName = inputName.replace(replace, replaceWith);
+                            $(this).attr('name', inputName);
+                        }
+
+                    });
+
+                });
+            }
+
+            rowCount++
+        });
+    }
+
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+        },
+        success: function (msg) {
+            unblockUI();
+            successToast();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(jqXHR.status);
+            unblockUI();
+        }
+    };
+    $('#tax-rates-form').ajaxForm(options);
+
+</script>
+
+
+

@@ -1,0 +1,216 @@
+﻿@using Common
+@model POS.Models.Pos.PosSaleVM
+
+<div class="portlet light">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="icon-bar-chart font-green"></i>
+            <span class="caption-subject font-green bold uppercase">Repair Orders</span>
+        </div>
+        <div class="actions">
+            <button onclick="openNewRepairOrderWindow()"
+                    class="btn btn-lg dark btn-home-back">
+                Add New
+                </button>
+            <button onclick="switchRepairOrdersScreen(false)" 
+                    class="btn btn-lg dark btn-home-back">@POS.Resources.Resource.Home</button>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div>
+            <div class="tab-div sr-tab-div">
+                <table class="display" style="width:100%" id="repairOrderTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Order #
+                            </th>
+                            <th>Date</th>
+                            <th>Customer Name</th>
+                            <th>Customer Phone</th>
+                            <th>Customer Email</th>
+                            <th>Total</th>
+                            <th>@POS.Resources.Resource.Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.RepairOrders)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.RefNo)
+                                </td>
+                                <td>
+                                    @item.Date.ToShortDateString()
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CustomerName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CustomerPhone)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CustomerEmail)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Total)
+                                </td>
+                                <td>
+                                    @if (item.Status == SharedTypes.RepairOrderStatus.Created)
+                                    {
+                                        <button onclick="SendRepairOrderToCustomer('@item.Id')"
+                                                class="btn btn-lg blue">
+                                            Send to Customer
+                                        </button>
+                                    }
+                                    else if (item.Status == SharedTypes.RepairOrderStatus.CustomerAgreed)
+                                    {
+                                        <button onclick="PrintScreen('@item.Id')"
+                                                class="btn btn-lg blue">
+                                            Print Order
+                                        </button>
+    <button onclick="openPrintRepairOrderTagWindow('@item.Id')"
+            class="btn btn-lg blue">
+        Print Tags
+    </button>
+                                    }
+                                    else if (item.Status == SharedTypes.RepairOrderStatus.Completed)
+                                    {
+                                        <button onclick="addRepairOrderInvoice('@item.Id')"
+                                                class="btn btn-lg blue">
+                                            Generate Invoice
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <b>SOLD</b>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="newRepairOrderWindow" style="display:none;">
+    <div style="display:flex;justify-content:space-between;padding:20px">
+        <h2>New Repair Order</h2>
+        <button type="button" class="btn" onclick="closeNewRepairOrderWindow()">X</button>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            <div style="display:flex;flex-direction:column">
+                <label>Device Information</label>
+                <input type="text" class="form-control" id="repairOrderDeviceInfo" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Device Password</label>
+                <input type="text" class="form-control" id="repairOrderDevicePassword" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Accessories Left</label>
+                <input type="text" class="form-control" id="repairOrderAccessoriesLeft" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Issue/Problem Description</label>
+                <input type="text" class="form-control" id="repairOrderProblemDescription" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Estimated Cost</label>
+                <input type="number" class="form-control" id="repairOrderEstimatedCost" />
+            </div>
+            <p>Optional Customer Information</p>
+            <div style="display:flex;flex-direction:column">
+                <label>Customer Name</label>
+                <input type="text" class="form-control" id="repairOrderCustomerName" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Customer Phone</label>
+                <input type="text" class="form-control" id="repairOrderCustomerPhone" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Customer Email</label>
+                <input type="text" class="form-control" id="repairOrderCustomerEmail" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            <button type="button" class="btn green" onclick="addNewRepairOrderRecord()">Send to Customer</button>
+        </div>
+    </div>
+</div>
+<a style="display:none" target="_blank" id="download-pdf" href="" onclick=""></a>
+
+<div id="printRepairOrderTagWindow" style="display:none;">
+    <div style="display:flex;justify-content:space-between;padding:20px">
+        <h2>Print Repair Order - Tags</h2>
+        <button type="button" class="btn" onclick="closePrintRepairOrderTagWindow()">X</button>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            <div style="display:flex;flex-direction:column">
+                <label>Number of Prints</label>
+                <input type="number" class="form-control" id="numberOfPrints" />
+            </div>
+            <div style="display:flex;flex-direction:column">
+                <label>Start From</label>
+                <input type="number" class="form-control" id="startFrom" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            <button type="button" class="btn green" onclick="printRoTags()">Print Tags</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+    var notificationHubForRepairOrders = null;
+    // notification hub
+    (function () {
+        // Defining a connection to the server hub.
+        notificationHubForRepairOrders = $.connection.notifyHub;
+        // Setting logging to true so that we can see whats happening in the browser console log. [OPTIONAL]
+        $.connection.hub.logging = true;
+        // Start the hub
+        $.connection.hub.start();
+
+        debugger;
+        // Client method to broadcast the message
+        notificationHubForRepairOrders.client.reloadRepairOrders = function () {
+            debugger;
+            RepairOrdersScreen();
+        };
+
+    }());
+
+    $(document).ready(function () {
+
+        $('#repairOrderTable').dataTable({
+            responsive: true,
+            order: [[0, 'desc']]
+
+        });
+
+        $("#newRepairOrderWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+        $("#printRepairOrderTagWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+    });
+
+</script>

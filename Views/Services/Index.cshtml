@@ -1,0 +1,109 @@
+﻿@model POS.Models.ServicesVM
+@{
+    ViewBag.Title = "Services";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Services
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew " onclick="addServices()" />
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div id="Service-div" class="add-div">
+
+        </div>
+
+        <div class="tab-div Item-tab-div">
+            <table id="ServiceTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Number
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Description
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.PurchasePrice
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.SalePrice
+                        </th>
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Services)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ItemNoStr)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PurchaseCost)
+                            </td>
+                  
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SalePrice)
+                            </td>
+                            <td>
+                                
+                                <a href="#" onclick="editService('@item.ItemID.ToString()')">@POS.Resources.Resource.Update/@POS.Resources.Resource.Detail</a>  <a href="#" onclick="deleteService('@item.ItemID.ToString()')">@POS.Resources.Resource.Delete</a>
+                                
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script>
+    //$(document).ready(function () {
+    //    $('#ServiceTable').dataTable({
+    //        "processing": true,
+    //        "serverSide": true,
+    //        "info": true,
+    //        "stateSave": true,
+    //        "responsive": true,
+    //        "lengthMenu": [[10, 20, 50, -1], [10, 20, 50, "All"]],
+    //        "ajax": {
+    //            "type": "POST",
+    //            "url": '/Services/DataHandler',
+    //            "contentType": 'application/json; charset=utf-8',
+    //            'data': function (data) {
+    //                return data = JSON.stringify(data);
+    //            }
+    //        },
+    //            "columns": [
+    //                { "data": "ItemNoStr", "orderable": false },
+    //                { "data": "Name", "orderable": false },
+    //                { "data": "Description", "orderable": false },
+    //                { "data": "PurchaseCost", "orderable": false },
+    //                { "data": "SalePrice", "orderable": false },
+    //                { "data": "Action", "orderable": false }
+    //            ]
+    //        });
+    //});
+    $(document).ready(function () {
+
+        $('#ServiceTable').dataTable({
+            responsive: true
+        });
+
+    });
+
+</script>

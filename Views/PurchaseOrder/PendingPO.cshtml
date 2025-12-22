@@ -1,0 +1,82 @@
+﻿@model POS.Models.PurchaseOrderVM
+@{
+    ViewBag.Title = "PurchaseOrder";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Pending Purchase Order
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="POTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderReferenceNumber 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderDate 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Supplier
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ShipmentMethod 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.PaymentTerms 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RequiredbyDate 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Total
+                        </th>
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Purchaseorders)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumberPO)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PurchaseOrderDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Suppliers.SupplierName)
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.ShippinMethod) </td>
+                            <td>@Html.DisplayFor(modelitem => item.PaymentTerms)</td>
+                            <td>@Html.DisplayFor(modelitem => item.RequiredbyDate) </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Total)
+                            </td>
+                            <td>
+                                <a href="#" onclick="acceptPO('@item.PurchaseOrderID.ToString()')">@POS.Resources.Resource.Accept</a> 
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#POTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

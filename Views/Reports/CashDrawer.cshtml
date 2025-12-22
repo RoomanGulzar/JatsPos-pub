@@ -1,0 +1,239 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Cash Drawers
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("CashDrawer", "Reports", FormMethod.Post, new { @id = "cl-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.From Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date", @style = "width:100%;" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.To Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date", @style = "width:100%;" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.LocationID, Model.getAllLocations(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+                
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                Opening Date Time
+                            </th>
+                            <th>
+                                Closing Date Time
+                            </th>
+                            <th>
+                                Opening Balance
+                            </th>
+                            <th>
+                                Closing Balance
+                            </th>
+                            <th>
+                                Balance Amount
+                            </th>
+                            <th>
+                                Number Of Sales
+                            </th>
+                            <th>
+                                Total Sale
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Cash
+                            </th>
+                            <th>
+                                Credit Card
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Due
+                            </th>
+                            <th>
+                                By
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Comments
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var cd in Model.CashDrawer)
+                        {
+                            var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                            var openBal = cd.OpeningBalance * dumpValue;
+                            var cloBal = cd.ClosingBalance * dumpValue;
+                            var balance = cd.Balance * dumpValue;
+                            var totalSale = cd.TotalSale * dumpValue;
+                            var cashSale = cd.CashSale * dumpValue;
+                            var crCardSale = cd.CreditCardSale * dumpValue;
+                            var dueSale = cd.DueSale * dumpValue;
+                            <tr>
+                                <td>
+                                    @cd.Location
+                                </td>
+                                <td>
+                                    @cd.OpeningDateTime
+                                </td>
+                                <td>
+                                    @cd.ClosingDateTime
+                                </td>
+                                <td>
+                                    @openBal
+                                </td>
+                                <td>
+                                    @cloBal
+                                </td>
+                                <td>
+                                    @balance
+                                </td>
+                                <td>
+                                    @cd.NumberOfSales
+                                </td>
+                                <td>
+                                    @totalSale
+                                </td>
+                                <td>
+                                    @cashSale
+                                </td>
+                                <td>
+                                    @crCardSale
+                                </td>
+                                <td>
+                                    @dueSale
+                                </td>
+                                <td>
+                                    @cd.LastModifiedBy
+                                </td>
+                                <td>
+                                    @cd.Comments
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function pdf() {
+
+        var html = "";
+        html += '<html><head><title>Cash Drawer</title>';
+        html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += '<div class="col-lg-12" style="text-align:right">TechCity</div><br/>';
+        html += "<div style='font-size:large;'>Cash Drawer</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Cash-Drawer";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Cash Drawer</title>');
+        docprint.document.write('' +
+    '<style type="text/css">' +
+     'table {width:100%;font-size:8px;!important; }' +
+    'table th, table td {' +
+    'border:1px solid #000;' +
+    'padding;0.5em;' +
+    '}' +
+    '</style>');
+
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">Kef Food</div><br/>');
+        docprint.document.write("<div style='font-size:10px;'>Cash Drawer</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';font-size:8px;>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(jqXHR.status);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#cl-form').ajaxForm(options);
+</script>
+

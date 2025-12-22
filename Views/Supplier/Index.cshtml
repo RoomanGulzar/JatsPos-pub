@@ -1,0 +1,108 @@
+﻿@model POS.Models.SupplierVM
+@{
+    ViewBag.Title = "SUPPLIERS";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+     @POS.Resources.Resource.Supplier
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddSupplier(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="sup-div" class="add-div">
+            @Html.Action("Create", "Supplier")
+        </div>
+
+        <div class="tab-div supplier-tab-div">
+            <table class="display" id="supplierTable">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ContactPerson
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ContactPersonNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.BankAccountTitle
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.BankAccountNumber
+                        </th>
+                        @*<th>
+                            Bank Account Detail
+                        </th>*@
+                        <th>
+                            @POS.Resources.Resource.GST
+                        </th>
+                        @*<th>
+                            Address
+                        </th>
+                        <th>
+                            Email
+                        </th>*@
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Suppliers)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SupplierNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SupplierName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ContactPerson)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ContactPersonPhone)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.BankAccountTitle)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.BankAccountNumber)
+                            </td>
+                            @*<td>
+                                @Html.DisplayFor(modelItem => item.BankAccountDetails)
+                            </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CompanyGST)
+                            </td>
+                            @*<td>
+                                @Html.DisplayFor(modelItem => item.SupplierAddress)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SupplierEmail)
+                            </td>*@
+                            <td>
+                                <a href="#" onclick="editSupplier('@item.SupplierID.ToString()')">@POS.Resources.Resource.Update/@POS.Resources.Resource.Detail</a> | <a href="#" onclick="deleteSupplier('@item.SupplierID.ToString()')">@POS.Resources.Resource.Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#supplierTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>

@@ -1,0 +1,103 @@
+﻿@model POS.Models.ItemBarcodeVM
+
+@using (Html.BeginForm("Barcodes", "Item", FormMethod.Post, new { @id = "salec-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="table table-responsive" id="sale-items">
+        <thead>
+            <tr>
+                <th>@POS.Resources.Resource.ItemNo</th>
+                <th>@POS.Resources.Resource.Item</th>
+                <th>@POS.Resources.Resource.MeasuringUnit</th>
+                <th>@POS.Resources.Resource.Barcode</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ItemBarcodes != null)
+            {
+                if (Model.ItemBarcodes.Count > 0)
+                {
+                    for (var i = 0; i < Model.ItemBarcodes.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @Html.HiddenFor(c => c.ItemBarcodes[i].ItemBarcodeID, new { @class = "barcode-list" })
+<input type="text" class="form-control" value="@Model.ItemBarcodes[i].pItem.ItemNoStr" readonly />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control"
+                                       value="@Model.ItemBarcodes[i].pItem.Name  @Model.ItemBarcodes[i].pItem.Description"
+                                       readonly />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@Model.ItemBarcodes[i].pUnit.Name" readonly />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@Model.ItemBarcodes[i].Barcode" name="ItemBarcodes[@i].Barcode" required />
+                            </td>
+                        </tr>
+                    }
+
+                }
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                    @if (Model.PageNo > 0)
+                    {
+                        <button type="button" onclick="searchItemBarcodes('@(Model.PageNo - 1)')">Previous</button>
+                    }
+                    @if (Model.Total > Model.PageSize)
+                    {
+                        <span>Page @(Model.PageNo + 1)</span>
+                    }
+                    @if ((Model.Total - (Model.PageNo * Model.PageSize)) > Model.PageSize)
+                    {
+                        <button type="button" onclick="searchItemBarcodes('@(Model.PageNo + 1)')">Next</button>
+                    }
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <input type="submit" class="btn btn-primary custombtn" value="Save" />
+    <input type="button" class="btn btn-primary custombtn" onclick="printBarcodes()" value="Print" />
+    <a style="display:none" target="_blank" id="download-pdf" href="" onclick=""></a>
+}
+<script>
+
+    function printBarcodes() {
+        $("#download-pdf").attr("href", "/Item/BarcodeReport?barcodeQuery="
+            + query + "&showSystemBarcode="
+            + showSystemBarcodes + "&numberOfPrints="
+            + numberOfPrints + "&startFrom="
+            + startFrom);
+        window.open($('#download-pdf').attr('href'), "_blank");
+
+    }
+
+    $(document).ready(function () {
+
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+            },
+            success: function (msg) {
+                unblockUI();
+                successToast();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+            }
+        };
+        $('#salec-form').ajaxForm(options);
+    });
+</script>

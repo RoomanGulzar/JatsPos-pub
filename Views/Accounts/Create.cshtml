@@ -1,0 +1,110 @@
+﻿@model POS.Models.ExpenseVM
+
+@using (Html.BeginForm("Create", "Accounts", FormMethod.Post, new { @id = "exp-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Location
+        </div>
+        <div class="form-input">
+          @Html.DropDownListFor(c => c.Expense.FKLocationID, Model.getAllLocations(Model.User), new {@class = "form-control", @id="Sale_FKLocationID" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Head
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Expense.FKExpenseHead, Model.getAllHeads(), new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Date
+        </div>
+        <div class="form-input">
+            @*@Html.TextBoxFor(c => c.DateforExpense, new { @class = "form-control datepicker" })*@
+            <input type="datetime" name="DateforExpense" class="form-control datepicker" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.InvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Expense.Invoice, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Description
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Expense.Description, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Amount
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Expense.Amount, new { @class = "form-control", @type = "numeric"})
+
+        </div>
+        <input type="text" id="test" class="temp3" onchange="arabicconvertion()"/>
+        <div class="test4">123321</div>
+    </div>
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<script>
+
+    
+    $(document).ready(function () {
+        //    debugger;
+        //        $("input").each(function () {
+        //            $(this).persiaNumber();
+
+        //            var temp = $("this").val();
+        //            alert(temp);
+
+
+        //        });
+      
+        var $select2 = $("#Sale_FKLocationID").selectize();
+        $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+        ////$("#DateforExpense").datepicker({ dateFormat: 'dd/mm/yy' });
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $("#Expense_Date").val("");
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getExpenseData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#exp-form').ajaxForm(options);
+    });
+</script>

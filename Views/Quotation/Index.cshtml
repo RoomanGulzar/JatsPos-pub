@@ -1,0 +1,75 @@
+﻿@model POS.Models.QuotationVM
+@{
+    ViewBag.Title = "Quotation";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Quotation
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew " onclick="showHideAddQuotation(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="quo-div" class="add-div">
+            @Html.Action("Create", "Quotation")
+        </div>
+
+        <div class="tab-div quotation-tab-div">
+            <table class="display" id="quotationTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.InvoiceNumber
+                        </th>
+                        <th>
+                           @POS.Resources.Resource.Date
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Customer
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Total
+                        </th>
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Quotes)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.QuoteDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Customer.CustomerName)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Total)
+                            </td>
+                            <td>
+                                <a href="#" onclick="editQuote('@item.QuotationID.ToString()')">@POS.Resources.Resource.Update</a> | <a href="#" onclick="moveToSale('@item.QuotationID.ToString()')">@POS.Resources.Resource.MoveToSale</a> | <a href="#" onclick="deleteQuote('@item.QuotationID.ToString()')">@POS.Resources.Resource.Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#quotationTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

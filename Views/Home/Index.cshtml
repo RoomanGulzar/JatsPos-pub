@@ -1,0 +1,163 @@
+﻿@model DataAccessLayer.Entities.DbUser
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .row {
+    margin: 0%;
+}
+    #saleGraph {
+            width: 774px;
+    height: 406px;
+    }
+</style>
+
+@if (true)//Model.RoleID.ToString() == DataAccessLayer.Helpers.Constants.SuperAdmin)
+{
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6" style="background-color: #d9534f;border-color: #d9534f;color: white;font-weight: bold;height: 30px;padding-top: 5px;">
+            @POS.Resources.Resource.CashReceived @DateTime.Now.ToShortDateString() : <span id="cashReceived">0</span>
+        </div>
+    </div>
+        <div class="row">
+            @if (Model != null)
+        {
+                @Html.HiddenFor(c => c.Location.SiteName)
+        }
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-comments fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge" id="pendingTransfer">0</div>
+                                <div>@POS.Resources.Resource.PendingTransfer </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#">
+                        <div class="panel-footer" onclick="getAllTransferData()">
+                            <span class="pull-left">@POS.Resources.Resource.ViewDetails</span>
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-tasks fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge" id="amountReceiveable">0</div>
+                                <div>@POS.Resources.Resource.AmountReceivable </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#">
+                        <div class="panel-footer" onclick="getDueSales()">
+                            <span class="pull-left">@POS.Resources.Resource.ViewDetails</span>
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-yellow">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-shopping-cart fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge" id="amountPayable">0</div>
+                                <div>@POS.Resources.Resource.AmountPayable </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#">
+                        <div class="panel-footer" onclick="addPOPayments()">
+                            <span class="pull-left">@POS.Resources.Resource.ViewDetails</span>
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-red">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-support fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge" id="pendingPO">0</div>
+                                <div>@POS.Resources.Resource.PendingPurchaseOrder</div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#">
+                        <div class="panel-footer" onclick="getPendingPO()">
+                            <span class="pull-left">@POS.Resources.Resource.ViewDetails</span>
+                            <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    @POS.Resources.Resource.SaleGraph
+                </div>
+                <div class="panel-body">
+                    <canvas id="saleGraph" height="200" width="400" style="width: 778px;height: 397px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12" style="display:none">
+            <div class="panel panel-green">
+                <div class="panel-heading">
+                    @POS.Resources.Resource.PurchaseGraph
+                </div>
+                <div class="panel-body">
+                    <canvas id="purchaseGraph" height="200" width="400"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="panel panel-yellow">
+                <div class="panel-heading">
+                    @POS.Resources.Resource.LocationWiseSaleGraph
+                </div>
+                <div class="panel-body">
+                    <canvas id="locationGraph" height="200" width="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="width: 102%;">
+        <div class="col-lg-12 col-md-12">
+            <div class="panel panel-red">
+                <div class="panel-heading">
+                    @POS.Resources.Resource.MostSoldItems
+                </div>
+                <div class="panel-body">
+                    <canvas id="msiGraph" height="200" width="399"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}

@@ -1,0 +1,238 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Inventory
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("Inventory", "Reports", FormMethod.Post, new { @id = "in-form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Category
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.Category, Model.getAllGroup(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+
+    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                     <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SerialNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Item #
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Description
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.WholeSalePrice
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Sale Price
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Cost
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Quantity
+                            </th>
+                        </tr>
+                    </thead>
+                    @{
+                        var sn = 0;
+                        var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                    }
+                    <tbody>
+
+                        @foreach (var sl in Model.Inventory)
+                        {
+                            sn = sn + 1;
+                            var wsPrice = sl.WholeSalePrice * dumpValue;
+                            var salePrice = sl.SalePrice * dumpValue;
+                            var prCost = sl.PurchaseCost * dumpValue;
+
+                            <tr>
+                                <td>
+                                    @sn
+                                </td>
+                                <td>
+                                    <a href="#" onclick="editItemP('@sl.ItemID.ToString()')">@sl.ItemNoStr</a>     
+                                </td>
+
+                                <td>
+                                    @(sl.Name + " " + sl.Description)
+                                </td>
+                                <td>
+                                    @wsPrice
+                                </td>
+                                <td>
+                                    @salePrice
+                                </td>
+                                <td>
+                                    @prCost
+                                </td>
+                                <td>
+                                    @sl.LocQuan
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editItemP(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Item/Update?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function pdf() {
+        window.location = '/Reports/HtmlToPdfInventory';
+        //var html = "";
+        //html += '<html><head><title>Inventory</title>';
+        //html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        //html += '</head><body>';
+        //html += "<div style='text-align:center'>";
+        //html += "<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>";
+        //html += "<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>";
+        //html += "<div style='font-size:large;'>Inventory</div>";
+        //html += "</div>";
+        //html += "<div style='width:100%'>";
+        //html += $(".print").html();
+        //html += "</div>";
+        //html += '</body></html>';
+        //var obj = new Object();
+        //obj.Html = html;
+        //obj.Name = "Inventory";
+        //$.ajax({
+        //    type: 'POST',
+        //    url: '/Reports/HtmlToPdf',
+        //    data: JSON.stringify(obj),
+        //    contentType: 'application/json; charset=utf-8',
+        //    dataType: 'json',
+        //    success: function (returnValue) {
+        //        window.location = '/Reports/HtmlToPdf';
+        //    }
+        //});
+    }
+    function print() {
+        $.ajax({
+            type: 'GET',
+            url: '/Reports/InventoryPrint',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                blockUI();
+                var docprint = window.open("about:blank", "_blank");
+                docprint.document.open();
+                docprint.document.write('<html><head><title>Inventory</title>');
+                docprint.document.write('' +
+            '<style type="text/css">' +
+             'table {width:100%;font-size:8px;!important; }' +
+            'table tr {' +
+            'border:1px solid #000;' +
+            'padding;0.5em;' +
+            '}' +
+            '</style>');
+                docprint.document.write('</head><body>');
+                docprint.document.write("<div style='text-align:center;'>");
+                docprint.document.write("<div style='width:40%;margin-left:190px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+                docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+                docprint.document.write("<div style='font-size:10px;'>Inventory</div>");
+                docprint.document.write("</div>");
+                docprint.document.write("</div>");
+                docprint.document.write("<div style='width:100%';font-size:8px;>");
+                docprint.document.write("<table style='border:1px solid #000;'>");
+                docprint.document.write("<thead><tr style='border:1px solid #000;'><th style='border:1px solid #000;'>SN</th><th style='border:1px solid #000;'>Item #</th><th style='border:1px solid #000;'>Description</th><th style='border:1px solid #000;'>Whole Sale Price</th><th style='border:1px solid #000;'>Sale Price</th><th style='border:1px solid #000;'>Cost</th><th style='border:1px solid #000;'>Quantity</th></tr></thead>");
+                var sn = 0;
+                for (var i = 0; i < returnValue.Inventory.length; i++)
+                {
+                    sn = sn + 1;
+                    docprint.document.write("<tr style='border:1px solid #000;'><td style='border:1px solid #000;'>" + sn + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].ItemNoStr + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].Description + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].WholeSalePrice + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].SalePrice + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].PurchaseCost + "</td><td style='border:1px solid #000;'>" + returnValue.Inventory[i].LocQuan + "</td></tr>");
+                }
+                docprint.document.write("</table>");
+                docprint.document.write("</div>");
+                docprint.document.write('</body></html>');
+                docprint.document.close();
+                docprint.print();
+                docprint.close();
+                unblockUI();
+            }
+        });
+      
+    }
+    $('.selectize').selectize();
+    //$('table').dataTable({
+    //    responsive: true
+    //});
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#in-form').ajaxForm(options);
+</script>

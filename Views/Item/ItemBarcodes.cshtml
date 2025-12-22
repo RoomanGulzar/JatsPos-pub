@@ -1,0 +1,36 @@
+﻿@model POS.Models.ItemBarcodeVM
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        @{
+            if (Model.ItemBarcodes != null)
+            {
+                <table class="table table-responsive" id="item-barcodes">
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th>@POS.Resources.Resource.Barcode</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.ItemBarcodes.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].ItemBarcodeID, new { @class = "form-control item-barcode-id" })
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].FkUnitGroupID, new { @class = "form-control item-barcode-unitgroup-id" })
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].FkUnitID, new { @class = "form-control item-barcode-unit-id" })
+                                    @Html.TextBoxFor(c => c.ItemBarcodes[i].pUnit.Name, new { @class = "form-control", @readonly = "readonly" })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(c => c.ItemBarcodes[i].Barcode, new { @class = "form-control item-barcode-barcode" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>

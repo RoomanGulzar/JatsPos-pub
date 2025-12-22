@@ -1,0 +1,298 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.PurchaseReport
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("Purchase", "Reports", FormMethod.Post, new { @id = "pr-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.From Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.To Date
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Supplier
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.SupplierID, Model.getAllSupplier(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.LocationID, Model.getAllLocations(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            @*<th>
+                                    Sn
+                                </th>*@
+                            <th>
+                                @POS.Resources.Resource.Invoice
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Supplier
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.SupplierInvoiceNumber
+                            </th>
+                            <th>@POS.Resources.Resource.Item</th>
+                            <th>@POS.Resources.Resource.Description</th>
+                            <th>@POS.Resources.Resource.Quantity</th>
+                            <th>@POS.Resources.Resource.Price</th>
+                            <th>@POS.Resources.Resource.Total</th>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.PurchaseOrderTotal
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.PurchaseOrderPaid
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.PurchaseOrderDue
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var sn = 0;
+                            decimal total = 0;
+                            decimal rec = 0;
+                            decimal due = 0;
+                        }
+                        @foreach (var sl in Model.PurchaseReport)
+                        {
+                            foreach (var purchaseItem in sl.Items)
+                            {
+                                sn = sn + 1;
+                                var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                                var unitPrice = purchaseItem.UnitPrice * dumpValue;
+                                var itemTotal = purchaseItem.Total * dumpValue;
+                                var poTotal = sl.Total * dumpValue;
+                                var poPaid = sl.Paid * dumpValue;
+                                var poDue = sl.Due * dumpValue;
+
+                                <tr>
+                                    @*<td>
+                                            @sn
+                                        </td>*@
+                                    <td>
+                                        <a href="#" onclick="purchaseOrderDetail('@sl.PurchaseOrderID')">@sl.ReferenceNumberPO</a>
+                                    </td>
+
+                                    <td>
+                                        @sl.Suppliers.SupplierName
+                                    </td>
+                                    <td>
+                                        @sl.PaymentTerms
+                                    </td>
+                                    <td>
+                                        @purchaseItem.Item.ItemNoStr
+                                    </td>
+                                    <td>
+                                        @purchaseItem.Item.Description
+                                    </td>
+                                    <td>
+                                        @purchaseItem.Quantity
+                                    </td>
+                                    <td>
+                                        @unitPrice
+                                    </td>
+                                    <td>
+                                        @itemTotal
+                                    </td>
+                                    <td>
+                                        @sl.Location.SiteName
+                                    </td>
+
+                                    <td>
+                                        @sl.PurchaseOrderDate
+                                    </td>
+                                    <td>
+                                        @poTotal
+                                    </td>
+                                    <td>
+                                        @poPaid
+                                    </td>
+                                    <td>
+                                        @poDue
+                                    </td>
+                                    @{
+                                total = total + poTotal;
+                                rec = rec + poPaid;
+                                due = due + poDue;
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-count">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="4" align="right">@POS.Resources.Resource.Total</td>
+                            <td>@total</td>
+                            <td>@rec</td>
+                            <td>@due</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function purchaseOrderDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/PurchaseOrder/Detail?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModalPO .modal-body").html(data);
+                $("#detailModalPO").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Purchase History</title>';
+        html += '<style type="text/css"> table {width:100%;  border-collapse:collapse; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>";
+        html += "<div style='font-size:large;'>Purchase History</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Purchase-History";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Purchase History</title>');
+        docprint.document.write('' +
+      '<style type="text/css">' +
+       'table {width:100%;  border-collapse:collapse; font-size:7px; }' +
+      'table th, table td {' +
+      'border:1px solid #000;' +
+      'padding;0.5em;' +
+      '}' +
+      '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:170px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:12px;'>TechCity</div>");
+        docprint.document.write("<div style='font-size:10px;'>Purchase History</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+        }
+    };
+    $('#pr-form').ajaxForm(options);
+</script>

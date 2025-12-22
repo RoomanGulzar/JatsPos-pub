@@ -1,0 +1,261 @@
+﻿@model POS.Models.TransferVM
+@using (Html.BeginForm("Create", "Transfer", FormMethod.Post, new { @id = "tra-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.FromLocation
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Transfer.FKFLocationID,Model.getAllSites() , new { @class = "form-control", @id = "Sale_FKLocationID", @onchange = "getLocationQuantity()", 
+           @readonly="readonly" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ToLocation
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Transfer.FKTLocationID, Model.getAllSites(), new { @class = "form-control" })
+
+        </div>
+    </div>
+   
+    <div class="form-row">
+        <div class="form-lable">
+         @POS.Resources.Resource.InvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Transfer.ReferenceNumber, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Date
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Transfer.InitiatedDate, new { @class = "form-control datepicker", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="tra-item-main">
+        <div style="clear:both;"></div>       
+        <table class="table table-responsive" id="Transfer-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SerialNo</th>
+                    <th>@POS.Resources.Resource.ItemNo</th>
+                    <th>@POS.Resources.Resource.Product</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.UnitPrice</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th>MU</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        1
+                    </td>
+                    <td><input type="text" class="form-control item-search" onchange="getItemDetailByNumber(this)" /></td>
+                    <td>
+                        <input id="TR-item-0" class="sale-items form-control" /> 
+                        <input type='hidden' class="item-id-hdn" name='Transfer.Items[0].FKItemID' />
+                        <input type='hidden' class="item-var-id-hdn" name='Transfer.Items[0].FkItemVariantID' />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control sale-item-quantity" onblur="setItemTotalTr(this)" name="Transfer.Items[0].Quantity" required />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control sale-item-price" onchange="setItemTotalTr(this)"  readonly />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control sale-item-total" name="PurchaseOrder.Items[0].Total" readonly />
+                    </td>
+                    <td><label class='measuring-unit'></label> <span class="prices"></span> <span class='image-col'></span> </td>
+                    <td><a href='#' onclick='removeRowT(this)'><i class='fa fa-trash fa-fw'></i></a></td>
+                </tr>
+
+            </tbody>
+        </table>
+        <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowTransfer()" value="@POS.Resources.Resource.AddNewRow" />
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Notes
+        </div>
+        <div class="form-input">
+            @Html.TextAreaFor(c => c.Transfer.Notes, new { @class = "form-control tra-notes"})
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.TotalItems
+        </div>
+        <div class="form-input">
+            <input type="number" id="total-items" class="form-control"  readonly />
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.TotalPrice
+        </div>
+        <div class="form-input">
+            <input type="number" id="total-price" class="form-control" readonly />
+
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" id="btnSave" value="@POS.Resources.Resource.Save" />
+    <input type="button" class="btn btn-primary custombtn" id="printButton" value="@POS.Resources.Resource.Print" onclick="printReceipt();" />
+    <input type="button" class="btn btn-primary custombtn" id="transferButton" value="@POS.Resources.Resource.NewTransfer" onclick="newTransfer();" />
+     <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+
+    <div class="modal fade image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade prices-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Prices</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+
+    $(document).ready(function () {
+        applyAutoComplete("TR-item-0");
+        $("#printButton").hide();
+        $("#transferButton").hide();
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                if ($("#transferFromLocation").val() == "" || $("#Transfer_FKTLocationID").val() == "")
+                {
+                    $().toastmessage('showToast', {
+                        text: "Please Select To and From Location",
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+                    });
+                    return false;
+                }
+                if ($("#transferFromLocation").val() == $("#Transfer_FKTLocationID").val())
+                {
+                    $().toastmessage('showToast', {
+                        text: "Can't Transfer to same location !",
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+                    });
+                    return false;
+                }
+                //if (confirm("Print Transfer ?")) {
+                //    printReceipt();
+                //    return true;
+                //}
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                $("#btnSave").hide();
+                unblockUI();
+                if (msg == "true") {
+                    $("#printButton").show();
+                    $("#transferButton").show();
+                    successToast();
+                    //getAllTransferData();
+                }
+                else {
+                    return $().toastmessage('showToast', {
+                        text: msg,
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+                    });
+                }
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#tra-form').ajaxForm(options);
+    });
+
+    $('#Transfer_FKTLocationID').selectize();
+    $("#Sale_FKLocationID").selectize();
+    var $select = $("#Sale_FKLocationID").selectize();
+    $select[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+    var $select1 = $("#Transfer_FKTLocationID").selectize();
+    $select1[0].selectize.setValue("");
+    function printReceipt() {
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write('<div style="width:800px;padding:20px;float:left;">');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:50%;margin-left:190px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='font-size:10px;'>Transfer Request</div>");
+        docprint.document.write("<div style='font-size:8px;'>Invoice No : " + $("#Transfer_ReferenceNumber").val() + " Location : " + $("#Transfer_FKFLocationID :selected").text() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:10px;border:1px solid #000;margin-top:10px;'><span style='float:left;width:10%;'>SN</span><span style='float:left;width:15%;'>ITEM NO</span><span style='float:left;width:25%'>DESCRIPTION</span><span style='float:left;width:15%'>QUANTITY</span><span style='float:left;width:15%'>PRICE</span><span style='float:left;width:15%'>TOTAL</span></div>");
+        $("#Transfer-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            sn = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:10px;border:1px solid #000;'><span style='float:left;width:10%;'>" + sn + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:25%'>" + desc + "</span><span style='float:left;width:15%'>" + qty + "</span><span style='float:left;width:15%'>" + price + "</span><span style='float:left;width:15%'>" + total + "</span></div>");
+
+        });
+        var items = $("#total-items").val();
+        var amount = $("#total-price").val();
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium;margin-top:10px;'>Total Items: " + items + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium;'>Total Amount: " + amount + "</div>");
+        docprint.document.write('</div>');
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+</script>

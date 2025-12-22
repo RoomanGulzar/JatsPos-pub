@@ -1,0 +1,63 @@
+﻿@model List<DataAccessLayer.Entities.DbSalePayment>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.PaymentHistoryFor <span id="cus-name"></span>
+    </div>
+    <div class="panel-body">
+
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="SaleHistory">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.PaidDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Note
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Paid
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ReceivedBy
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.PaidDate)</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Notes)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Amount)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ModifiedBy)
+                            </td>
+ 
+                        </tr>
+                       
+
+                        
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $('#SaleHistory').dataTable({
+            responsive: true
+        });
+    });
+</script>

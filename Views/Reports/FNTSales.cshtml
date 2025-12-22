@@ -1,0 +1,294 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.FNTSales
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("FNTSales", "Reports", FormMethod.Post, new { @id = "sl-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.FromDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ToDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SerialNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.SaleNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Customer
+                            </th>
+                            <th>
+                                Customer Email
+                            </th>
+                            <th>
+                                Customer Card Number
+                            </th>
+                            <th style="display:none;">
+                                Customer HST
+                            </th>
+                            <th>
+                                Customer Notes
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.SubTotal
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Discount
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Tax
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Total
+                            </th>
+                        </tr>
+                    </thead>
+                    @{
+                        var sn = 0;
+                        decimal subTotal = 0;
+                        decimal discountTotal = 0;
+                        decimal taxTotal = 0;
+                        decimal total = 0;
+                        decimal rec = 0;
+                        decimal due = 0;
+                    }
+                    <tbody>
+
+                        @foreach (var sl in Model.SalesReport)
+                        {
+                            sn = sn + 1;
+                            var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                            var dumpSubTotal = sl.SubTotal * dumpValue;
+                            var dumpDiscount = sl.DiscountAmount * dumpValue;
+                            var dumpTax = sl.TaxAmount * dumpValue;
+                            var dumpTotal = sl.Total * dumpValue;
+                            <tr>
+                                <td>
+                                    @sn
+                                </td>
+                                <td>
+                                    <a href="#" onclick="getDetail('@sl.SaleID.ToString()')">@sl.RefNO</a>
+                                </td>
+
+                                @if (sl.FKCustomerID == null)
+                                {
+                                    <td>
+                                        @sl.CustomerName
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        @sl.pCustomer.CustomerName
+                                    </td>
+                                }
+                                <td>
+                                    @sl.CustomerEmail
+                                </td>
+                                <td>
+                                    @sl.CustomerCardNumber
+                                </td>
+                                <td style="display:none;">
+                                    @sl.CustomerTaxNumber
+                                </td>
+                                <td>
+                                    @sl.CustomerNotes
+                                </td>
+                                <td>
+                                    @sl.SaleDate
+                                </td>
+                                <td>
+                                    @(dumpSubTotal)
+                                </td>
+                                <td>
+                                    @dumpDiscount
+                                </td>
+                                <td>
+                                    @dumpTax
+                                </td>
+                                <td>
+                                    @(dumpTotal)
+                                </td>
+                                @{
+                                subTotal = subTotal + dumpSubTotal;
+                                discountTotal = discountTotal + dumpDiscount;
+                                taxTotal = taxTotal + dumpTax;
+                                total = total + dumpTotal;
+                                rec = rec + sl.Received;
+                                due = due + sl.Due;
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-count">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="display:none"></td>
+                            <td></td>
+                            <td></td>
+                            <td>@subTotal</td>
+                            <td>@discountTotal</td>
+                            <td>@taxTotal</td>
+                            <td>@total</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetSale?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>First Nation Tax Sales</title>';
+        html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += '<div class="col-lg-12" style="text-align:right">TechCity</div><br/>';
+        html += "<div style='font-size:large;'>First Nation Tax Sales</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "FNT-Sales";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>First Nation Tax Sales</title>');
+        docprint.document.write('' +
+    '<style type="text/css">' +
+     'table {width:100%;font-size:8px; }' +
+    'table th, table td {' +
+    'border:1px solid #000;' +
+    'padding;0.5em;' +
+    '}' +
+    '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:190px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='font-size:10px;'>Sales History</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';font-size:8px;>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#sl-form').ajaxForm(options);
+</script>

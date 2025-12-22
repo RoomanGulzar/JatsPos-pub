@@ -1,0 +1,191 @@
+﻿@model POS.Models.PurchaseOrderVM
+@using (Html.BeginForm("Update", "PurchaseOrder", FormMethod.Post, new { @id = "po-form-u" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Purchaseorder.PurchaseOrderID)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.PurchaseOrderDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.PurchaseOrderDate, new { @class = "form-control datepicker" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Supplier
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Purchaseorder.FKSupplierID, Model.getAllSupplier(), new { @class = "Purchaseorder_FKSupplierID form-control" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.RequiredbyDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.RequiredbyDate, new { @class = "form-control datepicker" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.InvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.ReferenceNumberPO, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.SupplierInvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.PaymentTerms, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ShipmentMethod 
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.ShippinMethod, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="quo-item-main">
+        @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowQoute()" value="Add New Row" />*@
+        <div style="clear:both;"></div>
+        <table class="table table-responsive" id="PO-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SaleNo</th>
+                    <th>@POS.Resources.Resource.Item</th>
+                    <th>@POS.Resources.Resource.Product</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.Sale Price</th>
+                    <th>@POS.Resources.Resource.UnitPrice</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th>@POS.Resources.Resource.Action</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{var sn = 0;}
+                @for (int i = 0; i < Model.Purchaseorder.Items.Count; i++)
+                {
+                    sn++;
+                    if (Model.Purchaseorder.Items[i].Returned)
+                    {
+                        <tr style="background-color:red;">
+
+                            <td>
+                                @sn
+                            </td>
+                            <td><input type="text" class="form-control item-search" value="@Model.Purchaseorder.Items[i].Item.ItemNoStr" readonly /></td>
+                            <td>
+                                <input id="Po-item-0" value="@Model.Purchaseorder.Items[i].Item.Name @Model.Purchaseorder.Items[i].Item.Description " class="sale-items form-control" readonly /> <input type='hidden' class="item-id-hdn" value="@Model.Purchaseorder.Items[i].FKItemID" name='PurchaseOrder.Items[@i].FKItemID' />
+                                <input type='hidden' class="item-id-hdn" value="@Model.Purchaseorder.Items[i].PurchaseItemID" name='PurchaseOrder.Items[@i].PurchaseItemID' />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-quantity" value="@Model.Purchaseorder.Items[i].Quantity" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].Quantity" readonly />
+                            </td>
+
+                            <td>
+                                <input type="number" class="form-control sale-item-price" value="@Model.Purchaseorder.Items[i].UnitPrice" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].UnitPrice" readonly />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-price-po" value="@Model.Purchaseorder.Items[i].SalePrice" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].SalePrice" readonly />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-total" value="@Model.Purchaseorder.Items[i].Total" name="PurchaseOrder.Items[@i].Total" readonly />
+                            </td>
+                            <td></td>
+                            <td class="image-col"><a href='#' onclick='openSaleImageModal(this)'>Image</a> <input type='hidden' class='img-src' value='@Model.Purchaseorder.Items[i].Item.Image' /></td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+
+                            <td>
+                                @sn
+                            </td>
+                            <td><input type="text" class="form-control item-search" value="@Model.Purchaseorder.Items[i].Item.ItemNoStr" readonly /></td>
+                            <td>
+                                <input id="Po-item-0" value="@Model.Purchaseorder.Items[i].Item.Name @Model.Purchaseorder.Items[i].Item.Description " class="sale-items form-control" readonly /> <input type='hidden' class="item-id-hdn" value="@Model.Purchaseorder.Items[i].FKItemID" name='PurchaseOrder.Items[@i].FKItemID' />
+                                <input type='hidden' class="item-id-hdn" value="@Model.Purchaseorder.Items[i].PurchaseItemID" name='PurchaseOrder.Items[@i].PurchaseItemID' />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-quantity" value="@Model.Purchaseorder.Items[i].Quantity" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].Quantity" readonly />
+                            </td>
+
+                            <td>
+                                <input type="number" class="form-control sale-item-price" value="@Model.Purchaseorder.Items[i].UnitPrice" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].UnitPrice" readonly />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-price-po" value="@Model.Purchaseorder.Items[i].SalePrice" onchange="setItemTotalPO(this)" name="PurchaseOrder.Items[@i].SalePrice" readonly />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control sale-item-total" value="@Model.Purchaseorder.Items[i].Total" name="PurchaseOrder.Items[@i].Total" readonly />
+                            </td>
+                            <td><a href="#" onclick="purchaseOrderReturn('@Model.Purchaseorder.Items[i].PurchaseItemID.ToString()')">@POS.Resources.Resource.Return</a></td>
+                            <td class="image-col"><a href='#' onclick='openSaleImageModal(this)'>@POS.Resources.Resource.Image</a> <input type='hidden' class='img-src' value='@Model.Purchaseorder.Items[i].Item.Image' /></td>
+                        </tr>
+                    }
+
+
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.SubTotal 
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.SubTotal, new { @class = "form-control quo-sub", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Freight
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Freight, new { @class = "form-control quo-dis", @onchange = "calculatePO()", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Discount
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Discount, new { @class = "form-control quo-discount", @onchange = "calculatePO()", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Tax %
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Tax, new { @class = "form-control quo-tax", @onchange = "calculatePO()", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Total
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Total, new { @class = "form-control quo-total", @readonly = "readonly" })
+
+        </div>
+    </div>
+     <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+}

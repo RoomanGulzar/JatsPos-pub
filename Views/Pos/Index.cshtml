@@ -1,0 +1,910 @@
+﻿@using DataAccessLayer.Helpers
+
+@model POS.Models.Pos.PosVM
+@{
+    ViewBag.Title = "POS Terminal";
+    Layout = "~/Views/Shared/_LayoutPos.cshtml";
+}
+
+<div class="page-header navbar navbar-fixed-top">
+    <div class="page-header-inner ">
+        <div class="page-logo" style=" font-size: 25px; font-weight: bold; padding-top: 25px;">
+            TechCity
+        </div>
+        <div class="location-name">
+            <b>@Model.LocationName</b>
+        </div>
+
+        <div class="page-actions" style="float:right;">
+            <div style="float:left;margin:5px;">
+                <a href="#" class="btn btn-circle red btn-menu-lg" onclick="printLastInvoice()"><i class="fa fa-usd"></i> Print Last Invoice </a>
+            </div>
+            <div style="float:left;margin:5px;">
+                <div class="btn-group btn-menu-lg">
+                    <a class="btn btn-circle purple" href="javascript:;" data-toggle="dropdown" onclick="keyPressBeep()">
+                        <i class="fa fa-gear"></i> Settings
+                        <i class="fa fa-angle-down"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="javascript:;" onclick="OpeniningClosingScreen()">
+                                <i class="fa fa-folder-open"></i> Opening/Closing
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" onclick="SalesScreen()">
+                                <i class="fa fa-list"></i> @POS.Resources.Resource.Sale
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" onclick="RepairOrdersScreen()">
+                                <i class="fa fa-list"></i> Repair Orders
+                            </a>
+                        </li>
+                        @*<li class="divider"> </li>*@
+                        @*<li>
+                        <a href="@Url.Action("ChangeLanguage", "Language", new { langabb = "en-AU", redirectTo = "Pos" })">
+                            <span class="lang-sm lang-lbl" lang="en" onclick="changeCulture('en-AU', 'd/MM/yyy')"></span>
+                        </a>
+                    </li>*@
+                        @*<li>
+                        <a href="@Url.Action("ChangeLanguage", "Language", new { langabb = "ar-SA", redirectTo = "Pos" })">
+                            <span class="lang-sm lang-lbl" lang="ar" onclick="changeCulture('ar-AE', 'd/MM/yyy')"></span>
+                        </a>
+                    </li>*@
+                    </ul>
+                </div>
+            </div>
+            <div style="float:left;margin:5px;">
+                <a href="@Url.Action("LogOff", "Login")" class="btn btn-circle red btn-menu-lg" onclick="keyPressBeep()"><i class="fa fa-sign-out"></i> @POS.Resources.Resource.LogOut </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="opening_closing_screen" class="not_main_screen content-screen">
+</div>
+<div id="sales_screen" class="not_main_screen content-screen">
+</div>
+<div id="sales_refund_screen" class="not_main_screen content-screen">
+</div>
+<div id="repair_orders_screen" class="not_main_screen content-screen">
+</div>
+<div id="print_screen" class="not_main_screen content-screen">
+</div>
+<div class="content-screen" id="main_screen">
+    <div class="row">
+        <div class="col-sm-9">
+            <div class="row" style="display:none" id="search-grid-content">
+                <div class="col-sm-12">
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="portlet light no-padding">
+                                        <div class="portlet-body no-padding">
+                                            <div class="row no-margin">
+                                                <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                                                    Searched Items
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div id="searchGrid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="portlet light no-padding">
+                                        <div class="portlet-body no-padding">
+                                            <div style="display:flex;justify-content:space-between;" class="no-margin">
+                                                <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                                                    Items
+                                                </div>
+                                                @*<button type="button" class="btn green" onclick="openNewCartItemWindow()" title="alt+n">Add New</button>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div id="cartGridWrapper">
+                                        <div id="cartGrid"></div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="cartItemActionWindow" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;padding:20px">
+                        <button type="button"
+                                class="btn"
+                                style="background-color:darkred;color:white"
+                                onclick="removeCartItem()" title="alt+d">
+                            Remove Item
+                        </button>
+                        <button type="button" class="btn" onclick="closeCartItemActionWindow()">X</button>
+                    </div>
+                    <div class="row">
+                        @*Quantity*@
+                        <div class="col-sm-4">
+                            <div class="portlet light">
+                                <div class="portlet-body">
+                                    @*Qty: <h2 class="currentItem_Qty">0</h2>*@
+                                    <input name="currentItem_Qty" class="currentItem_Qty form-control" tabindex="1"
+                                           style="width: -webkit-fill-available;" id="currentItem_Qty" type="number" placeholder="Quantity" onkeyup="currentItem_QtyOnChange(this.value)" />
+                                </div>
+                            </div>
+                            <div class="portlet light">
+                                <div style="display:flex;justify-content:space-between;padding:20px">
+                                    <button type="button" class="btn cart-item-btn green" onclick="increaseQty()">+</button>
+                                    <button type="button" class="btn cart-item-btn blue" onclick="decreaseQty()">-</button>
+                                </div>
+                            </div>
+                            <div class="portlet light">
+                                <div class="portlet-body">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(7)" tabindex="-1">7</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(8)" tabindex="-1">8</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(9)" tabindex="-1">9</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(4)" tabindex="-1">4</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(5)" tabindex="-1">5</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(6)" tabindex="-1">6</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(1)" tabindex="-1">1</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(2)" tabindex="-1">2</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(3)" tabindex="-1">3</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-offset-4 col-sm-4">
+                                            <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(0)" tabindex="-1">0</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn clear-btn btn-qty btn-default" style="width:95% !important" onclick="setItemQuantity('clear')" tabindex="-1">Clear</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*Price*@
+                        <div class="col-sm-5">
+                            <div class="portlet light">
+                                <div class="portlet-body">
+                                    Price: <input type="number" tabindex="2"
+                                                  class="form-control"
+                                                  id="cartItemPriceInput"
+                                                  onkeyup="setCartItemPrice(this.value)" />
+                                </div>
+                            </div>
+                            <div class="portlet light">
+                                <div class="portlet-body">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(7)">
+                                                7
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(8)">
+                                                8
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(9)">
+                                                9
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(4)">
+                                                4
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(5)">
+                                                5
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(6)">
+                                                6
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(1)">
+                                                1
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(2)">
+                                                2
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(3)">
+                                                3
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-offset-4 col-sm-4">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn numeric-btn btn-qty btn-default"
+                                                    onclick="setItemPrice(0)">
+                                                0
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <button type="button" tabindex="-1"
+                                                    class="btn clear-btn btn-qty btn-default"
+                                                    style="width:95% !important" onclick="setItemPrice('clear')">
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*Item Tax*@
+                        <div class="col-sm-2">
+                            <div class="portlet light">
+                                <div class="portlet-body">
+                                    Tax: <input type="number" tabindex="3"
+                                                class="form-control"
+                                                id="cartItemTaxInput"
+                                                onkeyup="setCartItemTax(this.value)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="newCartItemWindow" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;padding:20px">
+                        <h2>New Item</h2>
+                        <button type="button" class="btn" onclick="closeNewCartItemWindow()">X</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div style="display:flex;flex-direction:column">
+                                <label>Name</label>
+                                <input type="text" class="form-control" id="itemName" />
+                            </div>
+                            <div style="display:flex;flex-direction:column">
+                                <label>Description</label>
+                                <input type="text" class="form-control" id="itemDescription" />
+                            </div>
+                            <div style="display:none;flex-direction:column">
+                                <label>IMEI/SN</label>
+                                <input type="text" class="form-control" id="itemImei" />
+                            </div>
+                            <div style="display:flex;flex-direction:column">
+                                <label>Sale Price</label>
+                                <input type="number" class="form-control" id="itemSalePrice" />
+                            </div>
+                            <div style="display:flex;flex-direction:column">
+                                <label>Purchase Cost</label>
+                                <input type="number" class="form-control" id="itemPurchaseCost" />
+                            </div>
+                            <div style="display: none!important; flex-direction: column">
+                                <label>Tax</label>
+                                <input type="number" class="form-control" id="itemTax" value="13" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <button type="button" class="btn green" onclick="addAnonymousCartItem()">Add Item</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="saleCreditAmountWindow" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;padding:20px">
+                        <h2>Credit Sale</h2>
+                        <button type="button" class="btn" onclick="closeSaleCrediAmountWindow()">X</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div style="display:flex;flex-direction:column">
+                                <label>Credit Sale</label>
+                                <input type="number" max="-1" class="form-control" id="saleCreditAmount" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <button type="button" class="btn green" onclick="addSaleCreditAmount()">Add Credit Sale</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="serviceChargesWindow" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;padding:20px">
+                        <h2>Service Charges</h2>
+                        <button type="button" class="btn" onclick="closeServiceChargesWindow()">X</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div style="display:flex;flex-direction:column">
+                                <label>Service Charges</label>
+                                <input type="number" max="-1" class="form-control" id="serviceCharges" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <button type="button" class="btn green" onclick="addServiceCharges()">Add Service Charges</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="IMEISNWindow" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;padding:20px">
+                        <h2>IMEI/SN</h2>
+                        <button type="button" class="btn" onclick="closeIMEISNWindow()">X</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div style="display:flex;flex-direction:column">
+                                <label>IMEI/SN</label>
+                                <input type="text" class="form-control" id="IMEISN" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <button type="button" class="btn green" onclick="addIMEISN()">Add IMEI/SN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="portlet light">
+                    <div class="portlet-body InstructionList">
+                        <h4>Instructions</h4>
+                        <ul class="list-unstyled">
+                            <li><strong>001</strong> - Add new Product</li>
+                            <li><strong>002</strong> - Chart TOPUP</li>
+                            <li><strong>003</strong> - Credit sale</li>
+                            <li><strong>004</strong> - No Warranty On Physical Items Or Liquid Damage</li>
+                            <li><strong>005</strong> - 30 Days Warranty</li>
+                            <li><strong>006</strong> - 90 Days Warranty On TV</li>
+                            <li><strong>007</strong> - Android Box</li>
+                            <li><strong>009</strong> - Service Charges</li>
+                            <li><strong>111</strong> - IMEI SN</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--
+        <div class="col-sm-3">
+
+                <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light bordered margin-bottom-10" id="quickCashContent">
+                        <div class="portlet-title">
+                            <div class="caption" style="text-align:center">
+                                Quick Cash Payment
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            <div class="row margin-bottom-10">
+                                <div class="col-sm-3 col-md-3">
+                                    <button type="button"
+                                            onclick="addPayment('@Constants.CashSale', 5)"
+                                            class="btn quick-cash-btn dark">
+                                        $5
+                                    </button>
+                                </div>
+                                <div class="col-sm-3 col-md-3">
+                                    <button type="button"
+                                            onclick="addPayment('@Constants.CashSale', 10)"
+                                            class="btn quick-cash-btn dark">
+                                        $10
+                                    </button>
+                                </div>
+                                <div class="col-sm-3 col-md-3">
+                                    <button type="button"
+                                            onclick="addPayment('@Constants.CashSale', 15)"
+                                            class="btn quick-cash-btn dark">
+                                        $15
+                                    </button>
+                                </div>
+                                <div class="col-sm-3 col-md-3">
+                                    <button type="button"
+                                            onclick="addPayment('@Constants.CashSale', 20)"
+                                            class="btn quick-cash-btn dark">
+                                        $20
+                                    </button>
+                                </div>
+                            </div>
+            @*<div class="row" style="margin:auto;width:70%;">
+                    <div class="col-sm-6 col-md-6">
+                        <button type="button" onclick="addPayment('@Constants.CashSale', 1000)" class="btn quick-cash-btn dark">1000</button>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <button type="button" onclick="addPayment('@Constants.CashSale', 5000)" class="btn quick-cash-btn dark">5000</button>
+                    </div>
+                </div>*@
+
+
+
+        </div>
+                -->
+
+        <div class="col-sm-3">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <input type="text" class="form-control" id="searchItemQuery" placeholder="Scan Box" />
+                        </div>
+                    </div>
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <input id="code" class="codeBox form-control" type="text" onkeyup="getCode(event)" placeholder="Code Box" autocomplete="off" />
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <div style="float:left;width:50%;font-size:20px;font-weight:bolder;">
+                                    Bill: <span id="order_no" class="order-number">@Model.OrderNo</span>
+                                </div>
+                                <div style="float:right;width:50%;text-align:right;font-size:20px;font-weight:bolder;">
+                                    <span class="order-number">@DateTime.Today.ToShortDateString()</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light summaryDiv">
+                        <div class="portlet-body">
+                            <div class="row subtotal-row">
+                                <div style="float:left">
+                                    <h3 class="subtotal">@POS.Resources.Resource.SubTotal</h3>
+                                </div>
+                                <div style="float:right">
+                                    <h3 class="subtotal" id="saleModel_SubTotal">$0</h3>
+                                </div>
+                            </div>
+                            <div class="row subtotal-row">
+                                <div style="float:left">
+                                    <h3 class="subtotal">Sales Tax</h3>
+                                </div>
+                                <div style="float:right">
+                                    <h3 class="subtotal" id="saleModel_GST">$0</h3>
+                                </div>
+                            </div>
+                            <div class="row subtotal-row">
+                                <div style="float:left">
+                                    <h3 class="subtotal">Discount</h3>
+                                </div>
+                                <div style="float:right;cursor:pointer;text-align:center;" onclick="addDiscount()">
+                                    <h3 class="saleModel_Discount subtotal">0%</h3>
+                                </div>
+                                <div id="discountWindow" style="overflow:hidden;display:none;">
+                                    <div class="row">
+                                        <div class="col-sm-11">
+                                            <div class="portlet light">
+                                                <div class="portlet-body">
+                                                    <h2 class="saleModel_Discount">0%</h2>
+                                                </div>
+                                            </div>
+                                            <div class="portlet light">
+                                                <div class="portlet-body">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(7)">7</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(8)">8</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(9)">9</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(4)">4</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(5)">5</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(6)">6</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(1)">1</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(2)">2</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(3)">3</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount('.')">.</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount(0)">0</button>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <button type="button" class="btn numeric-btn btn-default" onclick="setDiscount('00')">00</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <button type="button" class="btn clear-btn btn-default" style="width:308px;" onclick="setDiscount('clear')">Clear</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" onclick="closeDiscountWindow()" class="btn btn-lg green" style="font-size:20px">@POS.Resources.Resource.Save</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" onclick="cancelDiscount()" class="btn btn-lg dark" style="font-size:20px;float:right;">@POS.Resources.Resource.Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row subtotal-row">
+                                <div style="float:left">
+                                    <h3 id="totalAmount">@POS.Resources.Resource.Total</h3>
+                                </div>
+                                <div style="float:right">
+                                    <h3 class="saleModel_Total">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light bordered margin-bottom-10" id="taxRevisionContent" style="padding:5px;">
+                        <div class="portlet-title">
+                            <div class="caption" style="text-align:center">
+                                Tax Revision
+                            </div>
+                        </div>
+                        <div class="portlet-body">
+                            <div class="row margin-bottom-10">
+                                <div class="col-sm-4 col-md-4">
+                                    <button type="button"
+                                            onclick="taxApplied()" title="alt+t"
+                                            class="btn quick-cash-btn dark">
+                                        13%
+                                    </button>
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <button type="button"
+                                            onclick="taxLess()" title="alt+l"
+                                            class="btn quick-cash-btn dark">
+                                        Taxless
+                                    </button>
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <button type="button"
+                                            onclick="openFirstNationsTaxDetailWindowWindow()"
+                                            class="btn quick-cash-btn dark" title="alt+f">
+                                        FNT (5%)
+                                    </button>
+
+                                    <div id="firstNationsTaxDetailWindow" style="display:none;">
+                                        <div style="display:flex;justify-content:space-between;padding:20px">
+                                            <h2>First Nations Tax</h2>
+                                            <button type="button" class="btn" onclick="closeFirstNationsTaxDetailWindow()">X</button>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-11">
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Customer Name</label>
+                                                    <input type="text" class="form-control" id="taxCustomerName" />
+                                                </div>
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Customer HST</label>
+                                                    <input type="text" class="form-control" id="taxCustomerTaxNumber" />
+                                                </div>
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Customer Phone</label>
+                                                    <input type="text" class="form-control" id="taxCustomerPhone" />
+                                                </div>
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Customer Address</label>
+                                                    <input type="text" class="form-control" id="taxCustomerAddress" />
+                                                </div>
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Customer Card Number</label>
+                                                    <input type="text" class="form-control" id="taxCustomerCardNumber" />
+                                                </div>
+                                                <div style="display:flex;flex-direction:column">
+                                                    <label>Notes</label>
+                                                    <input type="text" class="form-control" id="taxCustomerNotes" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-11">
+                                                <button type="button" class="btn green" onclick="addFirstNationsTaxDetail()">
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="portlet light margin-bottom-10" style="padding:0px;">
+                    <div class="portlet-body">
+                        <div class="row" style="text-align:center;">
+                            <button type="button"
+                                    class="btn pay-action-btn purple" title="alt+c"
+                                    onclick="addPayment('@Constants.CashSale')">
+                                @POS.Resources.Resource.Cash
+                            </button>
+
+                            <button type="button"
+                                    class="btn pay-action-btn purple" title="alt+d"
+                                    onclick="addPayment('@Constants.DebitCardSale')">
+                                Debit Card
+                            </button>
+
+                            <button type="button"
+                                    class="btn pay-action-btn purple" title="alt+r"
+                                    onclick="addPayment('@Constants.CreditCardSale')">
+                                Credit Card
+                            </button>
+
+                            <button type="button"
+                                    class="btn pay-action-btn purple" title="alt+s"
+                                    onclick="addPayment('@Constants.StoreCreditSale')">
+                                Credit Sale
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="portlet light">
+                        <div class="portlet-body">
+                            <div class="row">
+                                <button type="button" onclick="refreshPage()" class="btn btn-lg pay-btn purple" style="background-color:#EA5257;">Cancel Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="paymentWindow" style="overflow:hidden;height:90vh;overflow-x:auto;scrollbar-width:thin;">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="portlet box blue-hoki">
+                <div class="portlet-title">
+                    <div style="text-align:center;">
+                        Bill Amount
+                    </div>
+                </div>
+                <div class=portlet-body>
+                    <h2 style="text-align:center" class="saleModel_Total">0</h2>
+                </div>
+            </div>
+            <div class="portlet box grey-cascade">
+                <div class="portlet-title">
+                    <div style="text-align:center;">
+                        Amount Received
+                    </div>
+                </div>
+                <div class=portlet-body>
+                    <h2 style="text-align:center" class="saleModel_Payment">0</h2>
+                </div>
+            </div>
+            <div class="portlet box green">
+                <div class="portlet-title">
+                    <div style="text-align:center;">
+                        Balance Amount
+                    </div>
+                </div>
+                <div class=portlet-body>
+                    <h2 style="text-align:center" class="saleModel_Balance">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="portlet light">
+                <div class="portlet-body">
+                    <input type="number"
+                           class="form-control"
+                           id="receiveAmountInput"
+                           onkeyup="setPaymentReceive(this.value)" />
+                </div>
+            </div>
+            <div class="portlet light">
+                <div class="portlet-body text-center">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(7)">7</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(8)">8</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(9)">9</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(4)">4</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(5)">5</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(6)">6</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(1)">1</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(2)">2</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(3)">3</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment('.')">.</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment(0)">0</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn numeric-btn btn-default" onclick="setPayment('00')">00</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button type="button" class="btn clear-btn btn-default" onclick="setPayment('clear')">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <label>@POS.Resources.Resource.CustomerName</label>
+            <textarea id="saleCustomerName" style="width:90%;" oninput="setSaleCustomerName(this)"></textarea>
+        </div>
+    </div>
+    @*<div class="row">
+            <div class="col-md-12">
+                <label>Tax Exemption ID</label>
+                <textarea id="saleCustomerTaxNumber" style="width:90%;" onchange="setSaleCustomerTaxNumber(this)"></textarea>
+            </div>
+        </div>*@
+    <div class="row">
+        <div class="col-md-12">
+            <label>Customer Phone</label>
+            <textarea id="saleCustomerPhone" style="width:90%;" oninput="setSaleCustomerPhone(this)"></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <label>Customer Email</label>
+            <textarea id="saleCustomerEmail" style="width:90%;" oninput="setSaleCustomerEmail(this)"></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row" style="margin:auto;width:50%;">
+                <div class="col-sm-5">
+                    <button type="button" onclick="closePaymentWindow()" class="btn btn-lg dark" style="font-size:40px">Close</button>
+                </div>
+                <div class="col-sm-5">
+                    <button type="button" onclick="addSale()" class="btn btn-lg dark" style="font-size:40px">Print Receipt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    //notificationsCount = parseInt('@Model.UnSeenNotifications');
+
+</script>

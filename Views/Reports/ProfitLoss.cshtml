@@ -1,0 +1,204 @@
+﻿@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Profit/LossStatement
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("ProfitLoss", "Reports", FormMethod.Post, new { @id = "pl-form" }))
+                {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.From Date
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.To Date
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                    </div>
+                </div>
+
+
+    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                     <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+        </div>
+
+        <div class="report">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-6">
+                        @Model.ProfitLoss.Sales.Name
+                    </div>
+                    <div class="col-lg-6">
+                        @Model.ProfitLoss.Sales.Amount
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-6">
+                        @POS.Resources.Resource.SaleReturns
+                    </div>
+                    <div class="col-lg-6">
+                        @Model.ProfitLoss.TotalSalesReturn
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="col-lg-6">
+                        @Model.ProfitLoss.Purchase.Name
+                    </div>
+                    <div class="col-lg-6">
+                        @Model.ProfitLoss.Purchase.Amount
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4>Expense</h4>
+                    @foreach (var e in Model.ProfitLoss.Expense)
+                    {
+                        <div class="col-lg-6">
+                            @e.Name
+                        </div>
+                        <div class="col-lg-6">
+                            @e.Amount
+                        </div>
+                    }
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4>Summary</h4>
+                    <div class="col-lg-4">
+                        Total Sales @Model.ProfitLoss.TotalSales
+                    </div>
+                    <div class="col-lg-4">
+                        Total Cost  @Model.ProfitLoss.TotalExpense
+                    </div>
+                    <div class="col-lg-4">
+                        @if (Model.ProfitLoss.TotalProfit < 0)
+                        {
+                            <div class="red">
+                                Total Profit  @Model.ProfitLoss.TotalProfit
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="green">
+                                Total Profit  @Model.ProfitLoss.TotalProfit
+                            </div>
+                        }
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Profit Loss Statement</title>';
+        html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += '<div class="col-lg-12" style="text-align:right">TechCity</div><br/>';
+        html += "<div style='font-size:large;'>Profit Loss Statement</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Profit-Loss-Statement";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Profit Loss Statement</title>');
+        docprint.document.write('' +
+'<style type="text/css">' +
+'table {width:100%;font-size:8px;!important; }' +
+'table th, table td {' +
+'border:1px solid #000;' +
+'padding;0.5em;' +
+'}' +
+'</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:190px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='font-size:10px;'>Profit Loss Statement</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';font-size:8px;>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#pl-form').ajaxForm(options);
+</script>

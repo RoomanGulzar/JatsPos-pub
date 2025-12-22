@@ -1,0 +1,75 @@
+﻿@model POS.Models.LocationVM
+
+@using (Html.BeginForm("Create", "Location", FormMethod.Post, new { @id = "loc-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+   
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Location.SiteName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.City
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Location.City, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Country
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Location.Country, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Address
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Location.OtherInfo, new { @class = "form-control" })
+
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getLocationData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#loc-form').ajaxForm(options);
+    });
+</script>

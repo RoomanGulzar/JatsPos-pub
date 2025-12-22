@@ -1,0 +1,153 @@
+﻿@model POS.Models.SupplierVM
+@using (Html.BeginForm("Create", "Supplier", FormMethod.Post, new { @id = "sup-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.CompanyName
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.SupplierName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+           @POS.Resources.Resource.SupplierNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.SupplierNumber, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ContactPerson
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.ContactPerson, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Phone
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.ContactPersonPhone, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+           @POS.Resources.Resource.Mobile
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.Mobile, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Fax
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.SupplierFax, new { @class = "form-control" })
+
+        </div>
+    </div>
+     <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Email
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.SupplierEmail, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Address
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.SupplierAddress, new { @class = "form-control" })
+
+        </div>
+    </div>
+   
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.GST/@POS.Resources.Resource.VAT
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.CompanyGST, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+           @POS.Resources.Resource.IBAN
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.BankAccountNumber, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.BankName
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.BankAccountDetails, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.BankAccountTitle
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Supplier.BankAccountTitle, new { @class = "form-control" })
+
+        </div>
+    </div>
+       <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Currency
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Supplier.Currency,Model.getAllCurrency(), new { @class = "form-control" })
+
+        </div>
+    </div>
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+              //  successToast();
+                getSuppliers();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#sup-form').ajaxForm(options);
+    });
+</script>

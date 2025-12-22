@@ -1,0 +1,275 @@
+﻿@model POS.Models.SaleReturnVM
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="portlet light">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-bar-chart font-green"></i>
+                    <span class="caption-subject font-green bold uppercase">@POS.Resources.Resource.Sales</span>
+                    <span class="caption-helper">daily sales..</span>
+                </div>
+                <div class="actions">
+                    <button onclick="switchSalesScreen(false)" class="btn btn-lg dark btn-home-back">@POS.Resources.Resource.Home</button>
+                </div>
+            </div>
+            <div class="portlet-body">
+
+                @using (Html.BeginForm("SaleReturn", "Sale", FormMethod.Post, new { @id = "sale-return-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Customer
+                        </div>
+                        <div class="form-input">
+                            @Html.DisplayFor(c => c.Sale.Customer, new { @class = "form-control" })
+                            @Html.HiddenFor(c => c.Sale.Customer)
+                            @Html.HiddenFor(c => c.Sale.FKLocationID)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DisplayFor(c => c.Sale.Location, new { @class = "form-control" })
+                            @Html.HiddenFor(c => c.Sale.Location)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.InvoiceNumber
+                        </div>
+                        <div class="form-input">
+                            @Html.DisplayFor(c => c.Sale.RefNO, new { @class = "form-control" })
+                            @Html.HiddenFor(c => c.Sale.RefNO)
+                            @Html.HiddenFor(c => c.Sale.FKSaleID)
+                        </div>
+                    </div>
+
+                    <div class="sale-item-main">
+                        <div style="clear:both;"></div>
+                        <table class="table table-responsive" id="saler-items">
+                            <thead>
+                                <tr>
+                                    <th>@POS.Resources.Resource.SerialNo</th>
+                                    <th>@POS.Resources.Resource.Item</th>
+                                    <th>@POS.Resources.Resource.Quantity</th>
+                                    <th>@POS.Resources.Resource.MeasuringUnit</th>
+                                    <th>@POS.Resources.Resource.Price</th>
+                                    <th>@POS.Resources.Resource.Total</th>
+                                    <th>@POS.Resources.Resource.ReturnQuantity</th>
+                                    <th>@POS.Resources.Resource.Return</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                    int sn = 0;
+                                }
+                                @foreach (var item in Model.Sale.pItems)
+                                {
+                                    if (!item.Returned)
+                                    {
+                                        <tr>
+                                            @{
+                                        sn = sn + 1;
+                                            }
+                                            <td>
+                                                @sn
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(c => item.ItemName)
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].FKItemID)
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].FKServiceID)
+
+                                                @*<input id="Sale-item-0" class="sale-items form-control" /> <input type='hidden' class="item-id-hdn" name='Sale.pItems[0].FKItemID' />*@
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(c => item.Quantity)
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].Quantity,
+                                             new { @class = "item-qty" })
+                                                @*<input type="number" class="form-control sale-item-quantity" onchange="setSItemTotal(this)" name="Sale.pItems[0].Quantity" required />*@
+                                            </td>
+                                            <td>
+                                                @if (item.Unit != null)
+                                                {
+                                                    @Html.DisplayFor(c => item.Unit.Name)
+                                                }
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].FkUnitID)
+                                                @*<input type="number" class="form-control sale-item-quantity" onchange="setSItemTotal(this)" name="Sale.pItems[0].Quantity" required />*@
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(c => item.UnitPrice)
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].UnitPrice, 
+                                                        new { @class = "unit-price" })
+                                                @*<input type="number" class="form-control sale-item-price" onchange="setSItemTotal(this)" name="Sale.pItems[0].UnitPrice" required />*@
+                                            </td>
+                                            
+                                            <td>
+                                                @Html.DisplayFor(c => item.Total)
+                                                @Html.HiddenFor(c => c.Sale.pItems[sn - 1].Total,
+                                             new { @class = "item-total" })
+                                                @*<input type="number" class="form-control sale-item-total" name="Sale.pItems[0].Total" readonly />*@
+                                            </td>
+                                            <td>@Html.TextBoxFor(c => c.Sale.pItems[sn - 1].ReturnedQuantity, new { @class = "form-control return-qty", @type = "number", @onchange = "calculateReturnTotal()" })</td>
+                                            <td>
+                                                @Html.CheckBoxFor(c => c.Sale.pItems[sn - 1].Returned, new { @class = "return-box", @onchange = "calculateReturnTotal()" })
+                                            </td>
+                                        </tr>
+                                    }
+
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="totla-rows">
+                        @*<div class="form-row">
+                                <div class="form-lable">
+                                    Sub Total
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBoxFor(c => c.Sale.SubTotal, new { @class = "form-control sale-sub", @readonly = "readonly" })
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-lable">
+                                    Cargo Charges
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBoxFor(c => c.Sale.Other, new { @class = "form-control sale-sub", @readonly = "readonly" })
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-lable">
+                                    Discount %
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBoxFor(c => c.Sale.Discount, new { @class = "form-control sale-dis", @type = "number", @readonly = "readonly" })
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-lable">
+                                    Discount Amount
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBox("ds-amt", "", new { @class = "form-control sale-dis-amt", @type = "number", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-lable">
+                                    Tax %
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBoxFor(c => c.Sale.GST, new { @class = "form-control sale-tax", @type = "number", @readonly = "readonly" })
+
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-lable">
+                                    Tax Amount
+                                </div>
+                                <div class="form-input">
+                                    @Html.TextBox("tx-amt", "", new { @class = "form-control sale-tax-amt", @type = "number", @readonly = "readonly" })
+                                </div>
+                            </div>*@
+                        <div class="form-row">
+                            <div class="form-lable">
+                                @POS.Resources.Resource.ReturnedTotal
+                            </div>
+                            <div class="form-input">
+                                @Html.TextBoxFor(c => c.Sale.Total, new { @class = "form-control sale-total", @readonly = "readonly" })
+
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+                            <input type="button"
+                                   class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back"
+                                   onclick="SalesScreen()" />
+
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateReturnTotal() {
+        var total = 0;
+        $("#saler-items tr").each(function () {
+            if ($(this).find(".return-box").prop("checked")) {
+                debugger;
+                var itemTotal = parseFloat($(this).find(".item-total").val());
+                var itemQty = parseFloat($(this).find(".item-qty").val());
+                var qty = parseFloat($(this).find(".return-qty").val());
+                var qtyDifference = itemQty - qty;
+
+                var price = itemTotal / itemQty;
+
+                if (qtyDifference <= 0) {
+                    total += itemTotal;
+                } else {
+                    total += price * qty;
+                }
+            }
+
+        });
+        $("#Sale_Total").val(total);
+    }
+    $(document).ready(function () {
+        $("select").selectize();
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                if (msg == "true") {
+                    successToast();
+                    SalesScreen();
+                }
+                else {
+                    return $().toastmessage('showToast', {
+                        text: msg,
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                }
+
+
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#sale-return-form').ajaxForm(options);
+        //applyAutoComplete("Sale-item-0");
+        //applyAutoComplete("Sale-item-1");
+        //applyAutoComplete("Sale-item-2");
+        //applyAutoComplete("Sale-item-3");
+        //applyAutoComplete("Sale-item-4");
+    });
+</script>
+

@@ -1,0 +1,82 @@
+﻿@model BusinessLayer.ViewModels.Inventory.ImeiCodes.ItemImeiCodeModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @Model.Name - @Model.ItemNoStr IMEI Numbers
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("UpdateItemImeiCodes", "Item", FormMethod.Post,
+            new { enctype = "multipart/form-data", @id = "item-imei-form" }))
+        {
+            <input id="ItemID_for_Imei" name="ItemID_for_Imei" value="@Model.ItemID" hidden />
+
+            @Html.HiddenFor(h => h.ItemID)
+            if (Model.ItemImeiCodes != null)
+            {
+                <table class="table table-responsive" id="item-imeicodes">
+                    <thead>
+                        <tr>
+                            <th>Sr No</th>
+                            <th>IMEI Number</th>
+                            <th>Sold</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.ItemImeiCodes.Count; i++)
+                        {
+
+                            bool sold = Model.ItemImeiCodes[i].Sold;
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(c => c.ItemImeiCodes[i].Id)
+                                    @Html.HiddenFor(c => c.ItemImeiCodes[i].FkItemID)
+                                    @(i + 1)
+                                </td>
+                                <td>
+                                    @(!sold ?
+                                    Html.TextBoxFor(c => c.ItemImeiCodes[i].ImeiCode,
+                                    new { @class = "form-control sale-items", @required = "required" })
+                                    :
+                                    Html.TextBoxFor(c => c.ItemImeiCodes[i].ImeiCode,
+                                    new { @class = "form-control sale-items", @readonly = "readonly" }))
+                                </td>
+                                <td>
+                                    @(sold ? "Yes": "No")
+                                </td>
+                                <td><a href='#' onclick='removeRowImei(this)'><i class="fa fa-trash fa-fw"></i></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowImeiNumber('@Model.ItemID')" value="Add New" />
+
+                <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+                <input type="button" class="btn btn-default custombtn" value="@POS.Resources.Resource.Back" onclick="getItemData()" />
+                <script>
+                    var options = {
+                        beforeSubmit: function (msg) {
+                            blockUI();
+                        },
+                        success: function (msg) {
+                            unblockUI();
+                            if (msg === true) {
+                                getItemData();
+                                successToast();
+                            } else {
+                                errorToast(msg);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            handleErrors(jqXHR.status);
+                            unblockUI();
+
+                        }
+                    };
+                    $('#item-imei-form').ajaxForm(options);
+                   
+                </script>
+            }
+        }
+    </div>
+</div>

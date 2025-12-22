@@ -1,0 +1,69 @@
+﻿@model POS.Models.UnitOfMeasure.UnitGroupVM
+@{
+    ViewBag.Title = "Create";
+}
+@using (Html.BeginForm("UnitGroupAdd", "MeasureUnit", FormMethod.Post, new { @id = "unit-grp-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Group.Name, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="uom-main">
+        <div style="clear:both;"></div>
+        <table class="table table-responsive" id="uoms">
+            <thead>
+                <tr>
+                    <th>Base Unit</th>
+                    <th>Base Unit Quantity</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <input type="hidden" class="form-control" name="Group.pUnits[0].IsBaseUnit" readonly checked="checked" value="true" />
+                        <input type="text" class="form-control" name="Group.pUnits[0].Name" required />
+                    </td>
+                    <td><input type="number" class="form-control" name="Group.pUnits[0].BaseUnitQunatity" readonly value="1" /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getUnitGroupData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#unit-grp-form').ajaxForm(options);
+    });
+</script>

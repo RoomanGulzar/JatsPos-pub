@@ -1,0 +1,479 @@
+﻿@model POS.Models.ItemVM
+@{
+    ViewBag.Title = "ITEMS";
+}
+
+@using (Html.BeginForm("Create", "Item", FormMethod.Post, new { enctype = "multipart/form-data", @id = "item-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Item.ItemNo, new { @id = "item-no" })
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Create Product
+        </div>
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Category
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.FKGroupID, Model.getAllGroup(), "Please Select....", new
+                       {
+                           @class = "form-control selectize",
+                           @onchange = "getItemNumber()",
+                           @id = "item-cat"
+                       })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            <label class="inline">Is Active</label>
+                        </div>
+                        <div class="input-group-addon bg-transparent">
+                            @Html.CheckBoxFor(c => c.Item.IsActive)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            <label class="inline">Is Part</label>
+                        </div>
+                        <div class="input-group-addon bg-transparent">
+                            @Html.CheckBoxFor(c => c.Item.IsPart)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Product Listing
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.Listing,
+                                    Model.getItemListings(),
+                                    "Please Select....",
+                                    new
+                                    {
+                                        @class = "form-control selectize"
+                                    })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Name
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Item.Name, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Title (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Item.Description, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Description (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Item.DescriptionForSite, new { @class = "form-control", @type = "text" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SupplierName
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.FKSupplierID, Model.getAllSuppliers(), "Please Select..", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ItemNo
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.ItemNoStr, new { @class = "form-control", @readonly = "readonly", @id = "item-str" })
+                        </div>
+                    </div>
+                    @*<div class="col-md-3 form-row">
+                            <div class="form-lable">
+                                @POS.Resources.Resource.Image
+                            </div>
+                            <div class="form-input">
+                                <input type="file" id="inputImage" name="image1" class="form-control" />
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-row">
+                            <div class="div-image">
+                                <img id="image1" src="~/Content/Images/item.png" />
+
+                            </div>
+                            <div class="div-image">
+                                <img id="image2" src="~/Content/Images/item.png" style="float:right;" />
+                            </div>
+                        </div>
+                        <div class="col-md-3 form-row">
+                            <div class="form-lable">
+                                @POS.Resources.Resource.Image 2
+                            </div>
+                            <div class="form-input">
+                                <input type="file" id="inputImage1" name="image2" class="form-control" />
+                            </div>
+                        </div>*@
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.MinStockLimit
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.MinStockLimit, new { @class = "form-control",@type="number" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.PurchaseCost
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.PurchaseCost, new { @class = "form-control", @type = "number" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalePrice
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.SalePrice, new { @class = "form-control", @type = "number" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalePrice (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.SpecialSalePrice, new { @class = "form-control", @type = "number" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Quantity
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.Quantity, new { @class = "form-control", @type = "number" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.LocationID, Model.getAllSites(), new { @class = "form-control selectize" })
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Measuring Unit*@
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Measuring Unit
+                </div>
+                <div class="panel-body">
+                    <div class="row clearfix">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <div class="unitgroup-dropdown">
+                                    <label> Unit Group</label>
+                                    @Html.DropDownListFor(c => c.Item.FkUnitGroupID, Model.getAllUnitGroups(), new
+                                                            {
+                                                                @class = "form-control field-setting"
+                                                            })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label> Base Unit</label>
+                                @{
+                                    var group = Model.getAllUnitGroups().FirstOrDefault();
+                                    @Html.DropDownListFor(c => c.Item.FkDefaultUnitID,
+                                        Model.getAllGroupUnits(group != null ? new Guid(group.Value) : Guid.Empty),
+                                        new
+                                        {
+                                            @class = "form-control field-setting"
+                                        })
+                                }
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+
+                            <div class="form-group">
+                                <label>
+                                    Barcode
+                                </label>
+                                @Html.TextBoxFor(c => c.Item.BarCode, new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Product Images
+                </div>
+                <div class="panel-body">
+                    <div class="item-images-main notStockField">
+                        <div style="clear:both;"></div>
+                        <table class="table table-responsive" id="item-images">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Description</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <input type="button"
+                               class="btn btn-warning  custombtn"
+                               onclick="addNewRowImage()"
+                               value="Add new Image" />
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+            <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="getItemData()" />
+        </div>
+    </div>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+                </div>
+                <div class="modal-body">
+                    <img />
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+
+    $('.selectize').selectize();
+    var $select1 = $("#Item_LocationID").selectize();
+
+    $select1[0].selectize.setValue("f66a3a73-0c03-4bf9-ac32-5d637b45caca");
+    //var $select = $("#Item_MeasuringUnit").selectize();
+    //$select[0].selectize.setValue("Piece");
+    var $selectItemListing = $("#Item_Listing").selectize();
+    $selectItemListing[0].selectize.setValue("10");
+    $("#Item_Listing").on('change', function () {
+        var value = $(this).val();
+        if (value == '10') {
+            $("#Item_Description").attr('disabled', true)
+            $("#Item_DescriptionForSite").attr('disabled', true)
+        } else {
+            $("#Item_Description").attr('disabled', false)
+            $("#Item_DescriptionForSite").attr('disabled', false)
+        }
+    })
+
+    $("#Item_Listing").trigger('change');
+
+
+    function getZeros(src) {
+        if (src.toString().length == 1) {
+            return "0000" + src;
+        }
+        else if (src.toString().length == 2) {
+            return "000" + src;
+        }
+        else if (src.toString().length == 3) {
+            return "00" + src;
+        }
+        else if (src.toString().length == 4) {
+            return "0" + src;
+        }
+        else {
+            return src;
+        }
+    }
+    function getItemNumber() {
+        if ($("#item-cat").val() == "") {
+            $("#item-str").val("");
+            $("#Item_Name").val("");
+            return false;
+        }
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "json",
+            url: '/Item/GetItemNumber?id=' + $("#item-cat").val(),
+            async: true,
+            success: function (data) {
+                unblockUI();
+                $("#item-no").val(data);
+                $("#item-str").val($("#item-cat option:selected").text().split(" | ")[0] + "" + getZeros(data));
+                $("#Item_Name").val($("#item-cat option:selected").text().split(" | ")[1]);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+
+    }
+    function readURL(input) {
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#image1').attr('src', e.target.result);
+                $('#image1').click(function () {
+
+                    $("#imageModal .modal-body img").attr('src', e.target.result);
+                    $("#imageModal").modal("show");
+                });
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function readURL1(input) {
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#image2').attr('src', e.target.result);
+                $('#image2').click(function () {
+
+                    $("#imageModal .modal-body img").attr('src', e.target.result);
+                    $("#imageModal").modal("show");
+                });
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    var xhr;
+    var select_group, $select_group;
+    var select_unit, $select_unit;
+
+    $select_group = $('#Item_FkUnitGroupID').selectize({
+        onChange: function (value) {
+            if (!value.length) return;
+            select_unit.disable();
+            select_unit.clearOptions();
+            select_unit.load(function (callback) {
+                xhr && xhr.abort();
+                xhr = $.ajax({
+                    url: '@Url.Action("GetGroupUnits", "Item")',
+
+                    data: { groupID: value },
+                    success: function (results) {
+                        select_unit.enable();
+                        callback(results);
+                    },
+                    error: function () {
+                        callback();
+                    }
+                })
+            });
+        }
+    });
+
+    $select_unit = $('#Item_FkDefaultUnitID').selectize({
+        valueField: 'Value',
+        labelField: 'Text'
+    });
+
+    select_unit = $select_unit[0].selectize;
+    select_group = $select_group[0].selectize;
+
+    $("#inputImage1").change(function () {
+        readURL1(this);
+    });
+    $("#inputImage").change(function () {
+        readURL(this);
+    });
+
+
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            var submit = true;
+            if (!submit) {
+                return false;
+            }
+            $(".btn").prop("disabled", true);
+
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            if (msg === true) {
+                successToast();
+                addItem();
+            } else {
+                errorToast(msg);
+            }
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+
+    $('#item-form').ajaxForm(options);
+    $('#Item_FKGroupID,#Item_FKConditionID').selectize({
+        create: function (input, callback) {
+
+        },
+        sortField: 'text'
+    });
+
+    $(document).ready(function () {
+        $("#item-form").off('keyup').keyup(function (e) {
+            if (e.key === 'Enter' && !(event.target.nodeName == "TEXTAREA")) {
+                console.log('submitt for enter is clicked')
+                console.log('node',event.target.nodeName)
+                $('#item-form').submit();
+                return false;
+            }
+        })
+    });
+
+</script>

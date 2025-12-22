@@ -1,0 +1,55 @@
+﻿@model POS.Models.CloseLocation
+@using (Html.BeginForm("Close", "Sale", FormMethod.Post, new { @id = "close-form" }))
+            {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @POS.Resources.Resource.CloseLocation
+        </div>
+        <div class="panel-body">
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Location
+                </div>
+                <div class="form-input">
+                    @Html.DropDownListFor(c => c.Close.LocationID, Model.getAllLocations(Model.user), new { @class = "form-control" })
+                </div>
+            </div>
+            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.CloseLocation " />
+            <a  class="btn custombtn">&nbsp;&nbsp;&nbsp;</a>
+            <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        </div>
+
+    </div>
+            }
+
+<script>
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var $select2 = $("#Close_LocationID").selectize();
+        $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+        
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                successToast();
+                getClose();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#close-form').ajaxForm(options);
+    });
+</script>

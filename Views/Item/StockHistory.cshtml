@@ -1,0 +1,126 @@
+﻿@model List<DataAccessLayer.Entities.DbUpdateStock>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Update Stock History
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="SaleHistory">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.InvoiceNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Date
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.TotalAmount
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.TotalItems
+                           
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ModifiedBy
+                        </th>
+                        <th>
+                           @POS.Resources.Resource.Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.RefNo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Date)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Quantity) 
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TotalAmount) 
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.pUser.FirstName) @Html.DisplayFor(modelItem => item.pUser.LastName)
+                            </td>
+                            <td>
+                                <a href="#" onclick="getUpdate('@item.ID.ToString()')">@POS.Resources.Resource.Update</a> | <a href="#" onclick="getDetail('@item.ID.ToString()')">@POS.Resources.Resource.Detail</a>    
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.StockDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+</div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#detailModal').on('hidden.bs.modal', function () {
+        getStockHistoryData();
+    })
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Item/StockDetail?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function getUpdate(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Item/UpdateStock?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#main-content").html("");
+                $("#main-content").html(data);
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        $('#SaleHistory').dataTable({
+            responsive: true
+        });
+    });
+</script>

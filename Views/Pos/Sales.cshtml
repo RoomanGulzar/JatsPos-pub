@@ -1,0 +1,181 @@
+﻿@*@model POS.Models.Pos.PosSaleVM*@
+
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="portlet light">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-bar-chart font-green"></i>
+                    <span class="caption-subject font-green bold uppercase">@POS.Resources.Resource.Sales</span>
+                    <span class="caption-helper">daily sales..</span>
+                </div>
+                <div class="actions">
+                    <button onclick="switchSalesScreen(false)" class="btn btn-lg dark btn-home-back">@POS.Resources.Resource.Home</button>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div id="SaleReturn">
+                    <div class="tab-div sr-tab-div">
+                        <table class="display" id="saleTable">
+                            <thead>
+                                <tr>
+                                    <th>Sale #</th>
+                                    <th>Bill #</th>
+                                    <th>@POS.Resources.Resource.Type</th>
+                                    <th>@POS.Resources.Resource.TaxAmount</th>
+                                    <th>@POS.Resources.Resource.CustomerName</th>
+                                    <th>@POS.Resources.Resource.Email</th>
+                                    <th>@POS.Resources.Resource.Phone</th>
+                                    <th>@POS.Resources.Resource.SaleDate</th>
+                                    @*<th>@POS.Resources.Resource.Discount</th>*@
+                                    <th>@POS.Resources.Resource.Total</th>
+                                    <th>@POS.Resources.Resource.Due</th>
+                                    <th>@POS.Resources.Resource.Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Sale #</th>
+                                    <th>Bill #</th>
+                                    <th>@POS.Resources.Resource.Type</th>
+                                    <th>@POS.Resources.Resource.TaxAmount</th>
+                                    <th>@POS.Resources.Resource.CustomerName</th>
+                                    <th>@POS.Resources.Resource.Email</th>
+                                    <th>@POS.Resources.Resource.Phone</th>
+                                    <th>@POS.Resources.Resource.SaleDate</th>
+                                    @*<th>@POS.Resources.Resource.Discount</th>*@
+                                    <th>@POS.Resources.Resource.Total</th>
+                                    <th>@POS.Resources.Resource.Due</th>
+                                    <th>@POS.Resources.Resource.Action</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <div id="emailWindow" style="display:none;">
+                            <div style="display:flex;justify-content:space-between;padding:20px">
+                                <h2>Email</h2>
+                                <button type="button" class="btn" onclick="closeEmailWindow()">X</button>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-11">
+                                    <div style="display:flex;flex-direction:column">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" id="email" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-11">
+                                    <button type="button" class="btn green" onclick="onEmailWindowSend()">Send Email</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<script type="text/javascript" charset="utf-8">
+
+    $(document).ready(function () {
+
+        $('#saleTable').DataTable({
+            searchDelay: 1000,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/pos/GetSales',   // Your action endpoint
+                type: 'POST'
+            },
+            columns: [
+                { data: "RefNO" },
+                { data: "BillNO" },
+                { data: "SaleType" },
+                { data: "GST" },
+                { data: "CustomerName" },
+                { data: "CustomerEmail" },
+                { data: "CustomerPhone" },
+                {
+                    data: "SaleDate",
+                    render: function (data) {
+                        return formatAspNetDate(data);
+                    }
+                },
+                { data: "Total" },
+                { data: "Due" },
+                {
+                    data: "SaleID",
+                    render: function (data, type, row) {
+                        let btns = `<button class="btn btn-lg blue print-receipt">Print Receipt</button>`;
+                        if (row.Total > 0) {
+                            btns += `<button onclick="refundInvoice('${data}')" class="btn btn-lg warning">Refund</button>`;
+                        }
+                        btns += `<button onclick="sendEmail('${data}', '${row.CustomerEmail}')" class="btn btn-lg blue">Send Email</button>`;
+                        return btns;
+                    }
+                }
+            ],
+            order: [[1, 'desc']],
+            columnDefs: [
+                {
+                    targets: [5, 6],   // hide Email and Phone
+                    visible: true,
+                    searchable: true
+                }
+            ]
+        });
+        $("input[type='search']").focus();
+
+        $("#emailWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+    });
+
+
+    var table = $('#saleTable').DataTable();
+
+    $('#saleTable tbody').on('click', '.print-receipt', function () {
+        // Get the row data using DataTables API
+        var rowData = table.row($(this).closest('tr')).data();
+        console.log("Print sale:", rowData);
+        reprintInvoice(rowData);
+    });
+
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetSale?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    $(document).ready(function () {
+        $("#emailWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+    });
+</script>

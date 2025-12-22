@@ -1,0 +1,184 @@
+﻿@model POS.Models.PurchaseOrderVM
+@{
+    ViewBag.Title = "PurchaseOrder";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.PurchaseOrderPayments
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="ADD NEW" onclick="showHideAddPurchaseOrder(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div id="quo-div" class="add-div">
+            @Html.Action("Create", "PurchaseOrder")
+        </div>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="POTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderReferenceNumber 
+                        </th>
+                        <th>
+                           @POS.Resources.Resource.PurchaseOrderDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Supplier
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RequiredbyDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Total
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Paid
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Due
+                        </th>
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Purchaseorders)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumberPO)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PurchaseOrderDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Suppliers.SupplierName)
+                            </td>
+                            <td>@Html.DisplayFor(modelitem => item.RequiredbyDate) </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Total)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Paid)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Due)
+                            </td>
+                            <td>
+                                <a href="#" onclick="getAddPayment('@item.PurchaseOrderID.ToString()')">@POS.Resources.Resource.AddPayment</a> 
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="paymenPOtModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.AddPayments</h4>
+            </div>
+            <div class="modal-body">
+
+                @using (Html.BeginForm("AddPayment", "PurchaseOrder", FormMethod.Post, new { @id = "pay-form-po" }))
+                {
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Date
+                        </div>
+                        <div class="form-input">
+                            @*<input type="text" class="form-control" id="payDate" name="PaidDate" required />*@
+                            <input type="text" class="form-control" id="PaidDate" name="PaidDate" required />
+                            <input type="hidden" id="poID" name="FKPOID" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.PaidAmount
+                        </div>
+                        <div class="form-input">
+                            @*@Html.TextBox("payDate", "", new { @class = "form-control", @name = "PaidDate", @required = "required" })*@
+                            <input type="number" class="form-control" id="payAmount" name="Amount" required />
+                        </div>
+                    </div>
+    <input type="submit" class="btn custombtn" value="@POS.Resources.Resource.AddPayment" />
+
+    <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="addPOPayments()" />
+                }
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+
+    function getAddPayment(id) {
+        $("#poID").val(id);
+        $("#paymenPOtModal").modal("show");
+        //$("#payDate").datepicker({ dateFormat: 'dd/mm/yy' });
+        $("#PaidDate").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+    }
+
+    $(document).ready(function () {
+
+        $('#POTable').dataTable({
+            responsive: true
+        });
+
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                if (msg == "true") {
+                    $("#paymenPOtModal").modal("hide");
+                    $('.modal-backdrop').hide();
+                    successToast();
+                    addPOPayments();
+
+                }
+                else {
+                    return $().toastmessage('showToast', {
+                        text: msg,
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'warning'
+
+                    });
+                }
+
+
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#pay-form-po').ajaxForm(options);
+
+    });
+</script>
+

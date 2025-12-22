@@ -1,0 +1,283 @@
+﻿@model POS.Models.ServicesVM
+@{
+    ViewBag.Title = "Services";
+}
+
+@using (Html.BeginForm("Create", "Services", FormMethod.Post, new { enctype = "multipart/form-data", @id = "Service-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Service.ItemNo, new { @id = "item-no" })
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Create Service
+        </div>
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Category
+                        </div>
+                        <div class="form-input">
+
+                            @Html.DropDownListFor(c => c.Service.FKGroupID, Model.getAllGroup(), "Please Select....", new
+                       {
+                           @class = "form-control selectize",
+                           @onchange = "getItemNumber()",
+                           @id = "item-cat"
+                       })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Name
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Service.Name, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ItemNo
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Service.ItemNoStr, new { @class = "form-control", @readonly = "readonly", @id = "item-str" })
+                        </div>
+                    </div>
+                    <div class="form-row" style="width:50%;">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Description
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Service.Description, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.PurchaseCost
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Service.PurchaseCost, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalePrice
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Service.SalePrice, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Barcode
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Service.Barcode, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Service.LocationID, Model.getAllSites(), "Please Select",
+                          new { @class = "form-control selectize" })
+                       
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+          
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Tax and Discount
+                </div>
+                <div class="panel-body">
+                    <div class="row clearfix">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="form-input-group">
+                                    <label class="inline">Is Taxable</label>
+                                </div>
+                                <div class="input-group-addon bg-transparent">
+                                    @Html.CheckBoxFor(c => c.Service.IsTaxable)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Tax Rate</label>
+                                @Html.DropDownListFor(c => c.Service.TaxRateID, Model.getAllTaxRates(), "Please Select..", new
+                                            { 
+                                    
+                                                         @class = "form-control field-setting selectize"
+                                                       })
+                               
+                               
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="form-input-group">
+                                    <label class="inline">Allow Discount</label>
+                                </div>
+                                <div class="input-group-addon bg-transparent">
+                                    @Html.CheckBoxFor(c => c.Service.AllowDiscount)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>@POS.Resources.Resource.Discount %</label>
+                                @Html.TextBoxFor(c => c.Service.DiscountAllowed, new { @class = "form-control field-setting" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+            <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="getItemData()" />
+        </div>
+    </div>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+                </div>
+                <div class="modal-body">
+                    <img />
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+
+    $('.selectize').selectize();
+    var $select1 = $("#Item_LocationID").selectize();
+
+    //$select1[0].selectize.setValue("f66a3a73-0c03-4bf9-ac32-5d637b45caca");
+    //var $select = $("#Item_MeasuringUnit").selectize();
+    //$select[0].selectize.setValue("Piece");
+
+    function getZeros(src) {
+        if (src.toString().length == 1) {
+            return "0000" + src;
+        }
+        else if (src.toString().length == 2) {
+            return "000" + src;
+        }
+        else if (src.toString().length == 3) {
+            return "00" + src;
+        }
+        else if (src.toString().length == 4) {
+            return "0" + src;
+        }
+        else {
+            return src;
+        }
+    }
+    function getItemNumber() {
+        if ($("#item-cat").val() == "") {
+            $("#item-str").val("");
+            $("#Item_Name").val("");
+            return false;
+        }
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "json",
+            url: '/Item/GetItemNumber?id=' + $("#item-cat").val(),
+            async: true,
+            success: function (data) {
+                unblockUI();
+                $("#item-no").val(data);
+                $("#item-str").val($("#item-cat option:selected").text().split(" | ")[0] + "" + getZeros(data));
+                $("#Item_Name").val($("#item-cat option:selected").text().split(" | ")[1]);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+
+    }
+    var xhr;
+    var select_group, $select_group;
+    var select_unit, $select_unit;
+    $select_group = $('#Item_FkUnitGroupID').selectize({
+        onChange: function (value) {
+            if (!value.length) return;
+            select_unit.disable();
+            select_unit.clearOptions();
+            select_unit.load(function (callback) {
+                xhr && xhr.abort();
+                xhr = $.ajax({
+                    url: '@Url.Action("GetGroupUnits", "Item")',
+
+                    data: { groupID: value },
+                    success: function (results) {
+                        select_unit.enable();
+                        callback(results);
+                    },
+                    error: function () {
+                        callback();
+                    }
+                })
+            });
+        }
+    });
+    $select_unit = $('#Item_FkDefaultUnitID').selectize({
+        valueField: 'Value',
+        labelField: 'Text'
+    });
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            var submit = true;
+            if (!submit) {
+                return false;
+            }
+            $(".btn").prop("disabled", true);
+
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            addServices();
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#Service-form').ajaxForm(options);
+
+</script>

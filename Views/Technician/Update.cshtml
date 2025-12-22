@@ -1,0 +1,742 @@
+﻿@model POS.Models.CustomerRepair.RepairOrderVM
+
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="portlet light">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-bar-chart font-green"></i>
+                    <span class="caption-subject font-green bold uppercase">Repair Order</span>
+                    <span class="caption-helper">order number @Model.RepairOrder.RefNo</span>
+                </div>
+                <div class="actions">
+                    @*<button onclick="printRepairOrder()" class="btn btn-lg dark btn-home-back">
+                            Print
+                        </button>*@
+                    <button onclick="switchUpdateScreen(false)"
+                            class="btn btn-lg dark btn-home-back">
+                        @POS.Resources.Resource.Home
+                    </button>
+                </div>
+            </div>
+            <div class="portlet-body" id="print-section" style="margin-left:100px;margin-right:100px">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div style="display:flex;justify-content:flex-start;padding:20px">
+                            <div style="width:50%">Client Name: @Model.RepairOrder.CustomerName</div>
+                            <div>Date: @Model.RepairOrder.Date.ToShortDateString()</div>
+                        </div>
+                        <div style="display:flex;justify-content:flex-start;padding:20px">
+                            <div style="width:50%">Phone Number: @Model.RepairOrder.CustomerPhone</div>
+                            <div>Repair ID: @Model.RepairOrder.RefNo</div>
+                        </div>
+                        <div style="display:flex;justify-content:flex-start;padding:20px">
+                            <div style="width:50%">Email: @Model.RepairOrder.CustomerEmail</div>
+                            <div>Password: </div>
+                        </div>
+                        <div style="display:flex;justify-content:flex-start;padding:20px">
+                            <div>@Model.RepairOrder.ProblemDescription</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="portlet light no-padding">
+                                    <div class="portlet-body no-padding">
+                                        <div style="display:flex;justify-content:space-between;" class="no-margin">
+                                            <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                                                Services
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-7">
+                                <div class="portlet light no-padding">
+                                    <div class="portlet-body no-padding">
+                                        <div style="display:flex;justify-content:space-between;" class="no-margin">
+                                            <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                                                Parts
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div id="cartGrid"></div>
+                                <input type="hidden"
+                                       id="services-json"
+                                       value="@Json.Encode(Model.RepairOrder.Services)" />
+                            </div>
+                            <div class="col-sm-7">
+                                <div id="cartPartGrid"></div>
+                                <input type="hidden"
+                                       id="parts-json"
+                                       value="@Json.Encode(Model.RepairOrder.Items)" />
+                            </div>
+                        </div>
+                        <div id="cartItemActionWindow" style="display:none;">
+                            <div style="display:flex;justify-content:space-between;padding:20px">
+                                <button type="button"
+                                        class="btn"
+                                        style="background-color:darkred;color:white"
+                                        onclick="removeCartItem()">
+                                    Remove Item
+                                </button>
+                                <button type="button" class="btn" onclick="closeCartItemActionWindow()">X</button>
+                            </div>
+                            <div class="row">
+                                @*Price*@
+                                <div class="col-sm-6">
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            Price: <h2 class="currentItem_Price">$0</h2>
+                                        </div>
+                                    </div>
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(7)">
+                                                        7
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(8)">
+                                                        8
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(9)">
+                                                        9
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(4)">
+                                                        4
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(5)">
+                                                        5
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(6)">
+                                                        6
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(1)">
+                                                        1
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(2)">
+                                                        2
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(3)">
+                                                        3
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-offset-4 col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setItemPrice(0)">
+                                                        0
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <button type="button"
+                                                            class="btn clear-btn btn-qty btn-default"
+                                                            style="width:95% !important" onclick="setItemPrice('clear')">
+                                                        Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="cartPartActionWindow" style="display:none;">
+                            <div style="display:flex;justify-content:space-between;padding:20px">
+                                <button type="button"
+                                        class="btn"
+                                        style="background-color:darkred;color:white"
+                                        onclick="removeCartPart()">
+                                    Remove Item
+                                </button>
+                                <button type="button" class="btn" onclick="closeCartPartActionWindow()">X</button>
+                            </div>
+                            <div class="row">
+                                @*Quantity*@
+                                <div class="col-sm-6">
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            Qty: <h2 class="currentPart_Qty">0</h2>
+                                        </div>
+                                    </div>
+                                    <div class="portlet light">
+                                        <div style="display:flex;justify-content:space-between;padding:20px">
+                                            <button type="button" class="btn cart-item-btn green" onclick="increaseQty()">+</button>
+                                            <button type="button" class="btn cart-item-btn blue" onclick="decreaseQty()">-</button>
+                                        </div>
+                                    </div>
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(7)">7</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(8)">8</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(9)">9</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(4)">4</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(5)">5</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(6)">6</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(1)">1</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(2)">2</button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(3)">3</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-offset-4 col-sm-4">
+                                                    <button type="button" class="btn numeric-btn btn-qty btn-default" onclick="setItemQuantity(0)">0</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <button type="button" class="btn clear-btn btn-qty btn-default" style="width:95% !important" onclick="setItemQuantity('clear')">Clear</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Price*@
+                                <div class="col-sm-6">
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            Price: <h2 class="currentPart_Price">$0</h2>
+                                        </div>
+                                    </div>
+                                    <div class="portlet light">
+                                        <div class="portlet-body">
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(7)">
+                                                        7
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(8)">
+                                                        8
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(9)">
+                                                        9
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(4)">
+                                                        4
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(5)">
+                                                        5
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(6)">
+                                                        6
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(1)">
+                                                        1
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(2)">
+                                                        2
+                                                    </button>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(3)">
+                                                        3
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-offset-4 col-sm-4">
+                                                    <button type="button"
+                                                            class="btn numeric-btn btn-qty btn-default"
+                                                            onclick="setPartPrice(0)">
+                                                        0
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <button type="button"
+                                                            class="btn clear-btn btn-qty btn-default"
+                                                            style="width:95% !important" onclick="setPartPrice('clear')">
+                                                        Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="portlet light">
+                                    <div class="portlet-body">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="searchItemQuery"
+                                               onkeyup="searchQueryChange(this)" />
+                                    </div>
+                                </div>
+                                <div class="portlet light">
+                                    <div class="portlet-body">
+
+                                        <div class="row" style="display:none" id="search-grid-content">
+                                            <div class="col-sm-12">
+                                                <div class="portlet light">
+                                                    <div class="portlet-body">
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <div class="portlet light no-padding">
+                                                                    <div class="portlet-body no-padding">
+                                                                        <div class="row no-margin">
+                                                                            <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                                                                                Searched Items
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <div id="searchGrid"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="portlet light">
+                                    <div class="portlet-body">
+                                        <div class="row subtotal-row">
+                                            <div style="float:left">
+                                                <h3 class="subtotal">@POS.Resources.Resource.SubTotal</h3>
+                                            </div>
+                                            <div style="float:right">
+                                                <h3 class="subtotal" id="repairOrderModel_SubTotal">$0</h3>
+                                            </div>
+                                        </div>
+                                        <div class="row subtotal-row">
+                                            <div style="float:left">
+                                                <h3 class="subtotal">@POS.Resources.Resource.TaxAmount</h3>
+                                            </div>
+                                            <div style="float:right">
+                                                <h3 class="subtotal" id="repairOrderModel_GST">$0</h3>
+                                            </div>
+                                        </div>
+                                        <div class="row subtotal-row">
+                                            <div style="float:left">
+                                                <h3>@POS.Resources.Resource.Total</h3>
+                                            </div>
+                                            <div style="float:right">
+                                                <h3 class="repairOrderModel_Total">$0</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="portlet light">
+                                    <div class="portlet-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <button type="button"
+                                                        onclick="updateRepairOrder()"
+                                                        class="btn btn-lg pay-btn purple"
+                                                        style="background-color:#EA5257;">
+                                                    Update Order
+                                                </button>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <button type="button"
+                                                        onclick="completeRepairOrder()"
+                                                        class="btn btn-lg pay-btn purple"
+                                                        style="background-color:#EA5257;">
+                                                    Complete Order
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+
+    $(document).ready(function () {
+
+        $("#searchGrid").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: {
+                        url: "/CustomerRepair/GetSearchItemGridList",
+                        type: "post",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json"
+                    },
+                    parameterMap: function (e, type) {
+                        if (type === "read") return JSON.stringify({
+                            GridFilters: e,
+                            Search: itemSearch
+                        })
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    model: {
+                        id: "Id",
+                        fields: {
+                            Id: {
+                                editable: false
+                            }
+                        }
+                    }
+                },
+                serverSorting: true,
+            },
+            scrollable: true,
+            sortable: true,
+            selectable: true,
+            pageable: false,
+            columns: [
+                //{ field: "ServiceNoStr", title: "Service #", width: "20%" },
+                "Name",
+                {
+                    field: "SalePrice",
+                    title: "Price",
+                    //format: "{0:c}",
+                    width: "20%"
+                },
+                {
+                    field: "PurchaseCost",
+                    title: "Cost",
+                    //format: "{0:c}",
+                    width: "10%"
+                },
+                {
+                    field: "Profit",
+                    title: "Profit",
+                    template: function (o) {
+                        return (((o.SalePrice - o.PurchaseCost) / o.SalePrice) * 100).toFixed(2) + "%";
+                    },
+                    width: "20%"
+                },
+            ],
+            change: function (e) {
+                keyPressBeep();
+                grid = e.sender;
+                var selectedItem = grid.dataItem(this.select());
+                if (selectedItem.ItemID) {
+                    currentCartPart = selectedItem;
+                    var cartPart = $("#cartPartGrid").data("kendoGrid");
+                    if (cartPart) {
+                        updateCartPart(cartPart, currentCartPart);
+                    }
+                } else {
+                    currentCartItem = selectedItem;
+                    var cart = $("#cartGrid").data("kendoGrid");
+                    if (cart) {
+                        updateCart(cart, currentCartItem);
+                    }
+                }
+            }
+        });
+
+        $("#cartGrid").kendoGrid({
+            dataSource: {
+                data: cartData,
+                schema: {
+                    model: {
+                        fields: {
+                            Id: {},
+                            Index: { type: "number" },
+                            Description: { type: "string" },
+                            Cost: { type: "number" },
+                            Price: { type: "number" },
+                            Profit: { type: "number" }
+                        }
+                    }
+                },
+                pageSize: 50
+            },
+            height: 200,
+            scrollable: true,
+            sortable: true,
+            selectable: true,
+            pageable: false,
+            columns: [
+                { field: "Index", title: "#", width: "8%" },
+                "Description",
+                {
+                    field: "Price",
+                    title: "Price",
+                    //format: "{0:c}",
+                    width: "15%"
+                },
+            ],
+            change: function (e) {
+                keyPressBeep();
+                grid = e.sender;
+                currentCartItem = grid.dataItem(this.select());
+                //$(".currentItem_Qty").html(currentCartItem.Qty);
+                //itemQtyKeppadVal = "";
+                $(".currentItem_Price").html("$" + currentCartItem.Price);
+                itemPriceKeppadVal = "";
+                var win = $("#cartItemActionWindow").data("kendoWindow");
+                win.center().open();
+            }
+        });
+
+        $("#cartItemActionWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+
+        $("#cartPartGrid").kendoGrid({
+            dataSource: {
+                data: cartPartData,
+                schema: {
+                    model: {
+                        fields: {
+                            Id: {},
+                            Index: { type: "number" },
+                            Description: { type: "string" },
+                            Qty: { type: "number" },
+                            Cost: { type: "number" },
+                            Price: { type: "number" },
+                            Profit: { type: "number" }
+                        }
+                    }
+                },
+                pageSize: 50
+            },
+            height: 200,
+            scrollable: true,
+            sortable: true,
+            selectable: true,
+            pageable: false,
+            columns: [
+                { field: "Index", title: "#", width: "8%" },
+                "Description",
+            {
+                field: "Qty",
+                title: "Qty",
+                width: "10%",
+            },
+            {
+                field: "Price",
+                title: "Price",
+                //format: "{0:c}",
+                width: "15%"
+            },
+            {
+                field: "Total",
+                title: "Total",
+                //format: "{0:c}",
+                width: "15%"
+            }
+            ],
+            change: function (e) {
+                keyPressBeep();
+                grid = e.sender;
+                currentCartPart = grid.dataItem(this.select());
+                $(".currentPart_Price").html("$" + currentCartPart.Price);
+                itemPriceKeppadVal = "";
+                $(".currentItem_Qty").html(currentCartPart.Qty);
+                itemQtyKeppadVal = "";
+                var win = $("#cartPartActionWindow").data("kendoWindow");
+                win.center().open();
+            }
+        });
+
+        $("#cartPartActionWindow").kendoWindow({
+            width: "630px",
+            title: false,
+            visible: false,
+            modal: true
+        });
+
+        var servicesJson = $('#services-json').val();
+        var services = [];
+        if (servicesJson) {
+            cartData = [];
+            services = JSON.parse(servicesJson);
+            var count = 0;
+            $.each(services, function (i, item) {
+                cartData.push({
+                    Id: item.Id,
+                    Index: ++count,
+                    ServiceId: item.ServiceId,
+                    Description: item.Description,
+                    Price: item.UnitPrice,
+                    Cost: 0,
+                    Profit: 0,
+                    AllowedDiscount: false,
+                    DiscountAllowed: 0,
+                    Discount: 0,
+                    IsTaxable: true,
+                    TaxRate: 13,
+                    Tax: item.Tax,
+                    Total: item.UnitPrice
+                });
+            });
+            var cart = $("#cartGrid").data("kendoGrid");
+            cart.dataSource.data(cartData);
+        }
+
+        var partsJson = $('#parts-json').val();
+        var parts = [];
+        if (partsJson) {
+            cartPartData = [];
+            parts = JSON.parse(partsJson);
+            var count = 0;
+            $.each(parts, function (i, item) {
+                cartPartData.push({
+                    Id: item.Id,
+                    Index: ++count,
+                    ItemId: item.ItemId,
+                    Description: item.Description,
+                    Price: item.UnitPrice,
+                    Qty: item.Quantity,
+                    Cost: 0,
+                    Profit: 0,
+                    AllowedDiscount: false,
+                    DiscountAllowed: 0,
+                    Discount: 0,
+                    IsTaxable: true,
+                    TaxRate: 13,
+                    Tax: item.Tax,
+                    Total: item.UnitPrice
+                });
+            });
+            var cartPart = $("#cartPartGrid").data("kendoGrid");
+            cartPart.dataSource.data(cartPartData);
+        }
+
+        repairOrderModel.Id = '@Model.RepairOrder.Id';
+        repairOrderModel.Services = services;
+        repairOrderModel.Items = parts;
+        repairOrderModel.SubTotal = '@Model.RepairOrder.SubTotal';
+        repairOrderModel.TaxAmount = '@Model.RepairOrder.Tax';
+        repairOrderModel.Total = '@Model.RepairOrder.Total';
+
+        updateTotals();
+    });
+</script>
+

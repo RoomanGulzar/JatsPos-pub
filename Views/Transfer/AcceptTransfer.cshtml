@@ -1,0 +1,183 @@
+﻿@model POS.Models.TransferVM
+@using (Html.BeginForm("AcceptTransfer", "Transfer", FormMethod.Post, new { @id = "tra-form-acc" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Transfer.TransferID)
+    @Html.HiddenFor(c => c.Transfer.InitiatedDate)
+    @Html.HiddenFor(c => c.Transfer.ComletedDate)
+    @Html.HiddenFor(c => c.Transfer.Completed)
+    @Html.HiddenFor(c => c.Transfer.FKFLocationID)
+    @Html.HiddenFor(c => c.Transfer.FKTLocationID)
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.FromLocation
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Transfer.FKFLocationID, Model.getAllSites(), new { @class = "form-control", @disabled = "disabled" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ToLocation
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Transfer.FKTLocationID, Model.getAllSites(), new { @class = "form-control", @disabled = "disabled" })
+
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ReferenceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Transfer.ReferenceNumber, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="tra-item-main">
+        @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowTransfer()" value="Add New Row" />*@
+        <div class="clearfix"></div>
+        <table class="table table-responsive" id="Transfer-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SerialNo</th>
+                    <th>@POS.Resources.Resource.Item</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.UnitPrice</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th>@POS.Resources.Resource.Sentby</th>
+                    <th>@POS.Resources.Resource.Accept</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{var sn = 0;
+                decimal items = 0;
+                decimal totals = 0;
+                }
+                @for (int i = 0; i < Model.Transfer.Items.Count; i++)
+                {
+                    sn++;
+                    <tr>
+                        <td>
+                            @sn
+                            @Html.HiddenFor(c => c.Transfer.Items[i].TransferItemID)
+                            @Html.HiddenFor(c => c.Transfer.Items[i].FKTranferID)
+                            @Html.HiddenFor(c => c.Transfer.Items[i].FKItemID)
+                            @Html.HiddenFor(c => c.Transfer.Items[i].Quantity)
+                        </td>
+                        <td>
+                            @*@Html.DropDownListFor(c => c.Transfer.Items[i].FKItemID, Model.getAllItems(), new { @value = Model.Transfer.Items[i].FKItemID, @class = "form-control tra-items" })*@
+                            @Model.Transfer.Items[i].Item.Name @Model.Transfer.Items[i].Item.Description
+
+                        </td>
+                        <td>
+                            @Html.DisplayFor(c => c.Transfer.Items[i].Quantity, new { @class = "tra-item-quantity" })
+                            @{
+                    var tot = Model.Transfer.Items[i].Item.SalePrice * Model.Transfer.Items[i].Quantity;
+                    totals += tot;
+                    items += Model.Transfer.Items[i].Quantity;
+                            }
+                        </td>
+                        <td>
+                            @Model.Transfer.Items[i].Item.SalePrice
+                        </td>
+                        <td>
+                            @tot
+                        </td>
+                        <td>
+                            @Html.DisplayFor(c => c.Transfer.SentBy)
+                        </td>
+                        <td>
+                            @if (!Model.Transfer.Items[i].Transfered)
+                            {
+                                @Html.CheckBoxFor(c => c.Transfer.Items[i].Transfered)
+                            }
+                            else
+                            {
+                                <div class="green">Transfered</div>
+                            }
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.TotalItems
+        </div>
+        <div class="form-input">
+            <input type="number" id="total-items" value="@items" class="form-control" readonly />
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.TotalPrice
+        </div>
+        <div class="form-input">
+            <input type="number" id="total-price" value="@totals" class="form-control" readonly />
+
+        </div>
+    </div>
+    <div>
+        @if (Model.user.LocationID == Model.Transfer.FKFLocationID)
+        {
+
+            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.AcceptTransfer" />
+        }
+    </div>
+
+    <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="getAllTransferData()" />
+
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                $("Transfer-items tr").each(function () {
+                    //  var from
+
+
+                });
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                if (msg == "true") {
+                    successToast();
+                    getAllTransferData();
+                }
+                else {
+                    return $().toastmessage('showToast', {
+                        text: msg,
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+                    });
+                }
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#tra-form-acc').ajaxForm(options);
+    });
+</script>

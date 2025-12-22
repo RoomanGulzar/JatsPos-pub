@@ -1,0 +1,136 @@
+﻿@model POS.Models.PaymentVM
+    @{
+        ViewBag.Title = "Create";
+    }
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @POS.Resources.Resource.CustomerPayments
+        </div>
+        <div class="panel-body">
+
+            @using (Html.BeginForm("AddCustomerPayment", "Sale", FormMethod.Post, new { @id = "sp-form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(c=>c.user)
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Customer
+                    </div>
+                    <div class="form-input">
+                        @Html.DropDownListFor(c => c.Payment.FKCustomerID,Model.getAllCustomers(),"Please Select Customer", new { @class = "form-control" })
+                    </div>
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Date
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Payment.PaidDate, new { @class = "form-control datepicker" ,@value= DateTime.Now})
+                    </div>
+                    <div class="form-lable">
+                        @POS.Resources.Resource.ChequeNo
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Payment.CheckNO, new { @class = "form-control" })
+                    </div>
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Notes
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Payment.Notes, new { @class = "form-control" })
+                    </div>
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Amount
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Payment.Amount, new { @class = "form-control", @type="number" })
+                    </div>
+                    <div class="form-input">
+                        <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+                        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+                    </div>
+                </div>
+
+            }
+            <div  id="cus-history">
+
+            </div>
+            </div>
+        </div>
+<script>
+
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    //$(".datepicker").datepicker();
+    $("select").selectize();
+    var $select1 = $("#Payment_FKCustomerID").selectize();
+    $select1[0].selectize.setValue("");
+    $select1[0].selectize.on('change', function () {
+        var id = $("#Payment_FKCustomerID").val();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetCustomerSales?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#cus-history").html("");
+                $("#cus-history").html(data);
+                $("#cus-name").html($("#Payment_FKCustomerID").text());
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    });
+    function printPayment(no) {
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('' +
+            '<style type="text/css">' +
+            'table {width:100%;  border-collapse:collapse; }' +
+            'table th, table td {' +
+            'border:1px solid #000;' +
+            'padding;0.5em;' +
+            '}' +
+            '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<table><tr style='background-color:#337ab7;color:#fff;'></tr><tr><td>Invoice #</td><td>" + no + "</td></tr><tr><td>Date</td><td>" + $("#Payment_PaidDate").val() + "</td></tr><tr><td>Customer</td><td>" + $("#Payment_FKCustomerID :selected").text() + "</td></tr><tr><td>Amount</td><td> " + $("#Payment_Amount").val() + "</td></tr><tr><td>Cheque No</td><td>" + $("#Payment_CheckNO").val() + "</td></tr><tr><td>Notes</td><td>" + $("#Payment_Notes").val() + "</td></tr><tr><td>Received By</td><td>" + $("#user").val() + "</td></tr></table>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                if (confirm("Print ?")) {
+                    printPayment(msg);
+                    successToast();
+                    getAddPayment();
+                }
+                else {
+                    successToast();
+                    getAddPayment();
+                }
+
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#sp-form').ajaxForm(options);
+    });
+</script>

@@ -1,0 +1,1003 @@
+﻿@model POS.Models.SaleVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Sales
+    </div>
+    <div class="panel-body">
+
+        @using (Html.BeginForm("Index", "Sale", FormMethod.Post, new { @id = "sale-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(c => c.Sale.FKQuotationID);
+            @Html.HiddenFor(c => c.Sale.SaleType);
+            @Html.HiddenFor(c => c.Sale.SaleID);
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Date
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Sale.SaleDate, new { @class = "form-control datepicker", @readonly = "readonly" })
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Customer
+                </div>
+                <div class="form-input">
+                    @Html.DropDownListFor(c => c.Sale.FKCustomerID, Model.getAllCustomers(), new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.CustomerName
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Sale.CustomerName, new { @class = "form-control", @readonly = "readonly" })
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Location
+                </div>
+                <div class="form-input">
+                    @Html.DropDownListFor(c => c.Sale.FKLocationID, Model.getAllLocations(Model.User), new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Invoice Number
+                </div>
+                <div class="form-input">
+                    @Html.TextBoxFor(c => c.Sale.RefNO, new { @class = "form-control", @readonly = "readonly" })
+
+                </div>
+            </div>
+
+            <div class="sale-item-main">
+                <div style="clear:both;"></div>
+                <table class="table table-responsive" id="sale-items">
+                    <thead>
+                        <tr>
+                            <th>@POS.Resources.Resource.SerialNo</th>
+                            <th>@POS.Resources.Resource.Item #</th>
+                            <th>@POS.Resources.Resource.Product</th>
+                            <th>@POS.Resources.Resource.Quantity</th>
+                            <th>@POS.Resources.Resource.MeasuringUnit</th>
+                            <th>@POS.Resources.Resource.Price</th>
+                            <th>@POS.Resources.Resource.Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+            int sn = 0;
+                        }
+                        @if (Model.Sale.pItems != null)
+                        {
+                            if (Model.Sale.pItems.Count > 0)
+                            {
+
+                                for (var i = 0; i < Model.Sale.pItems.Count; i++)
+                                {
+                                    if (Model.Sale.pItems[i].FKItemID != null)
+                                    {
+                                    if (Model.Sale.pItems[i].Returned)
+                                    {
+                                        <tr style="background-color:red;">
+                                            @{
+                                        sn = sn + 1;
+                                            }
+                                            <td>
+                                                @sn
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item-search" value="@Model.Sale.pItems[i].pItem.ItemNoStr" onchange="getItemDetailByNumber(this)" readonly />
+                                            </td>
+                                            <td>
+                                                <input id="Sale-item-0" class="sale-items form-control" value="@Model.Sale.pItems[i].pItem.Name  @Model.Sale.pItems[i].pItem.Description" readonly /> <input type='hidden' value="@Model.Sale.pItems[i].FKItemID" class="item-id-hdn" name='Sale.pItems[@i].FKItemID' />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-quantity" value="@Model.Sale.pItems[i].Quantity" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Quantity" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control sale-item-unit" value="@(Model.Sale.pItems[i].Unit != null ? Model.Sale.pItems[i].Unit.Name : string.Empty)" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Unit" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-price" value="@Model.Sale.pItems[i].UnitPrice" onchange="setSItemTotal(this)" name="Sale.pItems[@i].UnitPrice" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-total" value="@Model.Sale.pItems[i].Total" name="Sale.pItems[@i].Total" readonly />
+                                            </td>
+                                            <td class="image-col"><a href='#' onclick='openSaleImageModal(this)'>Image</a> <input type='hidden' class='img-src' value='@Model.Sale.pItems[i].pItem.Image' /></td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            @{
+                                        sn = sn + 1;
+                                            }
+                                            <td>
+                                                @sn
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item-search" value="@Model.Sale.pItems[i].pItem.ItemNoStr" onchange="getItemDetailByNumber(this)" readonly />
+                                            </td>
+                                            <td>
+                                                <input id="Sale-item-0" class="sale-items form-control" value="@Model.Sale.pItems[i].pItem.Name  @Model.Sale.pItems[i].pItem.Description" readonly /> <input type='hidden' value="@Model.Sale.pItems[i].FKItemID" class="item-id-hdn" name='Sale.pItems[@i].FKItemID' />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-quantity" value="@Model.Sale.pItems[i].Quantity" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Quantity" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control sale-item-unit" value="@(Model.Sale.pItems[i].Unit != null ? Model.Sale.pItems[i].Unit.Name : string.Empty)" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Unit" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-price" value="@Model.Sale.pItems[i].UnitPrice" onchange="setSItemTotal(this)" name="Sale.pItems[@i].UnitPrice" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-total" value="@Model.Sale.pItems[i].Total" name="Sale.pItems[@i].Total" readonly />
+                                            </td>
+                                            <td class="image-col"><a href='#' onclick='openSaleImageModal(this)'>Image</a> <input type='hidden' class='img-src' value='@Model.Sale.pItems[i].pItem.Image' /></td>
+                                            <td></td>
+                                        </tr>
+                                    }
+
+                                    }
+
+                                    if (Model.Sale.pItems[i].FKServiceID != null)
+                                    {
+                                    if (Model.Sale.pItems[i].Returned)
+                                    {
+                                        <tr style="background-color:red;">
+                                            @{
+                                        sn = sn + 1;
+                                            }
+                                            <td>
+                                                @sn
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item-search" value="@Model.Sale.pItems[i].pService.ItemNoStr" onchange="getItemDetailByNumber(this)" readonly />
+                                            </td>
+                                            <td>
+                                                <input id="Sale-item-0" class="sale-items form-control" value="@Model.Sale.pItems[i].pService.Name  @Model.Sale.pItems[i].pService.Description" readonly /> <input type='hidden' value="@Model.Sale.pItems[i].FKItemID" class="item-id-hdn" name='Sale.pItems[@i].FKItemID' />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-quantity" value="@Model.Sale.pItems[i].Quantity" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Quantity" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control sale-item-unit" value="@(Model.Sale.pItems[i].Unit != null ? Model.Sale.pItems[i].Unit.Name : string.Empty)" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Unit" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-price" value="@Model.Sale.pItems[i].UnitPrice" onchange="setSItemTotal(this)" name="Sale.pItems[@i].UnitPrice" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-total" value="@Model.Sale.pItems[i].Total" name="Sale.pItems[@i].Total" readonly />
+                                            </td>
+                                            <td class="image-col"></td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            @{
+                                        sn = sn + 1;
+                                            }
+                                            <td>
+                                                @sn
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item-search" value="@Model.Sale.pItems[i].pService.ItemNoStr" onchange="getItemDetailByNumber(this)" readonly />
+                                            </td>
+                                            <td>
+                                                <input id="Sale-item-0" class="sale-items form-control" value="@Model.Sale.pItems[i].pService.Name  @Model.Sale.pItems[i].pService.Description" readonly /> <input type='hidden' value="@Model.Sale.pItems[i].FKItemID" class="item-id-hdn" name='Sale.pItems[@i].FKItemID' />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-quantity" value="@Model.Sale.pItems[i].Quantity" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Quantity" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control sale-item-unit" value="@(Model.Sale.pItems[i].Unit != null ? Model.Sale.pItems[i].Unit.Name : string.Empty)" onchange="setSItemTotal(this)" name="Sale.pItems[@i].Unit" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-price" value="@Model.Sale.pItems[i].UnitPrice" onchange="setSItemTotal(this)" name="Sale.pItems[@i].UnitPrice" readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control sale-item-total" value="@Model.Sale.pItems[i].Total" name="Sale.pItems[@i].Total" readonly />
+                                            </td>
+                                            <td class="image-col"></td>
+                                            <td></td>
+                                        </tr>
+                                    }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+
+                    </tbody>
+                </table>
+                @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowSale()" value="Add New Row" />*@
+            </div>
+            <div class="totla-rows">
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.SubTotal
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.SubTotal, new { @class = "form-control sale-sub", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.CargoCharges
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Other, new { @class = "form-control sale-sub", @onchange = "addCargoCharges(this)", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Discount %
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Discount, new { @class = "form-control sale-dis", @type = "number", @onchange = "calculateSaleAmt(this)", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Discount Amount
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBox("ds-amt", "", new { @class = "form-control sale-dis-amt", @type = "number", @onchange = "calculateSaleAmt(this)", @id = "disc-amount", @readonly = "readonly" })
+                    </div>
+                </div>
+                @*<div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Tax %
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.GST, new { @class = "form-control sale-tax", @type = "number", @onchange = "calculateSaleAmtT(this)", @readonly = "readonly" })
+
+                    </div>
+                </div>*@
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Tax Amount
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBox("tx-amt", "", new { @class = "form-control sale-tax-amt", @type = "number", @onchange = "calculateSaleAmtT(this)", @id = "tax-amount", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Total
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Total, new { @class = "form-control sale-total", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Received
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Received, new { @class = "form-control rec-total", @onchange = "onReceiveChange()", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Due
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Due, new { @class = "form-control due-total", @readonly = "readonly" })
+
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-lable">
+                        @POS.Resources.Resource.Comments
+                    </div>
+                    <div class="form-input">
+                        @Html.TextBoxFor(c => c.Sale.Comments, new { @class = "form-control rec-total", @onchange = "onReceiveChange()" })
+                    </div>
+                </div>
+                <div class="form-row">
+                    @if (Model.Sale.SaleType == "Maintenance")
+                    {
+                        <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Print" onclick="openModalM()" />
+                    }
+                    else
+                    {
+                        <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Print" onclick="openModal()" />
+                    }
+
+                    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+                </div>
+
+            </div>
+        }
+
+        <div class="modal fade image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade print-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">@POS.Resources.Resource.Print</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            @if (Model.LocationName == "WALEED ELECTRONICS")
+                            {
+                                <button class="btn btn-default custombtn" onclick="printAlwaqt()">Print Invoice</button>
+                                <button class="btn btn-default custombtn" onclick="printReceipt()">@POS.Resources.Resource.SmallReceipt</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-default custombtn" onclick="printcrystal()">Invoice</button>
+                                <button class="btn btn-default custombtn" onclick="printReceiptAl()">@POS.Resources.Resource.SmallReceipt</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade print-modal-main" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">@POS.Resources.Resource.Print</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            @if (Model.LocationName == "WALEED ELECTRONICS")
+                            {
+                                <button class="btn btn-default custombtn" onclick="printWaleed()">Print Invoice</button>
+                                <button class="btn btn-default custombtn" onclick="printReceipt()">@POS.Resources.Resource.SmallReceipt</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-default custombtn" onclick="printcrystal()">@POS.Resources.Resource.Invoice</button>
+                                <button class="btn btn-default custombtn" onclick="printReceiptAl()">@POS.Resources.Resource.SmallReceipt</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    function printcrystal() {
+
+        var id = $('#Sale_SaleID').val();
+        var url = "@Url.Action("InvoicePrint", "Sale")?id=" + id;
+        var windowobject = window.open(url, "_blank");
+        windowobject.onload = function () {
+            windowobject.print();
+            windowobject.document.close();
+
+        }
+    }
+
+    var userfirstname = '@Model.User.FirstName';
+    var lastname = '@Model.User.LastName';
+
+    var cash = '@Model.Sale.SaleType';
+
+    var username = userfirstname + ' ' + lastname;
+
+
+    function openModal() {
+        $(".print-modal").modal("show");
+    }
+    function openModalM() {
+        $(".print-modal-main").modal("show");
+    }
+    function printReceiptM() {
+
+        var name = $("#Sale_FKCustomerID :selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:275px;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Date : " + date + " L.P.O. No.:</div>");
+        var gTotal = $("#Sale_Total").val();
+        var disc = $("#disc-amount").val();
+        docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>1</span><span style='float:left;'></span><span style='float:left;'>Maintenance Charges</span><span style='float:left;'></span><span style='float:left;'>" + gTotal + "</span><span style='float:left;'>" + gTotal + "</span></div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Discount:</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        postPrint();
+        docprint.close();
+    }
+    function printAlwaqtM() {
+
+        var name = $("#Sale_FKCustomerID :selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('</head><body style="width:800px;height:300px">');
+        docprint.document.write("<div style='float:left;width:800px;margin-top:110px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>" + date + "</span></div>");
+        docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+        docprint.document.write('<div style="margin-top:50px;float:left;min-height:335px;position: relative;">');
+        var gTotal = $("#Sale_Total").val();
+        var disc = $("#disc-amount").val();
+        docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>1</span><span style='float:left;width:15%;'></span><span style='float:left;width:45%;'>Maintenance Charges</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'></span><span style='float:left;width:10%;text-align:right; pading-right:5px;'></span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>" + gTotal + "</span></div>");
+        docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right'><div style='float:right;'></div><br /><br /><div style='float:right'>" + gTotal + "</div></div>");
+        docprint.document.write('</div></body></html>');
+        docprint.document.close();
+        docprint.print();
+        postPrint();
+        docprint.close();
+    }
+    function printWaleedM() {
+
+        var name = $("#Sale_FKCustomerID :selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('</head><body style="width:800px;height:300px">');
+        docprint.document.write("<div style='float:left;width:800px;margin-top:75px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>" + date + "</span></div>");
+        docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+        docprint.document.write('<div style="margin-top:50px;float:left;min-height:335px;position: relative;">');
+        var gTotal = $("#Sale_Total").val();
+        var disc = $("#disc-amount").val();
+        docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>1</span><span style='float:left;width:15%;'></span><span style='float:left;width:45%;'>Maintenance Charges</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'></span><span style='float:left;width:10%;text-align:right; pading-right:5px;'></span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>" + gTotal + "</span></div>");
+        docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right'><div style='float:right;'></div><br /><br /><div style='float:right'>" + gTotal + "</div></div>");
+        docprint.document.write('</div></body></html>');
+        docprint.document.close();
+        docprint.print();
+        postPrint();
+        docprint.close();
+
+    }
+    function postPrint() {
+        try {
+            //alert('calling ');
+            $(".print-modal").modal("hide");
+            window.external.OpenDrawer();
+        } catch (e) {
+            console.debug(e.message);
+            //alert(e.message);
+        }
+    }
+
+    function printReceipt() {
+        var name = $("#Sale_FKCustomerID:selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var sno = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:275px;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:meduim;font-weight:bold;'>WALEED ELECTRONICS</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small;font-weight:bold;'>Tel.: 011 4114443 </div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium;font-weight:bold;'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium;font-weight:bold;'> Date : " + date + "</div>");
+        docprint.document.write("<table style='font-weight:bold;float:left;text-align:left;font-size:meduim;border-style:solid;font-weight:bold;width:100%;'><tr><th style='font-weight:bold;'>" + "S No" + "</th><th style='font-weight:bold;'>" + "Description" + "</th><th style='font-weight:bold;'>" + "Qty" + "</th><th style='font-weight:bold;'>" + "Price" + "</th><th style='font-weight:bold;'>" + "Total" + "</th></tr>");
+        $("#sale-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            sno += sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            //"</span><span style='font-weight:bold;float:left;'>" + itemno +
+            docprint.document.write("<tr><td style='font-weight:bold;'>" + sno + "</td><td style='font-weight:bold;'>" + desc + "</td><td style='font-weight:bold;'>" + qty + "</td><td style='font-weight:bold;'>" + price + "</td><td style='font-weight:bold;'>" + total + "</td></tr>");
+
+        });
+        docprint.document.write("</table>");
+        var gTotal = $("#Sale_Total").val();
+        var subTotal = $("#Sale_SubTotal").val();
+        var disc = $("#disc-amount").val();
+        if (disc == "") {
+            disc = 0;
+        }
+
+        docprint.document.write("<br/><br/><br/><br/><div style='float:left;width:100%;text-align:right;font-size:medium;margin-top:10px;'>SubTotal: " + subTotal + "</div>");
+        docprint.document.write("<br/><br/><br/><br/><div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: " + disc + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write("<br/><br/><div style='float:left;width:100%;text-align:center;font-size:small'>Thank you for shopping </div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+
+        postPrint();
+        //docprint.close();
+    }
+    function printReceiptAl() {
+        var name = $("#Sale_FKCustomerID:selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var sno = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:275px;">');
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium;font-weight:bold;'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium;font-weight:bold;'> Date : " + date + "</div>");
+        docprint.document.write("<table style='font-weight:bold;float:left;text-align:left;font-size:meduim;border-style:solid;font-weight:bold;width:100%;'><tr><th style='font-weight:bold;'>" + "S No" + "</th><th style='font-weight:bold;'>" + "Description" + "</th><th style='font-weight:bold;'>" + "Qty" + "</th><th style='font-weight:bold;'>" + "Price" + "</th><th style='font-weight:bold;'>" + "Total" + "</th></tr>");
+        $("#sale-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            sno += sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            //"</span><span style='font-weight:bold;float:left;'>" + itemno +
+            docprint.document.write("<tr><td style='font-weight:bold;'>" + sno + "</td><td style='font-weight:bold;'>" + desc + "</td><td style='font-weight:bold;'>" + qty + "</td><td style='font-weight:bold;'>" + price + "</td><td style='font-weight:bold;'>" + total + "</td></tr>");
+
+        });
+        docprint.document.write("</table>");
+        var gTotal = $("#Sale_Total").val();
+        var subTotal = $("#Sale_SubTotal").val();
+        var disc = $("#disc-amount").val();
+        if (disc == "") {
+            disc = 0;
+        }
+
+        docprint.document.write("<br/><br/><br/><br/><div style='float:left;width:100%;text-align:right;font-size:medium;margin-top:10px;'>SubTotal: " + subTotal + "</div>");
+        docprint.document.write("<br/><br/><br/><br/><div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: " + disc + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write("<br/><br/><div style='float:left;width:100%;text-align:center;font-size:small'>Thank you for shopping </div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+
+        postPrint();
+        //docprint.close();
+    }
+    function printAlwaqt() {
+        if ($("#Sale_Comments").val() != "") {
+            printAlwaqtMaintenace();
+        }
+        else {
+            var arr = []; // object Array  added by nasib
+            var sn = 0; // serial no of record (1- > n)
+            var j = 1; // serial no of record(1 -> 9) per page
+            var itemsInPage = 9;//item per page
+            var disc = ""; var recivedby = ""; var gTotal = 0;
+            var itemno = 0; var desc = ""; var qty = 0;
+            var price = 0.0; var total = 0;
+            var min_height = 103;
+            var margin_top = 0; //sets margin from Top to set for page design
+            var name = $("#Sale_FKCustomerID :selected").text(); if (name == "") { name = $("#Sale_CustomerName").val(); }
+            var sr = $("#Sale_RefNO").val(); var date = $("#Sale_SaleDate").val();
+
+            $("#sale-items tbody tr").each(function () { //get All Data from model dialog
+                sn++;
+                itemno = $(this).find(".item-search").val();
+                desc = $(this).find(".sale-items").val();
+                qty = $(this).find(".sale-item-quantity").val();
+                price = $(this).find(".sale-item-price").val();
+                total = $(this).find(".sale-item-total").val();
+                gTotal = $("#Sale_Total").val();
+                disc = $("#disc-amount").val();
+                recivedby = username;
+
+                arr.push({ //push Data in object form in arr Array
+                    sn: sn,
+                    itemno: itemno,
+                    desc: desc,
+                    qty: qty,
+                    price: price,
+                    total: total,
+                    gTotal: gTotal,
+                    recivedby: recivedby,
+                    disc: disc
+                });
+            });
+            //print Starts from here
+            var docprint = window.open("about:blank", "_blank");
+            docprint.document.open();
+            docprint.document.write('<html><head><title></title>');
+            docprint.document.write('<style>html, body { height: 100%; width: 100%; margin: 0; }@@media screen {.pagebreak	{ border-top:1px dotted #999; }}@@media print {.pagebreak {page-break-after: always;}}</style>');
+            docprint.document.write('</head><body>');
+
+            for (var i = 0; i < arr.length; i++) {
+                if (j == 1) {//if page starts of no of recoeds are equal to pagecount(9)
+
+
+                    docprint.document.write('<table style="width: 800px;height:540px;">');
+
+                    docprint.document.write('<tr style="height: 125px;"><th style="width:10%;"></th><th style="width: 11%;"></th><th style="width: 47%;"></th><th style="width: 9%;"></th><th style="width: 9%;"></th><th style="width: 14%;"></th></tr>');
+
+                    docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="3">' + sr + '</td><td colspan="2">' + date + '</td></tr>');
+                    docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="3">' + name + '</td><td colspan="2">' + cash + '</td></tr>');
+                    docprint.document.write('<tr style="height:20px;"><td colspan="6"></td></tr>');
+
+                } //body area for each record
+                docprint.document.write('<tr style="height: 10px;"><td style="text-align: center">' + arr[i].sn + '</td><td>' + arr[i].itemno + '</td><td style="text-align: center;">' + (arr[i].desc).substring(0, 50) + '</td><td>' + arr[i].qty + '</td><td>' + arr[i].price + '</td><td>' + arr[i].total + '</td></tr>');
+
+                if (j == itemsInPage || (i + 1) == sn) {// if no of record = 9 footer area starts here
+                    if (((i + 1) == sn) && (sn % itemsInPage > 0)) { //if no of record in last page is > 9 (page count) add some empty rows to cover the height
+                        var loop_val = itemsInPage - (sn % itemsInPage);//no of empty rows to be added
+
+                        for (var k = 0; k < loop_val ; k++) {
+
+                            docprint.document.write('<tr style="height: 12px;"><td colspan="6">&nbsp;</td></tr>');
+                        }
+                    }// common footer of each page
+                    docprint.document.write('<tr style="height:35px;"><td colspan="5"></td><td>' + disc + '</td></tr>');
+                    docprint.document.write('<tr style="height:20px;"><td colspan="5"></td><td style="text-align:left;">' + gTotal + '</td></tr>');
+                    docprint.document.write('<tr style="height:20px;"><td colspan="2"></td><td colspan="2">' + recivedby + '</td></tr>');
+                    //  docprint.document.write('<tr style="height:0px;"><td colspan="2"></td><td colspan="4">&nbsp;</td></tr>');
+                    docprint.document.write('</table>');
+                    docprint.document.write('<div class="pagebreak"></div>');
+                    j = 1;
+                }
+                else {
+                    j++; // variable to check sr no of record wrt to page (1 -> 9)
+                }
+            } //for loop 'i' end here
+            docprint.document.write('</body></html>');
+            docprint.document.close();
+            docprint.print();
+            $(".print-modal").modal("hide");
+        }
+    }
+
+    function printAlwaqtMaintenace() {
+        var arr = []; // object Array  added by nasib
+        var sn = 0; // serial no of record (1- > n)
+        var j = 1; // serial no of record(1 -> 9) per page
+        var itemsInPage = 8;//item per page
+        var disc = ""; var recivedby = ""; var gTotal = 0;
+        var itemno = 0; var desc = ""; var qty = 0;
+        var price = 0.0; var total = 0;
+        var min_height = 103;
+        var margin_top = 0; //sets margin from Top to set for page design
+        var name = $("#Sale_FKCustomerID :selected").text(); if (name == "") { name = $("#Sale_CustomerName").val(); }
+        var sr = $("#Sale_RefNO").val(); var date = $("#Sale_SaleDate").val();
+        var Sale_Comments = $("#Sale_Comments").val();
+        $("#sale-items tbody tr").each(function () { //get All Data from model dialog
+            sn++;
+            itemno = $(this).find(".item-search").val();
+            desc = $(this).find(".sale-items").val();
+            qty = $(this).find(".sale-item-quantity").val();
+            price = $(this).find(".sale-item-price").val();
+            total = $(this).find(".sale-item-total").val();
+            gTotal = $("#Sale_Total").val();
+            disc = $("#disc-amount").val();
+
+            recivedby = username;
+
+            arr.push({ //push Data in object form in arr Array
+                sn: sn,
+                itemno: itemno,
+                desc: desc,
+                qty: qty,
+                price: price,
+                total: total,
+                gTotal: gTotal,
+                recivedby: recivedby,
+                disc: disc
+            });
+        });
+        //print Starts from here
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>html, body { height: 100%; width: 100%; margin: 0; }@@media screen {.pagebreak	{ border-top:1px dotted #999; }}@@media print {.pagebreak {page-break-after: always;}}</style>');
+        docprint.document.write('</head><body>');
+
+        for (var i = 0; i < arr.length; i++) {
+            if (j == 1) {//if page starts of no of recoeds are equal to pagecount(9)
+
+                docprint.document.write('<div class="col-lg-12" style="text-align:right">فرع مؤسسة مسلمة سليمان الصبحي</div><br/><div class="col-lg-12" style="text-align:right">للسباكة والكهرباء</div><br/><div class="col-lg-12" style="text-align:right">حي الملقا – شارع الأمير / محمد بن سعد</div><br/><div class="col-lg-12" style="text-align:right">شارع الخير سابقا</div><br/><div class="col-lg-12" style="text-align:right">تليفون:0112840699</div><br/>');
+                docprint.document.write('<table style="width: 800px;height:540px;">');
+
+                docprint.document.write('<tr style="height: 111px;"><th style="width:10%;"></th><th style="width: 0%;"></th><th style="width: 45%;"></th><th style="width: 10%;"></th><th style="width: 9%;"></th><th style="width: 14%;"></th></tr>');
+
+                docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="3">' + sr + '</td><td colspan="2">' + date + '</td></tr>');
+                docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="1">' + $("#Sale_FKCustomerID :selected").text() + '</td><td colspan="2" style="text-align: center;">' + $("#Sale_CustomerName").val() + '</td><td colspan="2">Maintenace</td></tr>');
+                docprint.document.write('<tr style="height:26px;"><td colspan="6"></td></tr>');
+
+            } //body area for each record
+            docprint.document.write('<tr style="height: 10px;"><td style="text-align: center"></td><td>' + arr[i].itemno + '</td><td>' + (arr[i].desc).substring(0, 32) + '</td><td>' + arr[i].qty + '</td><td>' + arr[i].price + '</td><td>' + arr[i].total + '</td></tr>');
+            if (j == itemsInPage || (i + 1) == sn) {// if no of record = 9 footer area starts here
+                docprint.document.write('<tr style="height: 10px;"><td colspan="2"><td style="word-wrap: break-word;">' + ((Sale_Comments.length > 32) ? Sale_Comments.substring(0, 32) + " ..." : Sale_Comments) + '</td><td colspan="3"></td></tr>');
+                if (((i + 1) == sn) && (sn % itemsInPage > 0)) { //if no of record in last page is > 9 (page count) add some empty rows to cover the height
+
+                    var loop_val = itemsInPage - (sn % itemsInPage);//no of empty rows to be added
+                    for (var k = 0; k < loop_val ; k++) {
+                        docprint.document.write('<tr style="height: 10px;"><td colspan="6">&nbsp;</td></tr>');
+                    }
+                }// common footer of each page
+                docprint.document.write('<tr style="height: 20px;"><td colspan="5"></td><td>' + disc + '</td></tr>');
+                docprint.document.write('<tr style="height:10px;"><td colspan="5"></td><td style="text-align:left;">' + gTotal + '</td></tr>');
+                docprint.document.write('<tr style="height:20px;"><td colspan="2"></td><td colspan="2">' + recivedby + '</td></tr>');
+                docprint.document.write('<tr style="height:0px;"><td colspan="2"></td><td colspan="4">&nbsp;</td></tr>');
+
+                docprint.document.write('</table>');
+                docprint.document.write('<div class="pagebreak"></div>');
+                j = 1;
+            }
+            else {
+                j++; // variable to check sr no of record wrt to page (1 -> 9)
+            }
+        } //for loop 'i' end here
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        $(".print-modal").modal("hide");
+    }
+
+    /*
+    function printAlwaqt() {
+        debugger;
+        var name = $("#Sale_FKCustomerID :selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var pagesCount = ($("#sale-items tbody tr").length);
+        var itemsInPage = 9;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        debugger;
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('</head><body>');
+        $("#sale-items tbody tr").each(function () {
+            if (sn % itemsInPage == 0) {
+                debugger;
+                docprint.document.write('<div style="width:800px;height:300px">');
+                docprint.document.write("<div style='float:left;width:800px;margin-top:99px;'><span style='float:left;margin-left:30px;margin-bottom:10px'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:20px;'>" + date + "</span></div>");
+                docprint.document.write("<div style='float:left;width:800px;margin-top:-13px;'><span style='float:left;margin-left:29px;;margin-bottom:10px'>" + name + "</span><span style='float:right;margin-right:123px;margin-bottom:20px;'>" + cash + "</span></div>");
+                docprint.document.write('<div style="margin-top:25px;float:left;min-height:330px;position: relative;">');
+            }
+            var itemno = $(this).find(".item-search").val();
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:800px;margin-top:9.5px;margin-left:10px;'><span style='float:left;left:0;text-align:left;width:5%;'>" + ++sn + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:45%;'>" + desc + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;margin-right:16px;text-align:left'>" + qty + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;text-align:left'>" + price + "</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;text-align:left'>" + total + "</span></div>");
+
+            if (sn % itemsInPage == 0 || sn == pagesCount) {
+                var gTotal = $("#Sale_Total").val();
+                var disc = $("#disc-amount").val();
+                var recivedby = username;
+                docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right;'><div style='margin-right:45px;;margin-top:2px;padding-bottom:62px' !Important;>" + disc + "</div></div><br /><div style='position: absolute;bottom:0;width:800px;text-align:right;'><div style='margin-right:45px;margin-left:15px;padding-bottom:5px !Important;'>" + gTotal + "</div><div style='margin-right:550px !Important;padding-bottom:5px;margin-top:10px !Important;'>" + recivedby + "</div></div>");
+                docprint.document.write('</div>');
+            }
+        });
+        docprint.document.write('</div></body></html>');
+        docprint.document.close();
+        docprint.print();
+        //docprint.close();
+        $(".print-modal").modal("hide");
+    }
+    */
+    function printWaleed() {
+        debugger;
+        var name = $("#Sale_FKCustomerID :selected").text();
+        if (name == "") {
+            name = $("#Sale_CustomerName").val();
+        }
+        var sr = $("#Sale_RefNO").val();
+        var date = $("#Sale_SaleDate").val();
+        var sn = 0;
+        var pagesCount = ($("#sale-items tbody tr").length);
+        var itemsInPage = 9;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        debugger;
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('</head><body>');
+        $("#sale-items tbody tr").each(function () {
+            if (sn % itemsInPage == 0) {
+                debugger;
+                docprint.document.write('<div style="width:800px;height:300px">');
+                docprint.document.write("<div style='float:left;width:800px;margin-top:99px;'><span style='float:left;margin-left:30px;margin-bottom:10px'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:20px;'>" + date + "</span></div>");
+                docprint.document.write("<div style='float:left;width:800px;margin-top:-13px;'><span style='float:left;margin-left:29px;;margin-bottom:10px'>" + name + "</span><span style='float:right;margin-right:123px;margin-bottom:20px;'>" + cash + "</span></div>");
+                docprint.document.write('<div style="margin-top:25px;float:left;min-height:330px;position: relative;">');
+            }
+            var itemno = $(this).find(".item-search").val();
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:800px;margin-top:9.5px;margin-left:10px;'><span style='float:left;left:0;text-align:left;width:5%;'>" + ++sn + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:45%;'>" + desc + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;margin-right:16px;text-align:left'>" + qty + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;text-align:left'>" + price + "</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;text-align:left'>" + total + "</span></div>");
+
+            if (sn % itemsInPage == 0 || sn == pagesCount) {
+                var gTotal = $("#Sale_Total").val();
+                var disc = $("#disc-amount").val();
+                var recivedby = username;
+                docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right;'><div style='margin-right:45px;;margin-top:2px;padding-bottom:62px' !Important;>" + disc + "</div></div><br /><div style='position: absolute;bottom:0;width:800px;text-align:right;'><div style='margin-right:45px;margin-left:15px;padding-bottom:5px !Important;'>" + gTotal + "</div><div style='margin-right:550px !Important;padding-bottom:5px;margin-top:10px !Important;'>" + recivedby + "</div></div>");
+                docprint.document.write('</div>');
+            }
+        });
+        docprint.document.write('</div></body></html>');
+        docprint.document.close();
+        docprint.print();
+        //docprint.close();
+        $(".print-modal").modal("hide");
+    }
+
+    //function printWaleed() {
+    //    debugger;
+    //    var name = $("#Sale_FKCustomerID:selected").text();
+    //    if (name == "") {
+    //        name = $("#Sale_CustomerName").val();
+    //    }
+    //    var sr = $("#Sale_RefNO").val();
+    //    var date = $("#Sale_SaleDate").val();
+    //    var sn = 0;
+    //    var a = 1;
+    //    var pagesCount = ($("#sale-items tbody tr").length);
+    //    var itemsInPage = 10;
+    //    var docprint = window.open("about:blank", "_blank");
+    //    docprint.document.open();
+    //    docprint.document.write('<html><head><title></title>');
+    //    docprint.document.write('</head><body>');
+    //    debugger;
+    //    $("#sale-items tbody tr").each(function () {
+    //        if (sn % itemsInPage == 0) {
+
+    //            if (sn== 0 || sn == 10) {
+    //                docprint.document.write('<div style="width:800px;height:330px" >');
+    //                docprint.document.write("<div style='float:left;width:780px;margin-top:72px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:13px;'>" + date + "</span></div>");
+    //                docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+    //                docprint.document.write('<div style="margin-top:58px;float:left;min-height:310px;position: relative;">');
+    //            }
+    //          else  if ( sn==20) {
+    //                docprint.document.write('<div style="width:800px;height:330px" >');
+    //                docprint.document.write("<div style='float:left;width:780px;margin-top:30px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:13px;'>" + date + "</span></div>");
+    //                docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+    //                docprint.document.write('<div style="margin-top:58px;float:left;min-height:310px;position: relative;">');
+    //          }
+    //          else if (sn == 30) {
+
+    //              docprint.document.write('<div style="width:800px;height:200px" >');
+    //              docprint.document.write("<div style='float:left;width:780px;margin-top:72px;'><span style='float:left;margin-left:55px;margin-to:20px'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:13px;'>" + date + "</span></div>");
+    //              docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;margin-left:55px;;margin-bottom:0px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:0px;'></span></div>");
+    //              docprint.document.write('<div style="margin-top:0px;float:left;min-height:310px;position: relative;">');
+    //          }
+
+    //        }
+    //        var itemno = $(this).find(".item-search").val();
+    //        var desc = $(this).find(".sale-items").val();
+    //        var qty = $(this).find(".sale-item-quantity").val();
+    //        var price = $(this).find(".sale-item-price").val();
+    //        var total = $(this).find(".sale-item-total").val();
+    //        docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;left:0;text-align:left;width:5%;margin-top:2px; '>" + ++sn + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:45%;'>" + desc + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + qty + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + price + "</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>" + total + "</span></div>");
+
+
+
+    //        if (sn % itemsInPage == 0 || sn == pagesCount) {
+    //            if (sn == 20) {
+    //                var gTotal = $("#Sale_Total").val();
+    //                var disc = $("#disc-amount").val();
+    //                docprint.document.write("<div style='position: absolute;bottom:0;width:750px;text-align:right'><div style='margin-rght:0; padding-right:5px;'>" + disc + "</div><br /><div style= 'margin-rght:0; padding-right:5px; margin-bottom:24px;'>" + gTotal + "</div></div>");
+    //                docprint.document.write('</div>');
+    //                docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;left:0;text-align:left;width:5%;margin-top:95px; '></span><span style='float:left;height:15%;'>");
+
+    //            }
+    //            else {
+    //                var gTotal = $("#Sale_Total").val();
+    //                var disc = $("#disc-amount").val();
+    //                docprint.document.write("<div style='position: absolute;bottom:0;width:750px;text-align:right'><div style='margin-rght:0; padding-right:5px;'>" + disc + "</div><br /><div style= 'margin-rght:0; padding-right:5px; margin-bottom:24px;'>" + gTotal + "</div></div>");
+    //                docprint.document.write('</div>');
+    //            }
+    //        }
+    //    });
+    //    docprint.document.write('</div></body></html>');
+    //    docprint.document.close();
+    //    docprint.print();
+    //    docprint.close();
+    //}
+
+    //function printWaleed() {
+
+    //    var name = $("#Sale_FKCustomerID:selected").text();
+    //    if (name == "") {
+    //        name = $("#Sale_CustomerName").val();
+    //    }
+    //    var sr = $("#Sale_RefNO").val();
+    //    var date = $("#Sale_SaleDate").val();
+    //    var sn = 1;
+    //    var docprint = window.open("about:blank", "_blank");
+    //    docprint.document.open();
+    //    docprint.document.write('<html><head><title></title>');
+    //    docprint.document.write('</head><body style="width:800px;height:300px">');
+    //    docprint.document.write("<div style='float:left;width:780px;margin-top:75px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>" + date + "</span></div>");
+    //    docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+    //    docprint.document.write('<div style="margin-top:55px;float:left;min-height:310px;position: relative;">');
+    //    $("#sale-items tbody tr").each(function () {
+    //        var itemno = $(this).find(".item-search").val();
+    //        var desc = $(this).find(".sale-items").val();
+    //        var qty = $(this).find(".sale-item-quantity").val();
+    //        var price = $(this).find(".sale-item-price").val();
+    //        var total = $(this).find(".sale-item-total").val();
+    //        docprint.document.write("<div style='float:left;width:780px;'><span style='float:left;left:0;text-align:left;width:5%;'>" + sn++ + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:45%;'>" + desc + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + qty + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + price + "</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>" + total + "</span></div>");
+    //    });
+
+    //    var gTotal = $("#Sale_Total").val();
+    //    var disc = $("#disc-amount").val();
+    //    docprint.document.write("<div style='position: absolute;bottom:0;width:750px;text-align:right'><div style='margin-rght:0; padding-right:5px;'>" + 157.5 + "</div><br /><div style= 'margin-rght:0; padding-right:5px; margin-bottom:13px;'>" + gTotal + "</div></div>");
+
+    //    docprint.document.write('</div></body></html>');
+    //    docprint.document.close();
+    //    docprint.print();
+    //    postPrint();
+    //    docprint.close();
+    //}
+
+</script>

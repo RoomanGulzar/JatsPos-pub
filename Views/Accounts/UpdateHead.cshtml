@@ -1,0 +1,47 @@
+﻿@model POS.Models.ExpenseHeadVM
+
+@using (Html.BeginForm("UpdateHead", "Accounts", FormMethod.Post, new { @id = "exp-head-form-u" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c=>c.ExpenseHead.ID)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.ExpenseHead.Name, new { @class = "form-control" })
+        </div>
+    </div>
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<script>
+
+    $(document).ready(function () {
+
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getExpenseHeadData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#exp-head-form-u').ajaxForm(options);
+    });
+</script>

@@ -1,0 +1,90 @@
+﻿@model POS.Models.CustomerVM
+@using (Html.BeginForm("Create", "Customer", FormMethod.Post, new { @id = "cus-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+          Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.CustomerName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+          @POS.Resources.Resource.CustomerNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.CustomerNumber, new { @class = "form-control", @readonly ="readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Phone
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.CustomerPhone, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Address
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.CustomerAddress, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Email
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.CustomerEmail, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            Store Credit 
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Customer.StoreCredit, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getCustomers();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#cus-form').ajaxForm(options);
+    });
+</script>

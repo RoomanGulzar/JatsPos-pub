@@ -1,0 +1,53 @@
+﻿@model POS.Models.ExpenseHeadVM
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Expenses
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddExpenseHead(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div id="con-div" class="add-div">
+            @Html.Action("CreateHead", "Accounts")
+        </div>
+
+        <div class="tab-div condition-tab-div">
+            <table class="display" id="expenseHeadTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.ExpenseHeads)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                <a href="#" onclick="editExpenseHead('@item.ID.ToString()')">Update/Detail</a> | <a href="#" onclick="deleteExpenseHead('@item.ID.ToString()')">@POS.Resources.Resource.Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+
+            $('#expenseHeadTable').dataTable({
+                responsive: true
+            });
+
+        });
+</script>

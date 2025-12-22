@@ -1,0 +1,91 @@
+﻿@model POS.Models.TransferVM
+@{
+    ViewBag.Title = "Transfer Requests";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.TransferRequest
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddTransfer(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="quo-div" class="add-div">
+            @Html.Action("Create", "Transfer")
+        </div>
+
+        <div class="tab-div">
+            <table class="display" id="TransferTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.ReferenceNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Status
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.InitiatedDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.FromLocation
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ToLocation
+                        </th>
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Transfers)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumber)
+                            </td>
+                            <td>
+                                @if (!item.Completed)
+                                {
+                                    <span>Pending</span>
+                                }
+                                else
+                                {
+                                    <span>Completed</span>
+                                }
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.InitiatedDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FromLocation.SiteName)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ToLocation.SiteName)
+                            </td>
+                            <td>
+                                <a href="#" onclick="acceptTransfer('@item.TransferID.ToString()')">@POS.Resources.Resource.Accept</a>
+                                <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#TransferTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

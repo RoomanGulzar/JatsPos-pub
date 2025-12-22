@@ -1,0 +1,36 @@
+﻿@model POS.Models.Pos.PosNotificationVM
+
+<div class="scroller" style="max-height: 100px;overflow:auto;" data-always-visible="1" data-rail-visible1="0" data-handle-color="#D7DCE2">
+    <ul class="feeds">
+        @{
+            if (Model.Activities != null && Model.Activities.Count > 0)
+            {
+                foreach (var activity in Model.Activities)
+                {
+                    <li>
+                        <div class="col1" onclick="@activity.Action" style="cursor:pointer;">
+                            <div class="cont">
+                                <div class="cont-col2">
+                                    <div class="desc">
+                                        @activity.Message by @activity.ActivityBy
+                                        @{
+                    if (!activity.Seen)
+                    {
+                        <span class="label label-sm label-info">
+                            New
+                        </span>
+                    }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col2">
+                            <div class="date"> @(activity.TimeSince) </div>
+                        </div>
+                    </li>
+                }
+            }
+        }
+    </ul>
+</div>

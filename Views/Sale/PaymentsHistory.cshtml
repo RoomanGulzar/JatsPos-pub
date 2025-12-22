@@ -1,0 +1,131 @@
+﻿@model List<DataAccessLayer.ReportModels.PaymentHistory>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.PaymentHistory
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="SaleHistory">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.InvoiceNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.SalereferenceNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.SaleDate
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Type
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Customer
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.SoldTo
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Paid Date
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Paid
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.ReceivedBy
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Notes
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+
+                        <tr>
+                            <td>
+                                    @Html.DisplayFor(modelItem => item.PaymentNo)
+                            </td>
+                            <td>
+                                @if(item.RefNo != null)
+                                {
+                                    @Html.DisplayFor(modelItem => item.RefNo)
+                                }
+
+                            </td>
+
+                            <td>
+                                @if(item.CDate != null)
+                                {
+                                    @Html.DisplayFor(modelItem => item.CDate)
+                                }
+                                </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Type)
+                            </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name2)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.PDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Amount)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UserName)
+                                    </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Note)
+                            </td>
+                            <td>
+                                <a href="#" onclick="updatePayment('@item.PaymentID.ToString()')">@POS.Resources.Resource.Update</a> 
+                            </td>
+                                </tr>
+
+                    }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+            <script>
+                $(document).ready(function () {
+
+                    $('#SaleHistory').dataTable({
+                        responsive: true
+                    });
+                });
+                function updatePayment(ref)
+                {
+                    blockUI();
+                    $.ajax({
+                        type: "GET",
+                        contentType: "html",
+                        url: '/Sale/UpdateCustomerPayment?id='+ref,
+                        async: true,
+                        success: function (data) {
+
+                            $("#main-content").html("");
+                            $("#main-content").html(data);
+                            unblockUI();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            handleErrors(textStatus);
+                        }
+                    });
+                }
+ 
+            </script>

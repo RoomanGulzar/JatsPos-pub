@@ -1,0 +1,586 @@
+﻿@model POS.Models.QuotationVM
+@using (Html.BeginForm("Update", "Quotation", FormMethod.Post, new { @id = "quo-form-u" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c=>c.Quote.QuotationID)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Date
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.QuoteDate, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+         <div class="form-row">
+        <div class="form-lable">
+           @POS.Resources.Resource.Location
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Quote.FKLocationID, Model.getAllLocations(Model.User), new { @class = "form-control", @disabled = "disabled" , @id="Sale_FKLocationID"})
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Customer
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Quote.FKCustomerID, Model.getAllCustomers(), new { @class = "form-control", @disabled = "disabled" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ExpiryDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.QuoteExpiry, new { @class = "form-control datepicker" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Quotation No
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.ReferenceNumber, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="quo-item-main">
+        @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowQoute()" value="Add New Row" />*@
+        <div style="clear:both;"></div>
+        <table class="table table-responsive" id="quotation-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SaleNo</th>
+                    <th>@POS.Resources.Resource.Item #</th>
+                    <th>@POS.Resources.Resource.Product</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.MeasuringUnit</th>
+                    <th>@POS.Resources.Resource.UnitPrice</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+    @{var sn = 0;}
+    @for (int i = 0; i < Model.Quote.Items.Count; i++)
+    {
+        sn++;
+        if (Model.Quote.Items[i].FKItemID != null)
+        {
+
+                        <tr>
+                            <td>
+                                @sn
+                                @Html.HiddenFor(c => c.Quote.Items[i].FKQuotationID)
+                                @Html.HiddenFor(c => c.Quote.Items[i].FKItemID)
+                            </td>
+                            <td><input type="text" class="form-control item-search" value="@Model.Quote.Items[i].Item.ItemNoStr" readonly/></td>
+                            <td>
+                                @Html.TextBoxFor(c => c.Quote.Items[i].Name, new { @class = "form-control",@value=(Model.Quote.Items[i].Name + " " +  @Model.Quote.Items[i].Item.Description), @readonly = "readonly" })
+                                @*<input class="sale-items form-control" value="@Model.Quote.Items[i].Item.Name" readonly />*@ 
+                            </td>                       
+                            <td>
+                                @Html.TextBoxFor(c => c.Quote.Items[i].Quantity, new { @class = "form-control sale-item-quantity", @onchange = "setItemTotal(this)" })
+                                @*<input type="number" class="form-control quo-item-quantity" onchange="setItemTotal(this)" name="Quote.Items[0].Quantity" required />*@
+                            </td>
+                            <td>
+                                <input type="hidden" id='Quote_Items@(i)_FkUnitGroupID' value="@Model.Quote.Items[i].Item.FkUnitGroupID" />
+                                <input type="hidden" id='Quote_Items@(i)_FkUnitIDVal' value="@Model.Quote.Items[i].FkUnitID" />
+                                <div id='Quote_Items@(i)_FkUnitID' class="form-control sale-item-unit"></div>
+                            </td>
+                            <td>
+                                <input type="number" style="display:none;" class="form-control sale-item-base-price" value="@Model.Quote.Items[i].Item.SalePrice" name="Quote.Items[@i].BasePrice" />
+                                <input type="number" style="display:none;" class="form-control sale-item-changed-price" value="0" name="Quote.Items[@i].PriceChanged" />
+                                @Html.TextBoxFor(c => c.Quote.Items[i].UnitPrice, new { @class = "form-control sale-item-price", @onchange = "setItemBasePrice(this)" })
+                                @*<input type="number" class="form-control quo-item-price" onchange="setItemTotal(this)" name="Quote.Items[0].UnitPrice" required />*@
+                            </td>
+                            <td>
+                                @Html.TextBoxFor(c => c.Quote.Items[i].Total, new { @class = "form-control sale-item-total", @readonly = "readonly" })
+                                @*<input type="number" class="form-control quo-item-total" name="Quote.Items[0].Total" readonly />*@
+                            </td>
+                            <td></td>
+                            <td><a href='#' onclick='removeRow(this)'><i class="fa fa-trash fa-fw"></i></a></td>
+                        </tr>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    @sn
+                    @Html.HiddenFor(c => c.Quote.Items[i].FKQuotationID)
+                </td>
+                <td>#</td>
+                <td>
+                    @Html.TextBoxFor(c => c.Quote.Items[i].Name, new { @class = "form-control",@value=Model.Quote.Items[i].Name, @readonly = "readonly" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(c => c.Quote.Items[i].Quantity, new { @class = "form-control sale-item-quantity", @onchange = "setItemTotal(this)" })
+                    @*<input type="number" class="form-control quo-item-quantity" onchange="setItemTotal(this)" name="Quote.Items[0].Quantity" required />*@
+                </td>
+                <td>
+                    <input type="hidden" id='Quote_Items@(i)_FkUnitGroupID' value="@Model.Quote.Items[i].Item.FkUnitGroupID" />
+                    <input type="hidden" id='Quote_Items@(i)_FkUnitIDVal' value="@Model.Quote.Items[i].FkUnitID" />
+                    <div id='Quote_Items@(i)_FkUnitID' class="form-control sale-item-unit"></div>
+                </td>
+                <td>
+                    <input type="number" style="display:none;" class="form-control sale-item-base-price" value="@Model.Quote.Items[i].Item.SalePrice" name="Quote.Items[@i].BasePrice" />
+                    <input type="number" style="display:none;" class="form-control sale-item-changed-price" value="0" name="Quote.Items[@i].PriceChanged" />
+                    @Html.TextBoxFor(c => c.Quote.Items[i].UnitPrice, new { @class = "form-control sale-item-price", @onchange = "setItemBasePrice(this)" })
+                    @*<input type="number" class="form-control quo-item-price" onchange="setItemTotal(this)" name="Quote.Items[0].UnitPrice" required />*@
+                </td>
+                <td>
+                    @Html.TextBoxFor(c => c.Quote.Items[i].Total, new { @class = "form-control sale-item-total", @readonly = "readonly" })
+                    @*<input type="number" class="form-control quo-item-total" name="Quote.Items[0].Total" readonly />*@
+                </td>
+                <td></td>
+                <td><a href='#' onclick='removeRow(this)'><i class="fa fa-trash fa-fw"></i></a></td>
+            </tr>
+                       
+                    }
+
+                }
+             
+            </tbody>
+        </table>
+        <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowQoute()" value="@POS.Resources.Resource.AddNewRow" />
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.SubTotal
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.SubTotal, new { @class = "form-control quo-sub", @readonly = "readonly" })
+
+        </div>
+    </div>
+    @*<div class="form-row">
+        <div class="form-lable">
+            Discount %
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.Discount, new { @class = "form-control quo-dis", @onchange = "calculate()", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            Tax %
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.Tax, new { @class = "form-control quo-tax", @onchange = "calculate()", @readonly = "readonly" })
+
+        </div>
+    </div>*@
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Total
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.Total, new { @class = "form-control quo-total", @readonly = "readonly" })
+
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="SAVE" />
+        <input type="button" class="btn btn-primary custombtn" value="BACK" onclick="getQuotations()" />
+    
+    <input type="button" onclick="$('.print-modal').modal('show');" class="btn btn-primary custombtn" value="PRINT" />
+}
+<div class="modal fade image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade prices-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Prices</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade print-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">@POS.Resources.Resource.Print</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    @if (Model.User.Location.SiteName == "WALEED ELECTRONICS")
+                    {
+                        <button class="btn btn-default custombtn" onclick="printW()">A4</button>
+                        <button class="btn btn-default custombtn" onclick="printAlwaqt()">Print Invoice</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-default custombtn" onclick="printA()">A4</button>
+                        <button class="btn btn-default custombtn" onclick="printcrystal()">@POS.Resources.Resource.Invoice</button>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    function printcrystal() {
+
+        var id = $('#Quote_QuotationID').val();
+        var url = "@Url.Action("InvoicePrint", "Quotation")?id=" + id;
+        var windowobject = window.open(url, "_blank");
+        windowobject.onload = function () {
+            windowobject.print();
+            windowobject.document.close();
+
+        }
+    }
+
+    function printW() {
+        cancelPrint();
+        var name = $("#Quote_FKCustomerID:selected").text();
+        var sr = $("#Quote_ReferenceNumber").val();
+        var date = $("#Quote_QuoteDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:100%;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>WALEED ELECTRONICS</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>QUOTATION</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>Tel.: 011 4114443 </div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Date : " + date + " L.P.O. No.:</div>");
+        $("#quotation-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            var sno = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>" + sno + "</span><span style='float:left;'>" + itemno + "</span><span style='float:left;'>" + desc + "</span><span style='float:left;'>" + qty + "</span><span style='float:left;'>" + price + "</span><span style='float:left;'>" + total + "</span></div>");
+
+        });
+        var gTotal = $("#Quote_Total").val();
+        var disc = "";
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: " + disc + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    function printA() {
+        cancelPrint();
+        var name = $("#Quote_FKCustomerID:selected").text();
+        var sr = $("#Quote_ReferenceNumber").val();
+        var date = $("#Quote_QuoteDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:100%;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>ET POS ELECTRONICS BRANCH</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>QUOTATION</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>Tel.: 011-4111227</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Date : " + date + " L.P.O. No.:</div>");
+        $("#quotation-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            var sno = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>" + sno + "</span><span style='float:left;'>" + itemno + "</span><span style='float:left;'>" + desc + "</span><span style='float:left;'>" + qty + "</span><span style='float:left;'>" + price + "</span><span style='float:left;'>" + total + "</span></div>");
+
+        });
+        var gTotal = $("#Quote_Total").val();
+        var disc = "";
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: " + disc + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    function printReceipt() {
+        var name = $("#Quote_FKCustomerID :selected").text();
+        var sr = $("#Quote_ReferenceNumber").val();
+        var date = $("#Quote_QuoteDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:275px;">');
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>QUOTATION</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> No : " + sr + " M/s: " + name + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Date : " + date + " L.P.O. No.:</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;width:5%'>S.No</span><span style='float:left;width:15%'>CODE</span><span style='float:left;width:30%'>DESCRIPTION</span><span style='float:left;width:15%'>QTY</span><span style='float:left;width:15%'>UNIT PRICE</span><span style='float:left;width:15%'>AMOUNT</span></div>");
+        $("#quotation-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            var sno = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;width:5%'>" + sno + "</span><span style='float:left;width:15%'>" + itemno + "</span><span style='float:left;width:30%'>" + desc + "</span><span style='float:left;width:15%'>" + qty + "</span><span style='float:left;width:15%'>" + price + "</span><span style='float:left;width:15%'>" + total + "</span></div>");
+
+        });
+        var gTotal = $("#Quote_Total").val();
+        var disc = "";
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: " + disc + "</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: " + gTotal + "</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+    function printAlwaqt() {
+
+        var name = $("#Quote_FKCustomerID :selected").text();
+        var sr = $("#Quote_ReferenceNumber").val();
+        var date = $("#Quote_QuoteDate").val();
+        var sn = 0;
+
+        var arr = []; // object Array  added by nasib
+
+        var j = 1; // serial no of record(1 -> 9) per page
+        var itemsInPage = 9;//item per page
+        var disc = ""; var recivedby = ""; var gTotal = 0;
+        var itemno = 0; var desc = ""; var qty = 0;
+        var price = 0.0; var total = 0;
+        var min_height = 103;
+        var margin_top = 0; //sets margin from Top to set for page design
+
+
+        $("#quotation-items tbody tr").each(function () { //get All Data from model dialog
+            sn++;
+            itemno = $(this).find(".item-search").val();
+            desc = $(this).find(".sale-items").val();
+            qty = $(this).find(".sale-item-quantity").val();
+            price = $(this).find(".sale-item-price").val();
+            total = $(this).find(".sale-item-total").val();
+            gTotal = $("#Quote_Total").val();
+
+
+
+            arr.push({ //push Data in object form in arr Array
+                sn: sn,
+                itemno: itemno,
+                desc: desc,
+                qty: qty,
+                price: price,
+                total: total,
+                gTotal: gTotal,
+                recivedby: username,
+                disc: disc
+            });
+        });
+        //print Starts from here
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>html, body { height: 100%; width: 100%; margin: 0; }@@media screen {.pagebreak	{ border-top:1px dotted #999; }}@@media print {.pagebreak {page-break-after: always;}}</style>');
+        docprint.document.write('</head><body>');
+
+        for (var i = 0; i < arr.length; i++) {
+            if (j == 1) {//if page starts of no of recoeds are equal to pagecount(9)
+
+
+                docprint.document.write('<table style="width: 800px;height:540px;">');
+
+                docprint.document.write('<tr style="height: 111px;"><th style="width:10%;"></th><th style="width: 11%;"></th><th style="width: 47%;"></th><th style="width: 9%;"></th><th style="width: 9%;"></th><th style="width: 14%;"></th></tr>');
+
+                docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="3">' + sr + '</td><td colspan="2">' + date + '</td></tr>');
+                docprint.document.write('<tr style="height: 10px;"><td></td><td colspan="3"></td><td colspan="2">Quotations</td></tr>');
+                docprint.document.write('<tr style="height:28px;"><td colspan="6"></td></tr>');
+
+            } //body area for each record
+            docprint.document.write('<tr style="height: 10px;"><td style="text-align: center">' + arr[i].sn + '</td><td>' + arr[i].itemno + '</td><td style="text-align: center;">' + (arr[i].desc).substring(0, 50) + '</td><td>' + arr[i].qty + '</td><td>' + arr[i].price + '</td><td>' + arr[i].total + '</td></tr>');
+            if (j == itemsInPage || (i + 1) == sn) {// if no of record = 9 footer area starts here
+                if (((i + 1) == sn) && (sn % itemsInPage > 0)) { //if no of record in last page is > 9 (page count) add some empty rows to cover the height
+                    var loop_val = itemsInPage - (sn % itemsInPage);//no of empty rows to be added
+                    for (var k = 0; k < loop_val ; k++) {
+                        docprint.document.write('<tr style="height: 10px;"><td colspan="6">&nbsp;</td></tr>');
+                    }
+                }// common footer of each page
+                docprint.document.write('<tr style="height: 20px;"><td colspan="5"></td><td>' + disc + '</td></tr>');
+                docprint.document.write('<tr style="height:10px;"><td colspan="5"></td><td style="text-align:left;">' + gTotal + '</td></tr>');
+                docprint.document.write('<tr style="height:20px;"><td colspan="2"></td><td colspan="2">' + recivedby + '</td></tr>');
+                docprint.document.write('<tr style="height:0px;"><td colspan="2"></td><td colspan="4">&nbsp;</td></tr>');
+
+                docprint.document.write('</table>');
+                docprint.document.write('<div class="pagebreak"></div>');
+                j = 1;
+            }
+            else {
+                j++; // variable to check sr no of record wrt to page (1 -> 9)
+            }
+        } //for loop 'i' end here
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        $(".print-modal").modal("hide");
+    }
+
+    function printWaleed() {
+
+        var name = $("#Quote_FKCustomerID :selected").text();
+        var sr = $("#Quote_ReferenceNumber").val();
+        var date = $("#Quote_QuoteDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('</head><body style="width:800px;height:300px">');
+        docprint.document.write("<div style='float:left;width:800px;margin-top:75px;'><span style='float:left;margin-left:55px;'>" + sr + "</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>" + date + "</span></div>");
+        docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>" + name + "</span><span style='float:right;margin-right:30px;margin-bottom:5px;'></span></div>");
+        docprint.document.write('<div style="margin-top:50px;float:left;min-height:335px;position: relative;">');
+        $("#quotation-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            var sno = sn + 1;
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>" + sno + "</span><span style='float:left;width:15%;'>" + itemno + "</span><span style='float:left;width:45%;'>" + desc + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + qty + "</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>" + price + "</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>" + total + "</span></div>");
+        });
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>1</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>2</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>3</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>4</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>5</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>6</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>7</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>8</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>9</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>10</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>11</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>12</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+        //docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+
+        var gTotal = $("#Quote_Total").val();
+        var disc = "";
+        docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right'><div style='float:right;'>" + disc + "</div><br /><br /><div style='float:right'>" + gTotal + "</div></div>");
+
+        docprint.document.write('</div></body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+
+    $(document).ready(function () {
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+
+        select_saleitemunit = [];
+        var rows = $('#quotation-items >tbody >tr');
+        $.each(rows, function (index, item) {
+            if (item) {
+                var groupHidden = $("#Quote_Items" + index + "_FkUnitGroupID");
+                var groupVal = groupHidden.val();
+                var dropDiv = $("#Quote_Items" + index + "_FkUnitID");
+                dropDiv.kendoDropDownList({
+                    optionLabel: "Please select",
+                    dataTextField: "Text",
+                    dataValueField: "Value",
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: '/Sale/GetItemUnitsByGroupForSale',
+                                data: function () {
+                                    return { groupID: groupVal }
+                                },
+                            }
+                        }
+                    },
+                    change: function (e) {
+                        var ref = $(e.sender.element.context).parent();
+                        $(ref).parent().parent().find(".sale-item-changed-price").val(0);
+                        setItemTotal(ref);
+                    }
+                });
+
+                select_saleitemunit[index] = dropDiv.data("kendoDropDownList");
+                var value = $("#Quote_Items" + index + "_FkUnitIDVal").val();
+                select_saleitemunit[index].value(value);
+            }
+        });
+        var options = {
+            beforeSubmit: function (msg) {
+                if (msg) {
+                    var list = msg;
+                    var rows = $('#quotation-items >tbody >tr');
+                    $.each(rows, function (index, item) {
+                        if (item) {
+                            list.push({ name: "Quote.Items[" + index + "].FkUnitID", value: select_saleitemunit[index].value() });
+                        }
+                    });
+                    msg = list;
+                }
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                 getQuotations();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#quo-form-u').ajaxForm(options);
+    });
+    //$('#Quote_FKCustomerID').selectize({
+    //    create: function (input, callback) {
+
+    //    },
+    //    sortField: 'text'
+    //});
+    //$('.quo-items').selectize();
+
+</script>

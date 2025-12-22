@@ -1,0 +1,422 @@
+﻿@model POS.Models.ItemVM
+@{
+    ViewBag.Title = "ITEMS";
+}
+
+@using (Html.BeginForm("Update", "Item", FormMethod.Post, new { enctype = "multipart/form-data", @id = "item-form-u" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Item.IsDeleted)
+    @Html.HiddenFor(c => c.Item.ItemID)
+    @Html.HiddenFor(c => c.Item.PurchaseDate)
+    @Html.HiddenFor(c => c.Item.ItemNo, new { @id = "item-no" })
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Update Product
+        </div>
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Category
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.FKGroupID, Model.getAllGroup(), "Please Select....", new { @class = "form-control", @onchange = "getItemNumber()", @id = "item-cat" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            <label class="inline">Is Active</label>
+                        </div>
+                        <div class="input-group-addon bg-transparent">
+                            @Html.CheckBoxFor(c => c.Item.IsActive)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            <label class="inline">Is Part</label>
+                        </div>
+                        <div class="input-group-addon bg-transparent">
+                            @Html.CheckBoxFor(c => c.Item.IsPart)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            Product Listing
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.Listing,
+                                    Model.getItemListings(),
+                                    "Please Select....",
+                                    new
+                                    {
+                                        @class = "form-control selectize"
+                                    })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Name
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.Name, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ItemNo
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.ItemNoStr, new { @class = "form-control", @readonly = "readonly", @id = "item-str" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SupplierName
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.FKSupplierID, Model.getAllSuppliers(), "Please Select..", new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-row" style="width:65%;">
+                        <div class="form-lable">
+                            Title (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Item.Description, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="width:50%;">
+                        <div class="form-lable">
+                            Description (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextAreaFor(c => c.Item.DescriptionForSite, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.MinStockLimit
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.MinStockLimit, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.PurchaseCost
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.PurchaseCost, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalePrice
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.SalePrice, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalePrice (for website)
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.SpecialSalePrice, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Quantity
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.Item.Quantity, new { @class = "form-control", @readonly = "readonly" })
+
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.Item.LocationID, Model.getAllSites(), new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Measuring Unit
+                </div>
+                <div class="panel-body">
+                    <div class="row clearfix">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="unitgroup-dropdown">
+                                    <label> Unit Group</label>
+                                    @Html.DropDownListFor(c => c.Item.FkUnitGroupID, Model.getAllUnitGroups(), "Please Select....",
+                                                            new
+                                                            {
+                                                                @class = "form-control field-setting"
+                                                            })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label> Base Unit</label>
+                                @Html.HiddenFor(c => c.Item.FkDefaultUnitID)
+                                <div class="form-lable field-setting" id="Item_DefaultUnit">
+                                    @Html.DisplayFor(c => c.Item.DefaultUnit.Name)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (Model.Item.pItemBarcodes != null)
+            {
+                
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Barcode and Prices
+                </div>
+                <div class="panel-body">
+
+                    <table class="table table-responsive" id="item-barcodes">
+                        <thead>
+                            <tr>
+                                <th>Unit</th>
+                                <th>@POS.Resources.Resource.Price</th>
+                                <th>@POS.Resources.Resource.Barcode</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Item.pItemBarcodes.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.HiddenFor(c => c.Item.pItemBarcodes[i].ItemBarcodeID)
+                                        @Html.HiddenFor(c => c.Item.pItemBarcodes[i].FkItemID)
+                                        @Html.HiddenFor(c => c.Item.pItemBarcodes[i].FkUnitGroupID)
+                                        @Html.HiddenFor(c => c.Item.pItemBarcodes[i].FkUnitID)
+                                        @Html.TextBoxFor(c => c.Item.pItemBarcodes[i].pUnit.Name,
+                                        new
+                                        {
+                                            @class = "form-control",
+                                            @readonly = "readonly"
+                                        })
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(c => c.Item.pItemBarcodes[i].Price, new
+                                   {
+                                       @class = "form-control"
+                                   })
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(c => c.Item.pItemBarcodes[i].Barcode, new
+                                   {
+                                       @class = "form-control",
+                                       @required = "required"
+                                   })
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            }
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Product Images
+                </div>
+                <div class="panel-body">
+                    <div class="item-image-main notStockField">
+                        <div style="clear:both;"></div>
+                        <table class="table table-responsive" id="item-images">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Description</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if (Model.Item.ItemImages != null)
+                                    {
+                                        for (int i = 0; i < Model.Item.ItemImages.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="div-image">
+                                                        @{
+                                                            if (Model.Item.ItemImages[i].ImageBase64 != null)
+                                                            {
+                                                                <img src="data:image/png;base64, @Model.Item.ItemImages[i].ImageBase64" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <img id="Model.Item.ItemImages[@i].Image" src="~/Content/Images/grey.jpg" />
+                                                            }
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td><input type='file' name='Item.ItemImages[@i].Image' /></td>
+
+                                                <td>
+                                                    @Html.TextBoxFor(c => c.Item.ItemImages[i].Description, 
+                                                        new { @class = "form-control", @value = Model.Item.ItemImages[i].Description })
+                                                    @Html.HiddenFor(c => c.Item.ItemImages[i].ItemQuantityID)
+                                                    @Html.HiddenFor(c => c.Item.ItemImages[i].FKItemID)
+                                                </td>
+                                                <td>
+                                                    <a href='#' onclick='removeItemImageRow(this, @i)'>
+                                                        <i class="fa fa-trash fa-fw"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <input type="button" 
+                               class="btn btn-warning  custombtn" 
+                               onclick="addNewRowImage()"
+                               value="Add new Image" />
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+            <input type="button" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Back" onclick="getItemData()" />
+        </div>
+    </div>
+}
+<script>
+    function readURL(input) {
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#image1').attr('src', e.target.result);
+                $('#image1').click(function () {
+
+                    $("#imageModal .modal-body img").attr('src', e.target.result);
+                    $("#imageModal").modal("show");
+                });
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function readURL1(input) {
+
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#image2').attr('src', e.target.result);
+                $('#image2').click(function () {
+
+                    $("#imageModal .modal-body img").attr('src', e.target.result);
+                    $("#imageModal").modal("show");
+                });
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    var xhr;
+    var select_group, $select_group;
+    var select_unit, $select_unit;
+
+    $select_group = $('#Item_FkUnitGroupID').selectize({
+        onChange: function (value) {
+            if (!value.length) return;
+            $.ajax({
+                url: '@Url.Action("GetBaseUnit", "Item")',
+
+                data: { groupID: value },
+                success: function (result) {
+                    $("#Item_FkDefaultUnitID").val(result.Value);
+                    $("#Item_DefaultUnit").html(result.Text);
+                },
+                error: function () {
+                    callback();
+                }
+            })
+        }
+    });
+
+    select_group = $select_group[0].selectize;
+
+
+    $("#inputImage1").change(function () {
+        readURL1(this);
+    });
+    $("#inputImage").change(function () {
+        readURL(this);
+    });
+
+
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            var submit = true;
+            if (!submit) {
+                return false;
+            }
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            getItemData();
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#item-form-u').ajaxForm(options);
+    $('#Item_FKGroupID,#Item_FKConditionID').selectize({
+        create: function (input, callback) {
+
+        },
+        sortField: 'text'
+    });
+    var $selectItemListing = $("#Item_Listing").selectize();
+    $selectItemListing[0].selectize.setValue("@((int)Model.Item.Listing)");
+
+</script>

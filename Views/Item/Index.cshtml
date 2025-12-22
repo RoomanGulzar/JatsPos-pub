@@ -1,0 +1,166 @@
+﻿
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Products
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="form-row">
+                <div class="form-lable">
+                    <label class="inline">Search</label>
+                </div>
+                <div class="form-input">
+                    <input id="searchQuery" type="text" class="form-control" onkeyup="searchItemList()" />
+                </div>
+            </div>
+            <input class="btn btn-primary custombtn right" type="button" value="@POS.Resources.Resource.AddNew " onclick="addItem()" />
+            <input class="btn btn-primary custombtn"
+                   type="button"
+                   value="Sync to WP"
+                   onclick="syncItems()" />
+            <input class="btn btn-primary btn-cons custombtn" type="button" value="@POS.Resources.Resource.Import" onclick="getImportInventory()" />
+            <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        </div>
+
+        <div class=" container-fluid   container-fixed-lg bg-white">
+            <div class="card card-transparent">
+                <div class="card-block">
+                    <div class="Item-tab-div">
+                        <div id="itemsGrid">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var itemsSearch = "";
+    function searchItemList() {
+        itemsSearch = $("#searchQuery").val();
+        var grid = $("#itemsGrid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.page(1);
+            grid.dataSource.read();
+        }
+    }
+
+    $(document).ready(function () {
+        $("#itemsGrid").kendoGrid({
+            dataSource: {
+                type: "odata",
+                transport: {
+                    read: {
+                        url: "/Item/GetItemList",
+                        type: "post",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json"
+                    },
+                    parameterMap: function (e, type) {
+                        if (type === "read") return JSON.stringify({
+                            GridFilters: e,
+                            Search: itemsSearch
+                        })
+                    }
+                },
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Total",
+                    model: {
+                        id: "ItemID",
+                        fields: {
+                            ItemID: {
+                                editable: false
+                            }
+                        }
+                    }
+                },
+                serverPaging: true,
+                serverSorting: true,
+                serverSearch: true,
+            },
+            sortable: true,
+            scrollable: true,
+            pageable: {
+                messages: {
+                    display: "{0}-{1} of {2} @POS.Resources.Resource.Item",
+                    empty: "NoItemFound"
+                }
+            },
+            columns: [
+                {
+                    field: "ItemNoStr",
+                    title: "@POS.Resources.Resource.Number",
+                    width: "5%"
+                },
+                    {
+                        field: "Name",
+                        title: "@POS.Resources.Resource.Name",
+                        width: "10%"
+                    },
+                    {
+                        field: "Description",
+                        title: "Website Title",
+                        width: "15%"
+                    },
+                    {
+                        field: "PurchaseCost",
+                        title: "Cost Price",
+                        width: "5%"
+                    },
+                    {
+                        field: "SalePrice",
+                        title: "Sale Price",
+                        width: "5%"
+                    },
+                    {
+                        field: "ItemQuantities",
+                        title: "@POS.Resources.Resource.Location / @POS.Resources.Resource.Quantity",
+                        width: "8%"
+                    },
+                    {
+                        field: "BarCode",
+                        title: "Barcode",
+                        width: "8%"
+                    },
+                    {
+                        field: "SupplierName",
+                        title: "Supplier",
+                        width: "5%"
+                    },
+                    {
+                        title: "Action",
+                        template: function (n) {
+                            return "<a href='#'  onclick='editItemBarcodesAndPrices(\"" + n.ItemID + "\")'>Barcodes and Prices</a>"
+                                + " | <a href='#'  onclick='editItemImeiCodes(\"" + n.ItemID + "\")'>IMEI Numbers</a>"
+                                + " | <a href='#' onclick='editItem(\"" + n.ItemID + "\")'>Update/Detail</a>"
+                           + " | <a href='#' onclick='deleteItem(\"" + n.ItemID + "\")'>Delete</a>";
+
+                        },
+                        width: "10%"
+                    }
+            ]
+        });
+    });
+
+    function syncItems() {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "json",
+            url: '/Item/SyncData',
+            async: true,
+            success: function (msg) {
+                unblockUI();
+                successToast();
+                getItemData();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+
+</script>

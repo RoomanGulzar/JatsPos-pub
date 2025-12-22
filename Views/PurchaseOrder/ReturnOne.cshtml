@@ -1,0 +1,82 @@
+﻿@model DataAccessLayer.Entities.DbPurchaseItem
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Return PO
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("ReturnOne", "PurchaseOrder", FormMethod.Post, new { @id = "return-form" }))
+        {
+            @Html.HiddenFor(c => c.PurchaseItemID)
+            @Html.HiddenFor(c => c.FKPurchaseOrderID)
+            @Html.HiddenFor(c => c.FKItemID)
+    @Html.HiddenFor(c => c.Quantity)
+    @Html.HiddenFor(c => c.UnitPrice)
+    @Html.HiddenFor(c => c.Total)
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Item
+                </div>
+                <div class="form-input">
+                    @Html.DisplayFor(c => c.Item.Name, new { @class = "form-control" })  @Html.DisplayFor(c => c.Item.Description, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.Quantity
+                </div>
+                <div class="form-input">
+                    @Html.DisplayFor(c => c.Quantity, new { @class = "form-control" })
+                    @*@Html.HiddenFor(c => c.Sale.Location)*@
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.UnitPrice
+                </div>
+                <div class="form-input">
+                    @Html.DisplayFor(c => c.UnitPrice, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-lable">
+                    @POS.Resources.Resource.TotalPrice
+                </div>
+                <div class="form-input">
+                    @Html.DisplayFor(c => c.Total, new { @class = "form-control" })
+                </div>
+            </div>
+            <input type="submit" class="btn custombtn btn-primary" value="Return" />
+    <input type="button" class="btn custombtn btn-primary" onclick="getCompletedPO()" value="Back" />
+        }
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getCompletedPO();
+
+
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#return-form').ajaxForm(options);
+
+    });
+</script>

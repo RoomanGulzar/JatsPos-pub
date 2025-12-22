@@ -1,0 +1,145 @@
+﻿@model POS.Models.PurchaseOrderVM
+@{
+    ViewBag.Title = "PurchaseOrder";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Completed Purchase Order
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddPurchaseOrder(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="quo-div" class="add-div">
+            @Html.Action("Create", "PurchaseOrder")
+        </div>
+        <div class="tab-div PO-tab-div">
+            <table class="display" id="POTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderReferenceNumber 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.PurchaseOrderDate 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Supplier
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RequiredbyDate 
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Total
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Paid
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Due
+                        </th>
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Purchaseorders)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ReferenceNumberPO)
+                            </td>
+
+                            <td>
+                                @Html.DisplayFor(modelItem => item.PurchaseOrderDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Suppliers.SupplierName)
+                            </td>
+                            <td>@Html.DisplayFor(modelitem => item.RequiredbyDate) </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Total)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Paid)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Due)
+                            </td>
+                            <td>
+                                <a href="#" onclick="purchaseOrderDetail('@item.PurchaseOrderID.ToString()')">@POS.Resources.Resource.Detail</a> 
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="detailModalPO" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Details</h4>
+            </div>
+            <div class="modal-body">
+
+
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#POTable').dataTable({
+            responsive: true
+        });
+
+    });
+    function purchaseOrderDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/PurchaseOrder/Detail?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModalPO .modal-body").html(data);
+                $("#detailModalPO").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function purchaseOrderReturn(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/PurchaseOrder/ReturnOne?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModalPO").modal("hide");
+                $('.modal-backdrop').hide();
+                $("#main-content").html("");
+                $("#main-content").html(data);
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+</script>
+

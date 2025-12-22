@@ -1,0 +1,65 @@
+﻿@model POS.Models.LocationVM
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Locations
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddLocation(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="con-div" class="add-div">
+            @Html.Action("Create", "Location")
+        </div>
+
+        <div class="tab-div condition-tab-div">
+            <table class="display" id="locationTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Address
+                        </th>
+
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Locations)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SiteName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.OtherInfo)
+                            </td>
+                            <td>
+                                @if (item.SiteID != new Guid("f66a3a73-0c03-4bf9-ac32-5d637b45caca"))
+                                {
+                                    <a href="#" onclick="editLocation('@item.SiteID.ToString()')">@POS.Resources.Resource.Update/Detail</a>  <a href="#" onclick="deleteLocation('@item.SiteID.ToString()')">@POS.Resources.Resource.Delete</a>
+                                }
+                                
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#locationTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

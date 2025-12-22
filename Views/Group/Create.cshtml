@@ -1,0 +1,57 @@
+﻿@model POS.Models.GroupVM
+@{
+    ViewBag.Title = "Create";
+}
+@using (Html.BeginForm("Create", "Group", FormMethod.Post, new { @id = "grp-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.CategoryNumber 
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Group.ItemGroupNo, new { @class = "form-control",@readonly="readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Group.ItemGroupName, new { @class = "form-control" })
+
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getGroupData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#grp-form').ajaxForm(options);
+    });
+</script>

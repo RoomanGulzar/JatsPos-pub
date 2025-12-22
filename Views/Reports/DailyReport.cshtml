@@ -1,0 +1,186 @@
+﻿@model POS.Models.ReportsVM
+<html>
+<head>
+    <title>@POS.Resources.Resource.SaleHistory</title>
+    <style type="text/css">
+        table {
+            width: 100%;
+        }
+
+            table th, table td {
+                border: 1px solid #000;
+                padding: 0.5em;
+            }
+    </style>
+</head>
+<body>
+    <div style='text-align:center'>
+        <div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>
+        <div style='float:left;width:100%;text-align:center;font-size:small'>Imports&Whole Sales of Electronics Spare Parts. Kingdom Of Saudi Arabia - Riaydh - Deera - Thormairy St. P.o. Box 330022-Riyadh 11373 - Tel.:2872326 - Fax: 2865558 </div>
+        <hr /><div style='font-size:large;'>@POS.Resources.Resource.Sales History</div>
+        <div style='font-size:medium'>From :@DateTime.Now.Year / @DateTime.Now.Month / @DateTime.Now.AddDays(-1).Day <br />To : @DateTime.Now.Year / @DateTime.Now.Month / @DateTime.Now.Day</div>
+        <hr />
+        @{
+            foreach (var item in Model.getAllLocations())
+            {
+                <br /><div style="font-size:large">@item.Text</div>
+                <div style='width:100%'>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    @POS.Resources.Resource.SerialNo
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.SaleNo
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Customer
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Location
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Date
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Total
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Recieved
+                                </th>
+                                <th>
+                                    @POS.Resources.Resource.Due
+                                </th>
+                            </tr>
+                        </thead>
+                        @{
+                var sn = 0;
+                decimal total = 0;
+                decimal rec = 0;
+                decimal due = 0;
+                        }
+                        <tbody>
+                            @foreach (var sl in Model.SalesReport)
+                            {
+                                if (sl.pLocation.SiteName != item.Text)
+                                {
+                                    continue;
+                                }
+                                sn = sn + 1;
+                                <tr>
+                                    <td style="width:10%">
+                                        @sn
+                                    </td>
+                                    <td style="width:10%">
+                                      <a href="#" onclick="getDetail(@sl.SaleID.ToString())">@sl.RefNO</a>  
+                                    </td>
+
+                                    @if (sl.FKCustomerID == null)
+                                    {
+                                        <td style="width:30%;">
+                                            @sl.CustomerName
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td style="width:30%">
+                                            @sl.pCustomer.CustomerName
+                                        </td>
+                                    }
+                                    <td>
+                                        @sl.pLocation.SiteName
+                                    </td>
+                                    <td style="width:10%">
+                                        @sl.SaleDate
+                                    </td>
+                                    <td style="width:10%">
+                                        @sl.Total
+                                    </td>
+                                    <td style="width:10%">
+                                        @sl.Received
+                                    </td>
+                                    <td style="width:10%">
+                                        @sl.Due
+                                    </td>
+                                    @{
+                                    total = total + sl.Total;
+                                    rec = rec + sl.Received;
+                                    due = due + sl.Due;
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-count">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>@total</td>
+                                <td>@rec</td>
+                                <td>@due</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        }
+    </div>
+    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog cus-modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+                </div>
+                <div class="modal-body">
+                    <div style="clear:both;"></div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetSale?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    //    document.write('<html><head><title>Sales History</title>');
+    //    document.write('' +
+    //'<style type="text/css">' +
+    // 'table {width:100%; }' +
+    //'table th, table td {' +
+    //'border:1px solid #000;' +
+    //'padding;0.5em;' +
+    //'}' +
+    //'</style>');
+    //    document.write('</head><body>');
+    //    document.write("<div style='text-align:center'>");
+    //    document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>");
+    //    document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>");
+    //    document.write("<div style='font-size:large;'>Sales History</div>");
+    //    document.write("<div style='font-size:medium'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+    //    document.write("</div>");
+    //    document.write("<div style='width:100%'>");
+    //    document.write($(".print").html());
+    //    document.write("</div>");
+    //    document.write('</body></html>');
+</script>

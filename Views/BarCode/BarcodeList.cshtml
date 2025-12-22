@@ -1,0 +1,363 @@
+
+<style>
+    #barcodePreview {
+        display: inline-block; /* keeps container inline */
+        position: relative; /* for absolute positioning if needed */
+        transition: transform 0.3s ease; /* smooth scale */
+    }
+
+        #barcodePreview img {
+            height: 100px; /* default size */
+            width: auto; /* maintain aspect ratio */
+            display: block;
+            transition: transform 0.3s ease; /* smooth scale */
+            cursor: pointer;
+        }
+
+        /* On hover: enlarge the image */
+        #barcodePreview:hover img {
+            position:relative;
+            transform: scale(3); /* scales image 3x */
+            z-index: 1050; /* ensure on top */
+        }
+
+</style>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Barcodes
+    </div>
+    <div class="panel-body">
+        <div class="row">
+
+            <div class="input-row col-md-3">
+                <label class="input-label">Select Barcode Size</label>
+                <div class="input-wrapper select-wrapper">
+                    <select id="BarcodeSize" name="BarcodeSize">
+                        <option data-template="s" value="1.0x2.625">1" x 2-5/8" (30 Up)</option>
+                        <option data-template="m" value="2.0x4.0">2" x 4" (10 Up)</option>
+                        <option data-template="l" value="4.0x6.0">4" x 6"</option>
+                        @*<option value="8.5x11.0">8.5" x 11" (Full Sheet)</option>*@
+                    </select>
+                </div>
+            </div>
+            <div class="checkbox-wrapper col-md-3 hidden" style="display:none;">
+                <div class="">
+                    <label class="checkbox-inline-label" for="ShowCompany">Show Company</label>
+                    <input id="ShowCompany" type="checkbox" />
+                </div>
+            </div>
+
+            <div class="checkbox-wrapper col-md-3" style="margin:25px;">
+                <div class="checkbox-inline-wrapper">
+                    <label class="checkbox-inline-label" for="ShowPrice">Show Price</label>
+                    <input id="ShowPrice" type="checkbox" checked />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div id="barcodePreview">
+                    <img id="barcodeImage" src="~/Content/barcode/small.png" alt="Barcode Preview" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row col-md-3">
+            <button class="btn btn-secondary" onclick="getSaleItemsJson()">Print Report</button>
+            <button class="btn btn-secondary" onclick="ResetBarcodeListForPrint()">Reset</button>
+            <button class="btn btn-secondary" onclick="BackToHomePage()">Back</button>
+        </div>
+        <div id="item-barcodes table-responsive">
+            <table class="table " id="sale-items">
+                <thead>
+                    <tr>
+                        <th>Print</th>
+                        <th>@POS.Resources.Resource.ItemNo</th>
+                        <th>@POS.Resources.Resource.Item</th>
+                        @*<th>@POS.Resources.Resource.CompanyName</th>*@
+                        <th>@POS.Resources.Resource.SalePrice</th>
+                        @*<th>@POS.Resources.Resource.MeasuringUnit</th>*@
+                        <th>@POS.Resources.Resource.Barcode</th>
+                        <th>@POS.Resources.Resource.Count</th>
+                        <th>Skip Before</th>
+                        @*<th style="display:none;">@POS.Resources.Resource.Size</th>
+                            <th>Show Company</th>
+                            <th>Show Price</th>*@
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Print</th>
+                        <th>@POS.Resources.Resource.ItemNo</th>
+                        <th>@POS.Resources.Resource.Item</th>
+                        @*<th>@POS.Resources.Resource.CompanyName</th>*@
+                        <th>@POS.Resources.Resource.SalePrice</th>
+                        @*<th>@POS.Resources.Resource.MeasuringUnit</th>*@
+                        <th>@POS.Resources.Resource.Barcode</th>
+                        <th>@POS.Resources.Resource.Count</th>
+                        <th>Skip Before</th>
+                        @*<th style="display:none;">@POS.Resources.Resource.Size</th>
+                            <th>Show Company</th>
+                            <th>Show Price</th>*@
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+<form style="" id="barcodeForm" method="post" target="_blank" action="/BarCode/DynamicBarcodeReport">
+    <input type="hidden" name="modelsJson" id="modelsJson" />
+    <input type="hidden" name="labelHeightInch" id="labelHeightInch" />
+    <input type="hidden" name="labelWidthInch" id="labelWidthInch" />
+    <input type="hidden" name="IsCompany" id="IsCompany" />
+    <input type="hidden" name="IsPrice" id="IsPrice" />
+</form>
+<script>
+    document.getElementById("BarcodeSize").addEventListener("change", function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const template = selectedOption.getAttribute("data-template");
+
+        const img = document.getElementById("barcodeImage");
+
+        if (template === "s") {
+            img.src = "/Content/barcode/small.png";
+        } else if (template === "m") {
+            img.src = "/Content/barcode/medium.png";
+        } else if (template === "l") {
+            img.src = "/Content/barcode/large.png";
+        }
+    });
+    var query = "";
+    var showSystemBarcodes = false;
+    var numberOfPrints = 1;
+    var startFrom = 1;
+    window.items = [];
+
+    let timer;
+    function debounce(func, delay) {
+        console.log(delay);
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+
+    function getSaleItemsJson() {
+        openBarcodeReport(items.filter(x => x.includeInPrint))
+        return items;
+    }
+    function ResetBarcodeListForPrint() {
+        items = [];
+        $("#sale-items input[type=checkbox]").prop('checked', false)
+    }
+
+    function BackToHomePage() {
+        window.location.href = '/Home'
+    }
+
+    function openBarcodeReport(models) {
+        // convert list to JSON string
+        var json = JSON.stringify(models);
+
+        // place JSON into hidden field
+        document.getElementById("modelsJson").value = json;
+        var BarcodeSizes = document.getElementById('BarcodeSize')?.value ?? "10x3";
+        var rowCols = BarcodeSizes.split('x');
+        document.getElementById("labelHeightInch").value = rowCols[0];
+        document.getElementById("labelWidthInch").value = rowCols[1];
+        document.getElementById("IsCompany").value = document.getElementById('ShowCompany').checked;
+        document.getElementById("IsPrice").value = document.getElementById('ShowPrice').checked;
+
+        // submit the form (opening in new tab)
+        document.getElementById("barcodeForm").submit();
+    }
+
+    $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+        return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+            // return 1 if checkbox is checked, 0 if unchecked
+            return $('input[type="checkbox"]', td).prop('checked') ? 1 : 0;
+        });
+    };
+
+    $(document).ready(function () {
+
+        $('#sale-items').DataTable({
+            ajax: {
+                url: "/Barcode/Barcodes",   // your endpoint
+                type: "POST",
+            },
+
+            paging: true,
+            searching: true,
+            ordering: true,
+            responsive: true,
+
+            columns: [
+                {
+                    data: "includeInPrint",
+                    render: function (data, type, row) {
+                        return `
+                        <input type="checkbox" name="includeInPrint" oninput="MaintainList(this)"/>
+                        <input type="hidden" class="barcode-list" name="ItemBarcodeID" value="${row.ItemBarcodeID}" />
+                        <input type="hidden" name="CompanyMake" value="${row.CompanyMake}" />
+                        <input type="hidden" name="SalePrice" value="${row.SalePrice}" />
+                        <input type="hidden" name="ItemNoStr" value="${row.ItemNoStr}" readonly class="form-control" />
+                        <input type="hidden" name="Description" value='${escapeHtml(row.Name)}' readonly class="form-control" />
+                        <input type="hidden" name="UnitName" value="${row.UnitName}" readonly class="form-control" />
+                        <input type="hidden" name="Barcode" value="${row.Barcode}" readonly class="form-control" />
+                    `;
+                    },
+                    className: "dt-center",
+                    orderDataType: "dom-checkbox", // use custom DOM sorter
+                    orderable: false
+
+                },
+                {
+                    data: "ItemNoStr",
+                    //render: function (data) {
+                    //    return `<input type="text" name="ItemNoStr" value="${data}" readonly class="form-control" />`;
+                    //},
+                    className: "dt-center ItemNoStr",
+                    orderable: true
+                },
+                {
+                    data: "Name",
+                    render: function (data, type, row) {
+                        const text = data?.toString() || '';
+                        return text.length > 50
+                            ? `<span title="${row.Name}">${text.slice(0, 50)}...</span>`
+                            : `<span title="${row.Name}">${text}</span>`;                        //return
+                        //`<input type="text" name="Description" value='${escapeHtml(row.Name)} ${escapeHtml(row.Description)}' readonly class="form-control" />`;
+                    },
+                    className: "dt-center Description",
+                },
+                //{
+                //    data: "CompanyMake",
+                //    //render: function (data) {
+                //    //    return `<input type="text" name="UnitName" value="${data}" readonly class="form-control" />`;
+                //    //},
+                //    className: "dt-center CompanyMake",
+                //    orderable: false,
+                //    visible: false,
+                //},
+                {
+                    data: "SalePrice",
+                    //render: function (data) {
+                    //    return `<input type="text" name="UnitName" value="${data}" readonly class="form-control" />`;
+                    //},
+                    className: "dt-center SalePrice",
+                    visible: false,
+                    orderable: false,
+                },
+                //{
+                //    data: "UnitName",
+                //    //render: function (data) {
+                //    //    return `<input type="text" name="UnitName" value="${data}" readonly class="form-control" />`;
+                //    //},
+                //    className: "dt-center UnitName",
+                //    orderable: false,
+                //    visible: false
+                //},
+                {
+                    data: "Barcode",
+                    //render: function (data) {
+                    //    return `<input type="text" name="Barcode" value="${data}" readonly class="form-control" />`;
+                    //},
+                    className: "dt-center Barcode",
+                },
+                {
+                    data: "Count",
+                    render: function (data) {
+                        return `<input type="number" name="Count" value="${(data)}" oninput="MaintainList(this)" class="count-input" />`;
+                    },
+                    className: "dt-center"
+                },
+                {
+                    data: "SkipBefore",
+                    render: function (data) {
+                        return `<input type="number" name="SkipBefore" value="${(data) }" oninput="MaintainList(this)" class="count-input" />`;
+                    },
+                    className: "dt-center"
+                }
+            ],
+            order: [[1, 'desc']],
+            autoWidth: false,  // IMPORTANT
+            columnDefs: [
+                { width: "60px", targets: 0 },   // checkbox column
+                { width: "120px", targets: 1 },  // ItemNoStr
+                { width: "250px", targets: 2 },  // Description
+                { width: "100px", targets: 3 },  // Unit
+                { width: "160px", targets: 4 },  // Barcode
+                { width: "80px", targets: 5 },   // Count
+                { width: "80px", targets: 6 }    // SkipBefore
+            ]
+        });
+
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+
+
+
+
+    //-------------------------------------------------------------------------//
+    //-------------------------------------------------------------------------//
+    //-------------------------------------------------------------------------//
+
+
+    function MaintainList(elem) {
+
+        // get the row of the changed input/checkbox
+        var row = elem.closest("tr");
+
+        // extract values from that row
+        var includeInPrint = row.querySelector('input[name="includeInPrint"]').checked;
+        var CompanyMake = row.querySelector('input[name="CompanyMake"]').value || "";
+        var SalePrice = row.querySelector('input[name="SalePrice"]').value || "0";
+        var itemBarcodeID = row.querySelector('.barcode-list').value || "";
+        var itemNo = row.querySelector('input[name="ItemNoStr"]').value || "";
+        var description = row.querySelector('input[name="Description"]').value || "";
+        var unitName = row.querySelector('input[name="UnitName"]').value || "";
+        var barcode = row.querySelector('input[name="Barcode"]').value || "";
+        var count = row.querySelector('input[name="Count"]').value || "0";
+        var skipBefore = row.querySelector('input[name="SkipBefore"]').value || "0";
+
+        // create object
+        var obj = {
+            includeInPrint: includeInPrint,
+            ItemBarcodeID: itemBarcodeID,
+            ItemNoStr: itemNo,
+            Description: description,
+            UnitName: unitName,
+            Barcode: barcode,
+            Count: parseInt(count),
+            CompanyMake: CompanyMake,
+            SalePrice: SalePrice,
+            IsCompany: true,
+            IsPrice: true,
+            SkipBefore: parseInt(skipBefore),
+        };
+
+        // maintain items list:
+        // find by ItemBarcodeID (unique)
+        var index = window.items.findIndex(x => x.ItemBarcodeID == itemBarcodeID);
+
+        if (index >= 0) {
+            window.items[index] = obj;     // update existing
+        } else {
+            window.items.push(obj);        // add new item
+        }
+
+        console.log(window.items); // for debugging
+    }
+
+</script>

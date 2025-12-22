@@ -1,0 +1,57 @@
+﻿@model POS.Models.UnitOfMeasure.UnitGroupVM
+@{
+    ViewBag.Title = "UNIT GROUPS";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Unit Groups
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddUnitGroup(this)" />
+        @*<input class="btn btn-primary custombtn" type="button" value="PRINT" onclick="" />*@
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="unit-grp-div" class="add-div">
+            @Html.Action("UnitGroupAdd", "MeasureUnit")
+        </div>
+
+        <div class="tab-div unit-group-tab-div">
+            <table class="display" id="unitGroupTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Groups)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                <a href="#" onclick="editUnitGroup('@item.UnitGroupID.ToString()')">@POS.Resources.Resource.Update/Detail</a> | <a href="#" onclick="deleteUnitGroup('@item.UnitGroupID.ToString()')">@POS.Resources.Resource.Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#unitGroupTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
+

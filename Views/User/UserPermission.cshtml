@@ -1,0 +1,71 @@
+﻿@model List<DataAccessLayer.Entities.Permission>
+
+@using (Html.BeginForm("UserPermission", "User", FormMethod.Post, new {  @id = "perm-form" }))
+{
+
+    for (var i = 0; i < @Model.Count; i++)
+    {
+        <div style="width:300px;float:left;">
+            <tr>
+                <td>
+                    <div style="font-weight:bold;">
+                        @Html.HiddenFor(x => x[i].PermissionID)
+                        @Html.HiddenFor(x => x[i].FKUserID)
+                        @Html.HiddenFor(x => x[i].Name)
+                        @Html.DisplayFor(x => x[i].Name)
+                    </div>
+                </td>
+                <td>
+                    <label>@POS.Resources.Resource.CanView</label>
+                    @Html.CheckBoxFor(x => x[i].CanView)
+                </td>
+                <td>
+                    <label>@POS.Resources.Resource.CanCreate</label>
+                    @Html.CheckBoxFor(x => x[i].CanCreate)
+                </td>
+                <td>
+                    <label>@POS.Resources.Resource.CanUpdate</label>
+                    @Html.CheckBoxFor(x => x[i].CanUpdate)
+                </td>
+                <td>
+                    <label>@POS.Resources.Resource.CanDelete</label>
+                    @Html.CheckBoxFor(x => x[i].CanDelete)
+                </td>
+            </tr>
+            <br />
+            <br />
+        </div>
+    }
+    <input type="submit" class="btn custombtn btn-primary" value="@POS.Resources.Resource.Update" />
+    <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<script>
+    $(document).ready(function () {
+      
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                $('#result').html("");
+                $('#result').html(msg);
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#perm-form').ajaxForm(options);
+
+    });
+</script>

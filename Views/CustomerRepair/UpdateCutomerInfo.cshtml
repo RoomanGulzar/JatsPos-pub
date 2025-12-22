@@ -1,0 +1,170 @@
+﻿@model POS.Models.CustomerRepair.RepairOrderVM
+
+<div class="col-sm-7">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="portlet light">
+                <div class="portlet-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>@POS.Resources.Resource.CustomerName</label>
+                            <input id="repairOrderCustomerName"
+                                   class="form-control"
+                                   style="width:90%;"
+                                   value="@Model.RepairOrder.CustomerName"
+                                   onchange="setRepairOrderCustomerName(this)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Customer Phone</label>
+                            <input id="repairOrderCustomerPhone"
+                                   class="form-control"
+                                   style="width:90%;"
+                                   value="@Model.RepairOrder.CustomerPhone"
+                                   onchange="setRepairOrderCustomerPhone(this)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Customer Email</label>
+                            <input id="repairOrderCustomerEmail"
+                                   class="form-control"
+                                   style="width:100%;"
+                                   value="@Model.RepairOrder.CustomerEmail"
+                                   onchange="setRepairOrderCustomerEmail(this)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Device Information</label>
+                            <input id="repairOrderDeviceInfo"
+                                   class="form-control"
+                                   style="width:90%;"
+                                   value="@Model.RepairOrder.Model"
+                                   onchange="setRepairOrderDeviceInfo(this)"
+                                   readonly="readonly" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Device Password</label>
+                            <input id="repairOrderDevicePassword"
+                                   class="form-control"
+                                   style="width:90%;"
+                                   value="@Model.RepairOrder.Password"
+                                   onchange="setRepairOrderDevicePassword(this)"
+                                   readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Accessories left behind in store</label>
+                            <textarea id="repairOrderAccessoriesLeft"
+                                      class="form-control"
+                                      style="width:100%;"
+                                      onchange="setRepairOrderAccessoriesLeft(this)"
+                                      readonly="readonly">
+                                @Model.RepairOrder.AccessoriesLeft
+                                </textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Describe Problem or Service</label>
+                            <textarea id="repairOrderProblemDescription"
+                                      class="form-control"
+                                      value=""
+                                      style="width:100%;"
+                                      onchange="setRepairOrderProblemDescription(this)"
+                                      readonly="readonly">
+                                @Model.RepairOrder.ProblemDescription
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-5">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="portlet light">
+                <div class="portlet-body">
+                    <div class="row">
+                        <div style="float:left;width:50%;font-size:20px;font-weight:bolder;">
+                            RO-<span id="order_no" class="order-number">@Model.RepairOrder.RefNo</span>
+                        </div>
+                        <div style="float:right;width:50%;text-align:right;font-size:20px;font-weight:bolder;">
+                            <span class="order-number">@Model.RepairOrder.Date.ToShortDateString()</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="portlet light">
+                <div class="portlet-body">
+                    <div class="row">
+                        <div style="float:left;width:100%;font-size:20px;font-weight:bolder;">
+                            Terms and Conditions:
+                        </div>
+                    </div>
+                    <div class="row">
+                        <ul>
+                            <li>$30 deposit is to be paid, this service charge applies for diagnosing on Laptops and Computers only for the first 30min </li>
+                            <li>Techsource will not be responsible for any data loss during the repair or service (but will take all measure to prevent this from happening)</li>
+                            <li>Techsource will not be responsible for products left over 90 days (after 90 days product will be sold Techsource will make attempts to contact client before this is done)</li>
+                            <li>All parts and additional service/repairs charges must be paid for in full upon collection</li>
+                            <li>By signing this form the customer agrees to all of the above terms and conditions</li>
+                        </ul>
+                    </div>
+                    <div class="row">
+                        <div class="sigPad">
+                            <ul class="sigNav">
+                                <li style="display:none" class="typeIt"><a href="#type-it">Type It</a></li>
+                                <li style="display:none" class="drawIt"><a href="#draw-it" class="current">Sign Now</a></li>
+                                <li class="clearButton"><a href="#clear">Clear</a></li>
+                            </ul>
+                            <div class="sig sigWrapper">
+                                <div style="display:none" class="typed"></div>
+                                <canvas class="pad" width="250" height="65"></canvas>
+                                <input type="hidden" id="repairOrderCustomerSignature" name="output" class="output">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="portlet light">
+                <div class="portlet-body">
+                    <div class="row">
+                        <button type="button"
+                                onclick="updateCustomerInfo()"
+                                class="btn btn-lg pay-btn purple"
+                                style="background-color:#EA5257;">
+                            I Agree
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    repairOrderModel.Id = '@Model.RepairOrder.Id';
+    repairOrderModel.CustomerName = '@Model.RepairOrder.CustomerName';
+    repairOrderModel.CustomerPhone = '@Model.RepairOrder.CustomerPhone';
+    repairOrderModel.CustomerEmail = '@Model.RepairOrder.CustomerEmail';
+    repairOrderModel.Model = '@Model.RepairOrder.Model';
+    repairOrderModel.Password = '@Model.RepairOrder.Password';
+    repairOrderModel.AccessoriesLeft = '@Model.RepairOrder.AccessoriesLeft';
+    repairOrderModel.ProblemDescription = '@Model.RepairOrder.ProblemDescription';
+
+    $(document).ready(function () {
+        $('.sigPad').signaturePad({ drawOnly: true });
+    });
+
+
+</script>

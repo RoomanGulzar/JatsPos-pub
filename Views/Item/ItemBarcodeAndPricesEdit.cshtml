@@ -1,0 +1,69 @@
+﻿@model BusinessLayer.ViewModels.Inventory.ItemBarcodeAndPriceModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @Model.Name - @Model.ItemNoStr @POS.Resources.Resource.Barcodes
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("UpdateItemBarcodes", "Item", FormMethod.Post, new { enctype = "multipart/form-data", @id = "item-barcode-form" }))
+        {
+            if (Model.ItemBarcodes != null)
+            {
+                <table class="table table-responsive" id="item-barcodes">
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th>@POS.Resources.Resource.Price</th>
+                            <th>@POS.Resources.Resource.Barcode</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.ItemBarcodes.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].ItemBarcodeID)
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].FkItemID)
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].FkUnitGroupID)
+                                    @Html.HiddenFor(c => c.ItemBarcodes[i].FkUnitID)
+                                    @Html.TextBoxFor(c => c.ItemBarcodes[i].Unit, new { @class = "form-control", @readonly = "readonly" })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(c => c.ItemBarcodes[i].Price, new { @class = "form-control" })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(c => c.ItemBarcodes[i].Barcode, new { @class = "form-control", @required = "required" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+                <input type="button" class="btn btn-default custombtn" value="@POS.Resources.Resource.Back" onclick="getItemData()" />
+                <script>
+                    var options = {
+                        beforeSubmit: function (msg) {
+                            blockUI();
+                        },
+                        success: function (msg) {
+                            unblockUI();
+                            if (msg === true) {
+                                getItemData();
+                                successToast();
+                            } else {
+                                errorToast(msg);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            handleErrors(jqXHR.status);
+                            unblockUI();
+
+                        }
+                    };
+                    $('#item-barcode-form').ajaxForm(options);
+                </script>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,507 @@
+﻿@using DataAccessLayer.Helpers
+@model POS.Models.ReportsVM
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.ItemWiseProfitLoss
+    </div>
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-lg-12">
+                @using (Html.BeginForm("ItemwiseProfitLoss", "Reports", FormMethod.Post, new { @id = "sl-form-p" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.FromDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.FromDate, new { @class = "form-control datepicker", @placeholder = "From Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.ToDate
+                        </div>
+                        <div class="form-input">
+                            @Html.TextBoxFor(c => c.RC.ToDate, new { @class = "form-control datepicker", @placeholder = "To Date" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Location
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.LocationID, Model.getAllLocations(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.SalesMan
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.User, Model.getAllUsers(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-lable">
+                            @POS.Resources.Resource.Customer
+                        </div>
+                        <div class="form-input">
+                            @Html.DropDownListFor(c => c.RC.CustomerID, Model.getAllCustomers(), "Please Select....", new { @class = "form-control selectize" })
+                        </div>
+                    </div>
+
+                    <input type="submit" class="custombtn btn btn-primary" value="@POS.Resources.Resource.View" />
+                    <input type="button" class="custombtn btn btn-primary" value="@POS.Resources.Resource.Reset" onclick="getItemwiseProfitLoss();" />
+                    <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+                    <input type="button" class="custombtn btn btn-danger" onclick="print()" value="@POS.Resources.Resource.Print" />
+                    <input type="button" class="custombtn btn btn-danger" onclick="pdf()" value="@POS.Resources.Resource.PDF" />
+                }
+            </div>
+            <div class="col-lg-12 print">
+                <table class="table table-responsive">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.Type
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.InvoiceNumber
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.ItemNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Description
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.UnitPrice
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Quantity
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Discount
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Tax
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.SalesPrice
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.CostPrice
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Profit/Loss
+                            </th>
+                        </tr>
+                    </thead>
+                    @{
+                        var sn = 0;
+                        decimal total = 0;
+                        decimal rec = 0;
+                        decimal due = 0;
+                        decimal disc = 0;
+                        var dumpValue = Model.User.RoleID.ToString() != Constants.SuperAdmin ? Model.CuttOffPercentage : 1;
+                    }
+                    <tbody>
+
+                        @foreach (var sl in Model.SalesReport)
+                        {
+                            if (sl.Discount > 0)
+                            {
+                                var discount = (sl.Discount / 100) * sl.SubTotal;
+                                disc = disc + discount;
+                            }
+                            disc = disc * dumpValue;
+                            foreach (var saleItem in sl.pItems.Where(x => x.Deleted == false).ToList())
+                            {
+                                var unitPrice = saleItem.UnitPrice * dumpValue;
+                                var itemDisc = saleItem.Discount * dumpValue;
+                                var itemtax = saleItem.Tax * dumpValue;
+                                var itemTotal = saleItem.Total * dumpValue;
+                                var itemPurCost = (saleItem.PurchaseCost.HasValue ? saleItem.PurchaseCost.Value : 0) * dumpValue;
+                                var itemProfit = (saleItem.ProfitLoss.HasValue ? saleItem.ProfitLoss.Value : 0) * dumpValue;
+                                
+                                sn = sn + 1;
+                                if (saleItem.Returned)
+                                {
+                                    <tr style="background-color:red;">
+                                        <td>
+                                            @sl.SaleType
+                                        </td>
+                                        <td>
+                                            <a href="#" onclick="getDetail('@sl.SaleID.ToString()')">@sl.RefNO</a>
+                                        </td>
+                                        <td>
+                                            @saleItem.ItemNoStr
+                                        </td>
+                                        <td>
+                                            @saleItem.Description
+                                        </td>
+                                        <td>
+                                            @unitPrice
+                                        </td>
+                                        <td>
+                                            @saleItem.Quantity
+                                        </td>
+                                        <td>
+                                            @itemDisc
+                                        </td>
+                                        <td>
+                                            @itemtax
+                                        </td>
+                                        <td>
+                                            @itemTotal
+                                        </td>
+                                        <td>
+                                            @itemPurCost
+                                            @{
+                                    rec = rec - itemPurCost;
+                                            }
+                                        </td>
+                                        <td>
+                                            -(@itemProfit)
+                                            @{
+                                    due = due - itemProfit;
+                                            }
+                                        </td>
+                                        @{
+                                    total = total - itemTotal;
+                                    //rec = rec + sl.Received;
+                                    //due = due + sl.Due;
+                                        }
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td>
+                                            @sl.SaleType
+                                        </td>
+                                        <td>
+                                            <a href="#" onclick="getDetail('@sl.SaleID.ToString()')">@sl.RefNO</a>
+                                        </td>
+                                        <td>
+                                            @saleItem.ItemNoStr
+                                        </td>
+                                        <td>
+                                            @saleItem.Description
+                                        </td>
+                                        <td>
+                                            @unitPrice
+                                        </td>
+                                        <td>
+                                            @saleItem.Quantity
+                                        </td>
+                                        <td>
+                                            @itemDisc
+                                        </td>
+                                        <td>
+                                            @itemtax
+                                        </td>
+                                        <td>
+                                            @itemTotal
+                                        </td>
+                                        <td>
+                                            @itemPurCost
+                                            
+                                        </td>
+                                        <td>
+                                            @itemProfit
+                                            @{
+                                    due += itemProfit;
+                                            }
+                                        </td>
+                                        @{
+                                    total = total + itemTotal;
+                                    //rec = rec + sl.Received;
+                                    //due = due + sl.Due;
+                                        }
+                                    </tr>
+
+                                }
+                            }
+                        }
+
+                        <tr class="total-count">
+                            <td colspan="8" align="right"><b>@POS.Resources.Resource.SalesTotal</b></td>
+                            @if (disc > 0)
+                            {
+                                var g = total - disc;
+                                <td>@g.ToString("F") Discount (@disc.ToString("F"))</td>
+                            }
+                            else
+                            {
+                                <td>@total</td>
+                            }
+                            <td>@rec</td>
+                            @if (disc > 0)
+                            {
+                                var g = due - disc;
+                                <td>@g.ToString("F")</td>
+                            }
+                            else
+                            {
+                                <td>@due.ToString("F")</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td colspan="10"><span style="font-weight:bold;">@POS.Resources.Resource.PurchaseOrderPayments</span></td>
+                        </tr>
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SerialNo
+                            </th>
+                            <th colspan="4">
+                                @POS.Resources.Resource.SupplierName
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Invoice
+                            </th>
+                            <th colspan="2">
+                                @POS.Resources.Resource.Amount
+                            </th>
+
+                        </tr>
+                    </thead>
+                    @{
+                        var sn11 = 0;
+                        decimal total11 = 0;
+                    }
+                    @foreach (var sl in Model.POPayments)
+                    {
+                        sn11 = sn11 + 1;
+                        var payAmount = sl.Amount * dumpValue;
+                        <tr style="background-color:green;color:white;">
+                            <td>
+                                @sn11
+                            </td>
+                            <td colspan="4">
+                                @sl.pOrder.Suppliers.SupplierName
+                            </td>
+
+                            <td>
+                                @sl.pOrder.ReferenceNumberPO
+                            </td>
+                            <td colspan="2">
+                                @payAmount
+                            </td>
+
+                            @{
+                        total11 = total11 + payAmount;
+
+                            }
+                        </tr>
+                    }
+                    <tr class="total-count">
+                        <td colspan="7" align="right"><b>Payment Total</b></td>
+                        <td>@total11</td>
+                    </tr>
+                    <tr>
+                        <td colspan="10"><span style="font-weight:bold;">@POS.Resources.Resource.Expenses</span></td>
+                    </tr>
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SerialNo
+                            </th>
+                            <th colspan="3">
+                                @POS.Resources.Resource.Description
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Head
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Total
+                            </th>
+                        </tr>
+                    </thead>
+
+                    @{
+                        var sn1 = 0;
+                        decimal total1 = 0;
+                        decimal rec1 = 0;
+                        decimal due1 = 0;
+                    }
+                    @foreach (var sl in Model.ExpenseReport)
+                    {
+                        sn1 = sn1 + 1;
+                        var expTotal = sl.Amount * dumpValue;
+                        <tr>
+                            <td>
+                                @sn1
+                            </td>
+                            <td colspan="3">
+                                @sl.Description
+                            </td>
+
+                            <td>
+                                @sl.pHead.Name
+                            </td>
+                            <td>
+                                @sl.pLocation.SiteName
+                            </td>
+
+                            <td>
+                                @sl.Date
+                            </td>
+                            <td>
+                                @expTotal
+                            </td>
+
+                            @{
+                        total1 = total1 + expTotal;
+
+                            }
+                        </tr>
+                    }
+
+                    <tr class="total-count">
+                        <td colspan="7" align="right"><b>@POS.Resources.Resource.ExpenseTotal</b></td>
+                        <td>@total1</td>
+                    </tr>
+
+                    <tfoot>
+                        <tr class="total-count">
+                            <td colspan="7" align="right"><b>@POS.Resources.Resource.TotalProfit/Loss</b></td>
+                            <td>@{var pl = due - total1;}@pl</td>
+                        </tr>
+                        <tr class="total-count">
+                            <td colspan="7" align="right"><b>@POS.Resources.Resource.Cash</b></td>
+                            <td>@{var tl = ((total - total11) - total1) - disc;}@tl.ToString("F")</td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetSale?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Profit & Loss Report (Items)</title>';
+        html += '<style type="text/css"> table {width:100%; border-collapse:collapse; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += '<div class="col-lg-12" style="text-align:right">TechCity</div><br/>';
+        html += "<div style='font-size:large;'>Profit Loss Statement</div>";
+        html += "<div style='font-size:medium;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Sales-History";
+        $.ajax({
+            type: 'POST',
+            url: '/Reports/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/Reports/HtmlToPdf';
+            }
+        });
+    }
+    function print() {
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title>Profit & Loss Report (Items)</title>');
+        docprint.document.write('' +
+    '<style type="text/css">' +
+     'table {width:100%;  border-collapse:collapse;font-size:8px;!important; }' +
+    'table th, table td {' +
+    'border:1px solid #000;' +
+    'padding;0.5em;' +
+    '}' +
+    '</style>');
+        docprint.document.write('</head><body>');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:40%;margin-left:160px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='font-size:10px;;'>Profit Loss Statement</div>");
+        docprint.document.write("<div style='font-size:8px;'>From :" + $("#RC_FromDate").val() + " To : " + $("#RC_ToDate").val() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='width:100%';font-size:8px !important;>");
+        docprint.document.write($(".print").html());
+        docprint.document.write("</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+
+    $(".datepicker").kendoDatePicker(datePickerOptions);
+    $('.selectize').selectize();
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+            $(".btn").prop("disabled", true);
+        },
+        success: function (msg) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            successToast();
+            $("#main-content").html("");
+            $("#main-content").html(msg);
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#sl-form-p').ajaxForm(options);
+</script>

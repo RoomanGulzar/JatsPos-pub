@@ -1,0 +1,195 @@
+﻿@model POS.Models.Pos.CashDrawerVM
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="portlet light">
+            <div class="portlet-body form">
+                @using (Html.BeginForm("OpeningClosingBalance", "Pos", FormMethod.Post, new { enctype = "multipart/form-data", @id = "cash-drawer-form", @class = "form-horizontal" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    @Html.HiddenFor(c => c.CashDrawer.Id)
+
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                Opening Date Time
+                            </label>
+                            <div class="col-md-6">
+                                @Html.TextBoxFor(c => c.CashDrawer.OpeningDate, new { @class = "form-control", @style = "width:100%" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                Opening Balance
+                            </label>
+                            <div class="col-md-6">
+                                @Html.TextBoxFor(c => c.CashDrawer.OpeningBalance, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                Closing Balance
+                            </label>
+                            <div class="col-md-6">
+                                @Html.TextBoxFor(c => c.CashDrawer.ClosingBalance, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                Close Day
+                            </label>
+                            <div class="col-md-6">
+                                @Html.CheckBoxFor(c => c.CashDrawer.Latest, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                Closing Date Time
+                            </label>
+                            <div class="col-md-6">
+                                @Html.TextBoxFor(c => c.CashDrawer.ClosingDate, new { @class = "form-control", @style = "width:100%" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">
+                                @POS.Resources.Resource.Comments
+                            </label>
+                            <div class="col-md-6">
+                                @Html.TextAreaFor(c => c.CashDrawer.Comments, new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <div class="row">
+                            <div class="col-md-offset-3 col-md-9">
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <button type="submit" class="btn green">
+                                            @POS.Resources.Resource.Save
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button type="button" onclick="switchOpeningClosingScreen(false)" class="btn dark">@POS.Resources.Resource.Back</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $("#CashDrawer_OpeningDate").kendoDateTimePicker(dateTimePickerOptions);
+    $("#CashDrawer_ClosingDate").kendoDateTimePicker(dateTimePickerOptions);
+
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            var closeDay = $("#CashDrawer_Latest").is(":checked");
+            if (closeDay) {
+                if (!confirm("Closing day will refresh bill number for sales, are you sure you want to close day?")) {
+                    return false;
+                }
+                var closingDate = $("#CashDrawer_ClosingDate").data("kendoDateTimePicker").value();
+                if (!closingDate) {
+                    $().toastmessage('showToast', {
+                        text: 'Please select closing date time',
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                    return false;
+                }
+                var openingDate = $("#CashDrawer_OpeningDate").data("kendoDateTimePicker").value();
+                if (!openingDate) {
+                    $().toastmessage('showToast', {
+                        text: 'Please select opening date time',
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                    return false;
+                }
+                //var nowDateTime = new Date();
+                //if (closingDate < nowDateTime) {
+                //    $().toastmessage('showToast', {
+                //        text: 'Closing date time should be greater than now',
+                //        sticky: false,
+                //        position: 'bottom-right',
+                //        type: 'error'
+
+                //    });
+                //    return false;
+                //}
+                if (closingDate <= openingDate) {
+                    $().toastmessage('showToast', {
+                        text: 'Closing date time should be greater than opening date time',
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                    return false;
+                }
+                var closingBalance = parseFloat($("#CashDrawer_ClosingBalance").val());
+                if (closingBalance <= 0) {
+                    $().toastmessage('showToast', {
+                        text: 'Closing balance should be greater than zero',
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                    return false;
+                }
+                var openingBalance = parseFloat($("#CashDrawer_OpeningBalance").val());
+                if (closingBalance < openingBalance) {
+                    $().toastmessage('showToast', {
+                        text: 'Closing balance should be greater than opening balance',
+                        sticky: false,
+                        position: 'bottom-right',
+                        type: 'error'
+
+                    });
+                    return false;
+                }
+            }
+            blockUI();
+
+        },
+        success: function (msg) {
+            if (msg.saleid && msg.saleid !== "00000000-0000-0000-0000-000000000000") {
+                unblockUI();
+                successToast();
+                refreshPage();
+                switchOpeningClosingScreen(false);
+                getCashCounterPrint(msg.CashCounterPrint);
+            }
+            else {
+                unblockUI();
+                return $().toastmessage('showToast', {
+                    text: msg.message,
+                    sticky: false,
+                    position: 'bottom-right',
+                    type: 'error'
+                });
+            }
+        },
+
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+            unblockUI();
+
+        }
+    };
+    $('#cash-drawer-form').ajaxForm(options);
+
+</script>

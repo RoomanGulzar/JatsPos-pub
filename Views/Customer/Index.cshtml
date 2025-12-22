@@ -1,0 +1,82 @@
+﻿@model POS.Models.CustomerVM
+@{
+    ViewBag.Title = "CUSTOMERS";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Customers
+    </div>
+    <div class="panel-body">
+
+        <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddCus(this)" />
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="cus-div" class="add-div">
+            @Html.Action("Create", "Customer")
+        </div>
+
+        <div class="tab-div customer-tab-div">
+            <table class="display" id="customerTable" >
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.ReferenceNumber
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Phone
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                        <th>
+                            Store Credit 
+                        </th>
+                        <th>@POS.Resources.Resource.Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Customers)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CustomerNumber)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CustomerName)
+                            </td>                          
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CustomerPhone)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CustomerEmail)
+                            </td>
+                            <td>
+                                $@Html.DisplayFor(modelItem => item.StoreCredit)
+                            </td>
+                            <td>
+                                @if (item.CustomerID != new Guid("88e90b46-7863-43a6-8b60-e0194025034c"))
+                                {
+                                    <a href="#" onclick="editCustomer('@item.CustomerID.ToString()')">@POS.Resources.Resource.Update/@POS.Resources.Resource.Detail</a>  <a href="#" onclick="deleteCustomer('@item.CustomerID.ToString()')">@POS.Resources.Resource.Delete</a>
+                                }
+                                
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+
+        $('#customerTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>

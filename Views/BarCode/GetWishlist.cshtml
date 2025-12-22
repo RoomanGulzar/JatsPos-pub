@@ -1,0 +1,175 @@
+﻿@model List<DataAccessLayer.Entities.Wishlist>
+@{
+    ViewBag.Title = "Wishlist";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Addwishlistitem 
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.Name
+            </div>
+            <div class="form-input">
+                @Html.TextBox("wishlistItem", "", new { @class = "form-control", @id = "wishlistItem", @type = "text" })
+            </div>
+        </div>
+        <input type="button" class="btn btn-primary custombtn" onclick="addWishlist()" value="@POS.Resources.Resource.Addtolist" />
+        <input type="button" class="btn btn-primary custombtn" onclick="pdf()" value="@POS.Resources.Resource.Printlist" />
+    </div>
+
+    <div class="panel-heading">
+        @POS.Resources.Resource.All Items
+    </div>
+
+    <div class="panel-body">
+        <div class="tab-div user-tab-div">
+            <table class="display table" id="wishlistTable">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Count
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Count)
+                            </td>
+                            <td>
+                                <a href="#" onclick="deleteWishlistItem('@item.Name')">@POS.Resources.Resource.Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel-body" style="display:none">
+        <div class="tab-div user-tab-div print">
+            <table class="display table">
+                <thead>
+                    <tr>
+                        <th>
+                            @POS.Resources.Resource.Name
+                        </th>
+                        <th>
+                            @POS.Resources.Resource.RequestsCount 
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Count)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    function addWishlist() {
+        var wishlistItem = $("#wishlistItem").val();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: "/BarCode/AddWishlist?itemName=" + wishlistItem,
+            async: true,
+            success: function (data) {
+                //$("#main-content").html("");
+                //$("#main-content").html(data);
+                //unblockUI();
+                location.reload(true);
+                getWishlist();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+        //$("#download-pdf").attr("href", "/BarCode/AddWishlist?itemName=" + wishlistItem);
+        //window.location = $('#download-pdf').attr('href');
+    }
+    function deleteWishlistItem(itemName) {
+        if (itemName) {
+
+            $.ajax({
+                type: "GET",
+                contentType: "html",
+                url: "/BarCode/DeleteWishlist?itemName=" + itemName,
+                async: true,
+                success: function (data) {
+                    //$("#main-content").html("");
+                    //$("#main-content").html(data);
+                    //unblockUI();
+                    location.reload(true);
+                    getWishlist();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(textStatus);
+                }
+            });
+        }
+        //$("#download-pdf").attr("href", "/BarCode/AddWishlist?itemName=" + wishlistItem);
+        //window.location = $('#download-pdf').attr('href');
+    }
+    function pdf() {
+        var html = "";
+        html += '<html><head><title>Wishlist</title>';
+        html += '<style type="text/css"> table {width:100%; } table th, table td {border:1px solid #000;padding;0.5em;}</style>';
+        html += '</head><body>';
+        html += "<div style='text-align:center'>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>";
+        html += "<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>";
+        html += "<div style='font-size:large;'>Items Details</div>";
+        html += "</div>";
+        html += "<div style='width:100%'>";
+        html += $(".print").html();
+        html += "</div>";
+        html += '</body></html>';
+        var obj = new Object();
+        obj.Html = html;
+        obj.Name = "Wishlist-Detail";
+        $.ajax({
+            type: 'POST',
+            url: '/BarCode/HtmlToPdf',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (returnValue) {
+                window.location = '/BarCode/HtmlToPdf';
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        $('#wishlistTable').dataTable({
+            responsive: true
+        });
+
+    });
+
+</script>

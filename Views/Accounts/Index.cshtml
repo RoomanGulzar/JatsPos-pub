@@ -1,0 +1,66 @@
+﻿@model POS.Models.ExpenseVM
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @POS.Resources.Resource.Expenses
+        </div>
+        <div class="panel-body">
+
+            <input class="btn btn-primary custombtn" type="button" value="@POS.Resources.Resource.AddNew" onclick="showHideAddExpense(this)" />
+            <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+            <div id="con-div" class="add-div">
+                @Html.Action("Create", "Accounts")
+            </div>
+
+            <div class="tab-div condition-tab-div">
+                <table class="display" id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.Head
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Description
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Amount
+                            </th>
+
+                            <th>@POS.Resources.Resource.Action</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Expenses)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.pHead.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Amount)
+                                </td>
+                                <td>
+                                    <a href="#" onclick="editExpense('@item.ID.ToString()')">Update/Detail</a> | <a href="#" onclick="deleteExpense('@item.ID.ToString()')">@POS.Resources.Resource.Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+
+            $('#expenseTable').dataTable({
+                responsive: true
+            });
+
+        });
+    </script>

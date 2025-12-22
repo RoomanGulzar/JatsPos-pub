@@ -1,0 +1,190 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+       @POS.Resources.Resource.Barcodes
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">BACK</a>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.FromNumber
+            </div>
+            <div class="form-input">
+                @Html.TextBox("from", "", new { @class = "form-control", @id = "FromNumber", @type = "number", @min = "10100001", @step = "1", @onchange = "applyAutoCompleteBarcode(this);" })
+                @*<td>
+                    <input id="Sale-item-0" class="sale-items form-control" /> <input type='hidden' class="item-id-hdn" name='Sale.pItems[0].FKItemID' />
+                </td>*@
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.ToNumber
+            </div>
+            <div class="form-input">
+                @Html.TextBox("to", "", new { @class = "form-control ui-autocomplete-input", @id = "ToNumber", @type = "number", @min = "10100001", @step = "1", @onchange = "applyAutoCompleteBarcode(this);" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.Size
+            </div>
+            <div class="form-input">
+                <select id="size1">
+                    <option value="0,0">custom...</option>
+                    <option value="99,57" selected="selected">1.4 x 0.8 inch</option>
+                    <option value="132.28,68.03">1.4 x 0.7 inch</option>
+                    <option value="147.40,79.37">1.6 x 0.8 inch</option>
+                    <option value="144,72">2 x 1 inch</option>
+                    <option value="144,49">2 x 0.7 inch</option>
+                    <option value="100,32">1.41 x 0.47 inch</option>
+                    <option value="144,26">2 x 0.39 inch</option>
+                </select>
+                @*@Html.TextBox("size1", "144", new { @class = "form-control", @id = "size1", @type = "number", @min = "1", @step = "1", @value = "144" })*@
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.Width
+            </div>
+            <div class="form-input">
+                @Html.TextBox("siza1", "2", new { @class = "form-control", @id = "siza1", @type = "number", @min = "1", @step = "1"})
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.Length
+            </div>
+            <div class="form-input">
+                @Html.TextBox("siza2", "1", new { @class = "form-control", @id = "siza2", @type = "number", @min = "1", @step = "1"})
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.Count
+            </div>
+            <div class="form-input">
+                @Html.TextBox("count", 1, new { @class = "form-control", @id = "BarCount", @type = "number", @pattern = "[0-9]+", @min = "1", @step = "1" })
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.IncludePrice
+            </div>
+            <div class="form-input">
+                @Html.CheckBox("isPrice",true, new { @class = "form-control", @id = "IsPrice" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                @POS.Resources.Resource.IncludeCompany
+            </div>
+            <div class="form-input">
+                @Html.CheckBox("isCompany", true, new { @class = "form-control", @id = "IsCompany" })
+            </div>
+        </div>
+        <input type="button" class="btn btn-primary custombtn" onclick="generateBarcodes()" value="@POS.Resources.Resource.GenerateBarcodes" />
+        <a style="display:none" target="_blank" id="download-pdf" href="" onclick=""></a>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        $('select').selectize();
+        applyAutoCompleteBarcode("FromNumber");
+        applyAutoCompleteBarcode("ToNumber");
+        //applyAutoComplete("Sale-item-0");
+    });
+    function generateBarcodes()
+    {
+        var from = $("#FromNumber").val();
+        var to = $("#ToNumber").val();
+        var count = $("#BarCount").val();
+        var size1 = $("#size1").val();
+        if (size1 == "0,0")
+        {
+            size1 = ($("#siza1").val() * 75 - 6) + "," + ($("#siza2").val() * 75 - 3);
+        }
+        var isPrice = document.getElementById('IsPrice').checked;// $("#IsPrice").val();
+        var isCompany = document.getElementById('IsCompany').checked;
+        if (from == "" || to == "")
+        {
+            var msg = "Please enter from and too number";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        debugger;
+        if (from.length != 8 || to.length != 8) {
+            var msg = "Length should be 8 digit for from and too number";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        if (!(Math.floor(from) == from && $.isNumeric(from)))
+        {
+            var msg = "Only numbers allowed for from and too number";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        if (!(Math.floor(to) == to && $.isNumeric(to))) {
+            var msg = "Only numbers allowed for from and too number";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        if (parseInt(from) > parseInt(to)) {
+            var msg = "To number can not be less than to number";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        if (parseInt(from) < 10100001)
+        {
+            var msg = "Min from number value is 10100001";
+            return $().toastmessage('showToast', {
+                text: msg,
+                sticky: false,
+                position: 'bottom-right',
+                type: 'warning'
+
+            });
+        }
+        
+        var url = "/BarCode/GetBarcode?from=" + from +
+            "&&to=" + to +
+            "&&count=" + count +
+            "&&isprice=" + isPrice +
+            "&&iscompany=" + isCompany +
+            "&&size1=" + size1;
+
+        $("#download-pdf").attr("href", url);
+        window.open(url, '_blank');
+        //applyAutoComplete
+    }
+</script>

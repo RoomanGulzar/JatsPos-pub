@@ -1,0 +1,104 @@
+﻿
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.Barcodes
+    </div>
+    <div class="panel-body">
+
+        <div class="form-row">
+            <div class="form-lable">
+                <label class="inline">Search</label>
+
+            </div>
+            <div class="form-input">
+                <input id="searchQuery" type="text" class="form-control" onkeyup="searchItemBarcodesDebounced(0)" 
+                       onchange="searchItemBarcodesDebounced(0)" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                <label class="inline">Number of Barcodes (per product)</label>
+
+            </div>
+            <div class="form-input">
+                <input id="numberOfPrints"
+                       type="number"
+                       class="form-control"
+                       onkeyup="searchItemBarcodes(0)"
+                       value="1" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                <label class="inline">Skip Positions</label>
+
+            </div>
+            <div class="form-input">
+                <input id="startFrom"
+                       type="number"
+                       class="form-control"
+                       onkeyup="searchItemBarcodes(0)"
+                       value="0" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                <label class="inline">Show System Barcodes</label>
+            </div>
+            <div class="input-group-addon bg-transparent">
+                <input id="showSystemBarcodes" type="checkbox" onchange="searchItemBarcodes(0)" />
+            </div>
+        </div>
+        <div id="item-barcodes">
+        </div>
+    </div>
+</div>
+<script>
+
+    var query = "";
+    var showSystemBarcodes = false;
+    var numberOfPrints = 1;
+    var startFrom = 1;
+
+    let timer;
+    function debounce(func, delay) {
+        console.log(delay);
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+    var searchItemBarcodesDebounced = debounce(searchItemBarcodes, 300);
+
+
+    function searchItemBarcodes(pageNumber) {
+        query = $("#searchQuery").val();
+        var ch = $("#showSystemBarcodes");
+        showSystemBarcodes = ch[0].checked;
+        numberOfPrints = $("#numberOfPrints").val();
+        startFrom = $("#startFrom").val();
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Item/Barcodes?query=' + query + '&showSystemBarcodes=' + showSystemBarcodes + '&pageNo=' + pageNumber,
+            async: true,
+            success: function (data) {
+
+                $("#item-barcodes").html("");
+                $("#item-barcodes").html(data);
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+
+    }
+
+    searchItemBarcodes(0);
+
+</script>

@@ -1,0 +1,74 @@
+﻿@model POS.Models.ItemVM
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Import Inventory
+    </div>
+    
+
+    <div class="panel-body">
+         @using (Html.BeginForm("Inventory", "Import", FormMethod.Post, new { enctype = "multipart/form-data", @id = "item-form" })) { @Html.AntiForgeryToken()  @Html.ValidationSummary(true)   <div class="row">
+                <div class="col-lg-12">
+                    <div class="card card-transparent">
+                        <div class="card-block">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <p>please download the template for import @Html.ActionLink("here", "InventoryTemplate")</p>
+                                </div>
+                            </div>
+                            <div class="row clearfix">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label> @POS.Resources.Resource.PleaseSelect</label>
+                                        <input type="file" id="inputImage" name="InventoryTemplate" class="form-control field-setting" />
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Import" />
+                            <input type="button" class="btn btn-default custombtn" value="@POS.Resources.Resource.Back" onclick="getImportData()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+
+</div>
+
+<script>
+
+    $('form').removeData('validator');
+    $('form').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse('form');
+    var options = {
+        beforeSubmit: function (msg) {
+            blockUI();
+        },
+        success: function (response) {
+            $(".btn").prop("disabled", false);
+            unblockUI();
+            if (response) {
+                if (response.Errors.length > 0) {
+                    return ImportErrorResponse(response, "InventoryImportErrorLog.csv");
+                }
+                if (response.HasError === true) {
+                    errorToast(response.Message);
+                    return;
+                }
+                getItemData();
+          
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(jqXHR.status);
+            unblockUI();
+            $(".btn").prop("disabled", false);
+
+        }
+    };
+    $('#item-form').ajaxForm(options);
+
+</script>
+

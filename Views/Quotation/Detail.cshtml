@@ -1,0 +1,162 @@
+﻿@model POS.Models.QuotationVM
+@using (Html.BeginForm("Update", "Quotation", FormMethod.Post, new { @id = "quo-form-u" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Quote.QuotationID)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Date
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.QuoteDate, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Customer
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Quote.FKCustomerID, Model.getAllCustomers(), new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ExpiryDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.QuoteExpiry, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Quotation No
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.ReferenceNumber, new { @class = "form-control", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="quo-item-main">
+        @*<input type="button" class="btn btn-warning  custombtn" onclick="addNewRowQoute()" value="Add New Row" />*@
+        <div style="clear:both;"></div>
+        <table class="table table-responsive" id="quotation-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SaleNo</th>
+                    <th>@POS.Resources.Resource.Item</th>
+                    <th>@POS.Resources.Resource.UnitPrice</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{var sn = 0;}
+                @for (int i = 0; i < Model.Quote.Items.Count; i++)
+                {
+                    sn++;
+                    <tr>
+                        <td>
+                            @sn
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(c => c.Quote.Items[i].FKItemID, Model.getAllItems(), new { @value = Model.Quote.Items[i].FKItemID, @class = "form-control sal-items", @readonly = "readonly" })
+
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(c => c.Quote.Items[i].UnitPrice, new { @class = "form-control quo-item-price", @onchange = "setItemTotal(this)", @readonly = "readonly" })
+                            @*<input type="number" class="form-control quo-item-price" onchange="setItemTotal(this)" name="Quote.Items[0].UnitPrice" required />*@
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(c => c.Quote.Items[i].Quantity, new { @class = "form-control quo-item-quantity", @onchange = "setItemTotal(this)", @readonly = "readonly" })
+                            @*<input type="number" class="form-control quo-item-quantity" onchange="setItemTotal(this)" name="Quote.Items[0].Quantity" required />*@
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(c => c.Quote.Items[i].Total, new { @class = "form-control quo-item-total", @readonly = "readonly" })
+                            @*<input type="number" class="form-control quo-item-total" name="Quote.Items[0].Total" readonly />*@
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.SubTotal
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.SubTotal, new { @class = "form-control quo-sub", @readonly = "readonly" })
+
+        </div>
+    </div>
+    @*<div class="form-row">
+            <div class="form-lable">
+                Discount %
+            </div>
+            <div class="form-input">
+                @Html.TextBoxFor(c => c.Quote.Discount, new { @class = "form-control quo-dis", @onchange = "calculate()", @readonly = "readonly" })
+
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-lable">
+                Tax %
+            </div>
+            <div class="form-input">
+                @Html.TextBoxFor(c => c.Quote.Tax, new { @class = "form-control quo-tax", @onchange = "calculate()", @readonly = "readonly" })
+
+            </div>
+        </div>*@
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Total
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Quote.Total, new { @class = "form-control quo-total", @readonly = "readonly" })
+
+        </div>
+    </div>
+     <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+    @*<input type="submit" class="btn btn-primary custombtn" value="SAVE" />*@
+}
+<script>
+
+    $(document).ready(function () {
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                 getQuotations();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#quo-form-u').ajaxForm(options);
+    });
+    //$('#Quote_FKCustomerID').selectize({
+    //    create: function (input, callback) {
+
+    //    },
+    //    sortField: 'text'
+    //});
+    //$('.quo-items').selectize();
+
+</script>

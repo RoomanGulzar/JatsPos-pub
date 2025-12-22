@@ -1,0 +1,73 @@
+﻿@model IEnumerable<DataAccessLayer.Entities.DbPurchaseOrder>
+@{
+    var totalammount=0;
+    var count = 1;
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+      Purchase Orders
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="SaleReturn">
+            <div class="tab-div sr-tab-div">
+                <table class="display" id="saleDueTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                PO NO.
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date/Time
+                            </th>
+                            <th>Supplier</th>
+                            <th>@POS.Resources.Resource.Total</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @count
+                                    @*@Html.DisplayFor(modelItem => item.)*@
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Location.SiteName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PurchaseOrderDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Suppliers.SupplierName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Total)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.LastModifiedBy)
+                                </td>
+                            </tr>
+                            count++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#saleDueTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>

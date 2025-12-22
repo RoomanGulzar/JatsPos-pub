@@ -1,0 +1,91 @@
+﻿@model POS.Models.UnitOfMeasure.UnitGroupVM
+
+@using (Html.BeginForm("UnitGroupUpdate", "MeasureUnit", FormMethod.Post, new { @id = "unit-group-form-u" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(c => c.Group.UnitGroupID)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Name
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Group.Name, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="uom-main">
+        <div style="clear:both;"></div>
+        <table class="table table-responsive" id="group-uoms">
+            <thead>
+                <tr>
+                    <th>Base Unit</th>
+                    <th>Base Unit Quantity</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model.Group.pUnits != null && Model.Group.pUnits.Count > 0)
+                    {
+                        for (var i = 0; i < Model.Group.pUnits.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="Group.pUnits[@i].IsBaseUnit" value="@Model.Group.pUnits[i].IsBaseUnit" />
+                                    <input type="hidden" name="Group.pUnits[@i].ItemUnitID" value="@Model.Group.pUnits[i].ItemUnitID" />
+                                    <input type="text" class="form-control" name="Group.pUnits[@i].Name"
+                                           value="@Model.Group.pUnits[i].Name" required />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" name="Group.pUnits[@i].BaseUnitQunatity"
+                                           value="@Model.Group.pUnits[i].BaseUnitQunatity" @(Model.Group.pUnits[i].IsBaseUnit ? "readonly" : "") />
+                                </td>
+                                <td>
+                                    @if (!Model.Group.pUnits[i].IsBaseUnit)
+                                    {
+                                        <a href='#' onclick='removeRowUom(this)'><i class="fa fa-trash fa-fw"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+        <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowUom()" value="@POS.Resources.Resource.AddNewRow" />
+    </div>
+    <div class="form-input">
+        <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+    </div>
+
+}
+<script>
+
+    $(document).ready(function () {
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+                $(".btn").prop("disabled", false);
+                unblockUI();
+                successToast();
+                getUnitGroupData();
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#unit-group-form-u').ajaxForm(options);
+    });
+</script>

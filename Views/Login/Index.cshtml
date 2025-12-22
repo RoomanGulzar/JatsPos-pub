@@ -1,0 +1,183 @@
+﻿@model POS.Models.LoginModel
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>TechCity | LOGIN</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="~/Content/Styles/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Styles/timeline.css" rel="stylesheet" />
+    <link href="~/Content/Styles/sb-admin-2.css" rel="stylesheet" />
+    <link href="~/Content/Styles/morris.css" rel="stylesheet" />
+    <link href="~/Content/Styles/metisMenu.min.css" rel="stylesheet" />
+    <link href="~/Content/Styles/font-awesome.min.css" rel="stylesheet" />
+    <style>
+        .field-validation-error {
+        color:maroon;        
+        }
+    </style>
+</head>
+<body>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <div class="login-panel panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Please Sign In</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form role="form">
+                                <fieldset>
+                                    <div class="form-group">
+                                       @Html.TextBoxFor(c => c.Email, new { @class = "form-control", @placeholder = "USER NAME", @autofocus = "autofocus" }) 
+                                       @Html.ValidationMessageFor(c=>c.Email)
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.PasswordFor(c => c.Password, new { @class = "form-control", @placeholder = "PASSWORD"})
+                                        @Html.ValidationMessageFor(c => c.Password)
+                                       
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="remember" type="checkbox" value="Remember Me">Remember Me
+                                        </label>
+                                    </div>
+                                    <!-- Change this to a button or input when using this as a form -->
+                                    <input type="submit" class="btn btn-lg btn-success btn-block" value="LOGIN" />
+                                    @Html.ValidationSummary(true)
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    <!-- jQuery -->
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.11.3.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/metisMenu.min.js"></script>
+    <script src="~/Scripts/raphael-min.js"></script>
+    <script src="~/Scripts/morris.min.js"></script>
+    <script src="~/Scripts/sb-admin-2.js"></script>
+    <script src="~/Scripts/modernizr-2.5.3.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        //function printCheck() {
+
+        //    var docprint = window.open("about:blank", "_blank");
+        //    docprint.document.open();
+        //    docprint.document.write('<html><head><title></title>');
+        //    docprint.document.write('<style>span { margin:3px; }</style>');
+        //    docprint.document.write('</head><body style="width:275px;">');
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:large'>TechCity</div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:small'>المملكة العربية السعودية الرياض العريجاء شارع مارية القبطية</div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> No : 1 M/s: Abdullah Tariq</div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:center;font-size:medium'> Date : 9/14/2015 L.P.O. No.:123456</div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>1</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>2</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>3</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>4</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>5</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>6</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>7</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>8</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:small'><span style='float:left;'>9</span><span style='float:left;'>1010007</span><span style='float:left;'>This is test description</span><span style='float:left;'>50</span><span style='float:left;'>100</span><span style='float:left;'>500</span></div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Discount: 50</div>");
+        //    docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:medium'>Total: 5000</div>");
+        //    docprint.document.write('</body></html>');
+        //    docprint.document.close();
+        //    docprint.print();
+        //    docprint.close();
+        //}
+        function printAlwaqt() {
+
+            var docprint = window.open("about:blank", "_blank");
+            docprint.document.open();
+            docprint.document.write('<html><head><title></title>');
+            docprint.document.write('</head><body style="width:800px;height:300px">');
+            docprint.document.write("<div style='float:left;width:800px;margin-top:100px;'><span style='float:left;margin-left:55px;'>1</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>9/11/2015</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;margin-left:55px;;margin-bottom:5px;'>Abdullah Tariq</span><span style='float:right;margin-right:30px;margin-bottom:5px;'>1236</span></div>");
+            docprint.document.write('<div style="margin-top:35px;float:left;min-height:335px;position: relative;">');
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>1</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>2</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>3</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>4</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>5</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>6</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>7</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>8</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>9</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>10</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>11</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>12</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right'><div style='margin-right:25px;margin-bottom:-10px'>20</div><br /><div style='margin-right:25px;padding-bottom:45px !Important'>1200</div></div>");
+
+            docprint.document.write('</div></body></html>');
+            docprint.document.close();
+            docprint.print();
+            docprint.close();
+        }
+
+        function printWaleed() {
+
+            var docprint = window.open("about:blank", "_blank");
+            docprint.document.open();
+            docprint.document.write('<html><head><title></title>');
+            docprint.document.write('</head><body style="width:800px;height:300px">');
+            docprint.document.write("<div style='float:left;width:800px;margin-top:80px;'><span style='float:left;margin-left:55px;'>1</span><span style='float:right;margin-right:30px;margin-bottom:10px;'>9/11/2015</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;margin-left:45px;;margin-bottom:6px;'>Abdullah Tariq</span><span style='float:right;margin-right:30px;margin-bottom:6px;'>1236</span></div>");
+            docprint.document.write('<div style="margin-top:70px;float:left;min-height:335px;position: relative;">');
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>1</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>2</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>3</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>4</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>5</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>6</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>7</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>8</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>9</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>10</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>11</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>12</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='float:left;width:800px;'><span style='float:left;left:0;text-align:left;width:5%;'>13</span><span style='float:left;width:15%;'>10100007</span><span style='float:left;width:45%;'>This is test description</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>10</span><span style='float:left;width:10%;text-align:right; pading-right:5px;'>30</span><span style='float:left;width:10%;margin-left:15px;text-align:right; pading-right:5px;'>300</span></div>");
+            docprint.document.write("<div style='position: absolute;bottom:0;width:800px;text-align:right'><div style='margin-right:25px;margin-bottom:-20px'>20</div><br /><br /><div style='margin-right:25px;padding-bottom:40px !Important'>1200</div></div>");
+
+            docprint.document.write('</div></body></html>');
+            docprint.document.close();
+            docprint.print();
+            docprint.close();
+        }
+    </script>
+</body>
+</html>

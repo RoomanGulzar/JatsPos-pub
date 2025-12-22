@@ -1,0 +1,280 @@
+﻿@model POS.Models.PurchaseOrderVM
+@using (Html.BeginForm("Create", "PurchaseOrder", FormMethod.Post, new { @id = "po-form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.PurchaseOrderDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.PurchaseOrderDate, new { @class = "form-control datepicker" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+           @POS.Resources.Resource.Location
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Purchaseorder.FKLocationID, Model.getAllLocations(Model.User), new { @class = "form-control", @id = "Sale_FKLocationID" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.RequiredbyDate
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.RequiredbyDate, new { @class = "form-control datepicker" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.InvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.ReferenceNumberPO, new { @class = "form-control", @readonly="readonly" })
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+       @POS.Resources.Resource.SupplierInvoiceNumber
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.PaymentTerms, new {@class= "form-control"})
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.ShipmentMethod
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.ShippinMethod, new { @class = "form-control"})
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Supplier
+        </div>
+        <div class="form-input">
+            @Html.DropDownListFor(c => c.Purchaseorder.FKSupplierID,Model.getAllSupplier(), new { @class = "form-control"})
+        </div>
+    </div>
+    <div class="quo-item-main">
+        <div style="clear:both;">
+
+        </div>
+      
+        <table class="table table-responsive" id="PO-items">
+            <thead>
+                <tr>
+                    <th>@POS.Resources.Resource.SaleNo</th>
+                    <th>@POS.Resources.Resource.ItemNo</th>
+                    <th>@POS.Resources.Resource.Product</th>
+                    <th>@POS.Resources.Resource.Quantity</th>
+                    <th>@POS.Resources.Resource.UnitPrice/Cost</th>
+                    <th>@POS.Resources.Resource.Sale Price</th>
+                    <th>@POS.Resources.Resource.Total</th>
+                    <th>@POS.Resources.Resource.MeasuringUnit</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+        <input type="button" class="btn btn-warning  custombtn" onclick="addNewRowPO()" value="@POS.Resources.Resource.AddNewRow" />
+    </div>
+
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.SubTotal
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.SubTotal, new { @class = "form-control quo-sub", @readonly = "readonly" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Freight
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Freight, new { @class = "form-control quo-dis", @onchange = "calculatePO()" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Tax %
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Tax, new { @class = "form-control quo-tax", @onchange = "calculatePO()" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Discount
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Discount, new { @class = "form-control quo-discount", @onchange = "calculatePO()" })
+
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-lable">
+            @POS.Resources.Resource.Total
+        </div>
+        <div class="form-input">
+            @Html.TextBoxFor(c => c.Purchaseorder.Total, new { @class = "form-control quo-total", @readonly="readonly" })
+
+        </div>
+    </div>
+
+    <input type="submit" class="btn btn-primary custombtn" value="@POS.Resources.Resource.Save" />
+     <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+}
+<div class="modal fade image-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Image</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade prices-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.Prices</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade print-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">@POS.Resources.Resource.Print</h4>
+            </div>
+            <div class="modal-body">
+                <div><button class="btn btn-default custombtn" onclick="printA()">@POS.Resources.Resource.Print</button><button class="btn btn-default custombtn" onclick="cancelPrint()">@POS.Resources.Resource.Cancel</button></div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function cancelPrint() {
+        $(".print-modal").modal("hide");
+        $('.modal-backdrop').hide();
+        successToast();
+        getPurchaseOrder();
+    }
+    function printA() {
+        cancelPrint();
+        var name = $("#Purchaseorder_FKSupplierID:selected").text();
+        var sr = $("#Purchaseorder_ReferenceNumberPO").val();
+        var date = $("#Purchaseorder_PurchaseOrderDate").val();
+        var sn = 0;
+        var docprint = window.open("about:blank", "_blank");
+        docprint.document.open();
+        docprint.document.write('<html><head><title></title>');
+        docprint.document.write('<style>span { margin:3px; }</style>');
+        docprint.document.write('</head><body style="width:100%;">');
+        docprint.document.write('<div style="width:800px;padding:20px;float:left;">');
+        docprint.document.write("<div style='text-align:center;'>");
+        docprint.document.write("<div style='width:50%;margin-left:190px;margin-bottom:10px;border-radius:4px;border:solid 1px;'>");
+        docprint.document.write('<div class="col-lg-12" style="text-align:right">TechCity</div><br/>');
+        docprint.document.write("<div style='font-size:10px;'>Purchase Order</div>");
+        docprint.document.write("<div style='font-size:8px;'>Invoice No : " + $("#Purchaseorder_ReferenceNumberPO").val() + " Location : " + $("#Sale_FKLocationID :selected").text() + "</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("</div>");
+        docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:10px;border:1px solid #000;'><span style='float:left;width:5%'>S.No</span><span style='float:left;width:15%'>CODE</span><span style='float:left;width:30%'>DESCRIPTION</span><span style='float:left;width:15%'>QTY</span><span style='float:left;width:15%'>UNIT PRICE</span><span style='float:left;width:15%'>AMOUNT</span></div>");
+        $("#PO-items tbody tr").each(function () {
+            var itemno = $(this).find(".item-search").val();
+            var desc = $(this).find(".sale-items").val();
+            var qty = $(this).find(".sale-item-quantity").val();
+            var price = $(this).find(".sale-item-price").val();
+            var total = $(this).find(".sale-item-total").val();
+            sn++;
+            docprint.document.write("<div style='float:left;width:100%;text-align:left;font-size:10px;border:1px solid #000;'><span style='float:left;width:5%'>" + sn + "</span><span style='float:left;width:15%'>" + itemno + "</span><span style='float:left;width:30%'>" + desc + "</span><span style='float:left;width:15%'>" + qty + "</span><span style='float:left;width:15%'>" + price + "</span><span style='float:left;width:15%'>" + total + "</span></div>");
+
+        });
+        var gTotal = $("#Purchaseorder_Total").val();
+        docprint.document.write("<div style='float:left;width:100%;text-align:right;font-size:10px;border:1px solid #000;'>Total: " + gTotal + "</div>");
+        docprint.document.write('</body></html>');
+        docprint.document.close();
+        docprint.print();
+        docprint.close();
+    }
+    $(document).ready(function () {
+        //$(".datepicker").kendoDatePicker(datePickerOptions);
+        $(".datepicker").kendoDatePicker(datePickerOptions);
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+        var options = {
+            beforeSubmit: function (msg) {
+                blockUI();
+                $(".btn").prop("disabled", true);
+            },
+            success: function (msg) {
+
+                $(".btn").prop("disabled", false);
+                unblockUI();
+
+                if (msg == false) {
+                    return errorToast();
+                }
+                $(".print-modal").modal("show");
+
+            },
+
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+                unblockUI();
+                $(".btn").prop("disabled", false);
+
+            }
+        };
+        $('#po-form').ajaxForm(options);
+        $('select').selectize();
+        try {
+            var $select1 = $("#Purchaseorder_FKSupplierID").selectize();
+            @*$("#Purchaseorder_FKSupplierID").val('@Model.getAllSupplier().Where(x=>x.Text.ToLower()=="cash").First().Value');
+            $select1[0].selectize.setValue('@Model.getAllSupplier().Where(x=>x.Text.ToLower()=="cash").First().Value');*@
+
+            $select1 = $("#Sale_FKLocationID").selectize();
+            $("#Sale_FKLocationID").val('@Model.getAllLocations(Model.User).Where(x=>x.Value == Model.User.LocationID.ToString()).First().Value');
+            $select1[0].selectize.setValue('@Model.getAllLocations(Model.User).Where(x=>x.Value == Model.User.LocationID.ToString()).First().Value');
+
+            var $select2 = $("#Sale_FKLocationID").selectize();
+            $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');
+        } catch (e) {
+            //alert(e.message);
+        }
+    });
+
+    //$('select').selectize();
+    $('select').selectize();
+    applyAutoComplete("Po-item-0");
+</script>

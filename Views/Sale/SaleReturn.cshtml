@@ -1,0 +1,145 @@
+﻿@model POS.Models.SaleVM
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        @POS.Resources.Resource.SaleReturn
+    </div>
+    <div class="panel-body">
+        <a href="/Home" class="btn btn-primary custombtn">@POS.Resources.Resource.Back</a>
+        <div id="SaleReturn">
+            <div class="tab-div sr-tab-div">
+                <table class="display" id="saleRetunTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                @POS.Resources.Resource.SaleNo
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Type
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Location
+                            </th>
+                            <th>
+                                @POS.Resources.Resource.Date
+                            </th>
+                            <th>@POS.Resources.Resource.Customer</th>
+                            <th>@POS.Resources.Resource.Total</th>
+                            <th>@POS.Resources.Resource.SoldBy</th>
+                            <th>@POS.Resources.Resource.Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Sales)
+                        {
+                            if (item.ReturnedItems)
+                            {
+                                <tr style="background-color:yellow;">
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RefNO)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SaleType)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.pLocation.SiteName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SaleDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.pCustomer.CustomerName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Total)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.LastModifiedBy)
+                                    </td>
+                                    <td>
+                                        <a href="#" onclick="getReturnSale('@item.SaleID.ToString()')">@POS.Resources.Resource.Return</a> | <a href="#" onclick="getDetail('@item.SaleID.ToString()')">@POS.Resources.Resource.Detail</a>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.RefNO)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SaleType)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.pLocation.SiteName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SaleDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.pCustomer.CustomerName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Total)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.LastModifiedBy)
+                                    </td>
+                                    <td>
+                                        <a href="#" onclick="getReturnSale('@item.SaleID.ToString()')">@POS.Resources.Resource.Return</a> | <a href="#" onclick="getDetail('@item.SaleID.ToString()')">@POS.Resources.Resource.Detail</a>
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+      
+
+    </div>
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog cus-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">@POS.Resources.Resource.SaleDetails</h4>
+            </div>
+            <div class="modal-body">
+                <div style="clear:both;"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf-8">
+    function getDetail(id) {
+        blockUI();
+        $.ajax({
+            type: "GET",
+            contentType: "html",
+            url: '/Sale/GetSale?id=' + id,
+            async: true,
+            success: function (data) {
+                $("#detailModal .modal-body").html(data);
+                $("#detailModal").modal("show");
+                unblockUI();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                handleErrors(textStatus);
+            }
+        });
+    }
+    $(document).ready(function () {
+
+        $('#saleRetunTable').dataTable({
+            responsive: true
+        });
+
+    });
+</script>
