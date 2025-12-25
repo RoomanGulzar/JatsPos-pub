@@ -116,6 +116,7 @@
                         let btns = `<button class="btn btn-lg blue print-receipt">Print Receipt</button>`;
                         if (row.Total > 0) {
                             btns += `<button onclick="refundInvoice('${data}')" class="btn btn-lg warning">Refund</button>`;
+                            btns += `<button onclick="voidSale('${data}')" class="btn btn-lg warning">Void</button>`;
                         }
                         btns += `<button onclick="sendEmail('${data}', '${row.CustomerEmail}')" class="btn btn-lg blue">Send Email</button>`;
                         return btns;

@@ -712,7 +712,7 @@ function currentItem_QtyOnChange(number) {
     if (number == 0) {
         return;
     }
-    if (currentCartItem.ImeiId !== null && currentCartItem.ImeiId !== undefined) {
+    if (!currentCartItem || (currentCartItem.ImeiId !== null || currentCartItem.ImeiId !== undefined)) {
         return;
     }
     //var discount = currentCartItem.AllowedDiscount === true ? (currentCartItem.Price * (currentCartItem.Discount / 100)) : 0;
@@ -1887,6 +1887,39 @@ function refundInvoice(id) {
         }
     });
 }
+function voidSale(id) {
+    blockUI();
+    $.ajax({
+        type: "GET",
+        contentType: "html",
+        url: '/Pos/VoidSale?id=' + id,
+        async: true,
+        success: function (data) {
+            unblockUI();
+            if (data.message == "true") {
+                $().toastmessage('showToast', {
+                    text: "Operation Successfull",
+                    sticky: false,
+                    position: 'bottom-right',
+                    type: 'success'
+                });
+            } else {
+                $().toastmessage('showToast', {
+                    text: "Operation Successfull",
+                    sticky: false,
+                    position: 'bottom-right',
+                    type: 'error'
+                });
+            }
+            if ($.fn.DataTable.isDataTable('#saleTable')) {
+                $('#saleTable').DataTable().ajax.reload(null, false);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            handleErrors(textStatus);
+        }
+    });
+}
 
 function switchSalesRefundScreen(showSales) {
     keyPressBeep();
@@ -2783,7 +2816,7 @@ function printReceipt(sale) {
     docprint.document.write('<div class="totals-section">');
     docprint.document.write(`<div class="flex-row"><span style="font-size:${fsLarge};">SUB TOTAL:   </span><span>$${sale.SubTotal.toFixed(2)}</span></div>`);
     docprint.document.write(`<div class="flex-row"><span style="font-size:${fsLarge};">HST:         </span><span>$${sale.GST.toFixed(2)}</span></div>`);
-    docprint.document.write(`<div class="flex-row"><span style="font-size:${fsLarge};">DISCOUNT:    </span><span>$${parseFloat(sale.Discount||0).toFixed(2)}</span></div>`);
+    docprint.document.write(`<div class="flex-row"><span style="font-size:${fsLarge};">DISCOUNT:    </span><span>$${parseFloat(sale.Discount || 0).toFixed(2)}</span></div>`);
     if (sale.Discount > 0) {
     }
     docprint.document.write(`<div class="flex-row bold" style="margin-top:2px;">

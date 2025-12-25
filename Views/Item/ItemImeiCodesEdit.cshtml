@@ -74,9 +74,37 @@
                         }
                     };
                     $('#item-imei-form').ajaxForm(options);
-                   
+
                 </script>
             }
         }
     </div>
 </div>
+@*<script>
+    function removeRowImei(el) {
+        $(el).closest('tr').remove();
+        reIndexImeiRows();
+    }
+
+    function reIndexImeiRows() {
+        $('#item-imeicodes tbody tr').each(function (index) {
+
+            // Update Sr No
+            $(this).find('td:first').text(index + 1);
+
+            // Update input names
+            $(this).find('input').each(function () {
+                var name = $(this).attr('name');
+                if (!name) return;
+
+                name = name.replace(/ItemImeiCodes\[\d+\]/g, 'ItemImeiCodes[' + index + ']');
+                $(this).attr('name', name);
+            });
+        });
+    }
+
+    // Ensure correct indexes before submit (IMPORTANT)
+    $('#item-imei-form').on('submit', function () {
+        reIndexImeiRows();
+    });
+</script>*@
