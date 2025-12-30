@@ -50,13 +50,7 @@
                             Product Listing
                         </div>
                         <div class="form-input">
-                            @Html.DropDownListFor(c => c.Item.Listing,
-                                    Model.getItemListings(),
-                                    "Please Select....",
-                                    new
-                                    {
-                                        @class = "form-control selectize"
-                                    })
+                            @Html.DropDownListFor(c => c.Item.Listing, Model.getItemListings(), "Please Select....", new { @class = "form-control selectize" })
 
                         </div>
                     </div>
@@ -135,7 +129,7 @@
                             @POS.Resources.Resource.MinStockLimit
                         </div>
                         <div class="form-input">
-                            @Html.TextBoxFor(c => c.Item.MinStockLimit, new { @class = "form-control",@type="number" })
+                            @Html.TextBoxFor(c => c.Item.MinStockLimit, new { @class = "form-control", @type = "number" })
 
                         </div>
                     </div>
@@ -467,7 +461,11 @@
 
     $(document).ready(function () {
         $("#item-form").off('keyup').keyup(function (e) {
-            if (e.key === 'Enter' && !(event.target.nodeName == "TEXTAREA")) {
+            if (e.key !== 'Enter') {
+                return;
+            }
+            debugger
+            if (!(event.target.nodeName == "TEXTAREA") && !(event.target.nodeName == "SELECT") && !(event.target.parentElement.classList.contains('selectize-input'))) {
                 console.log('submitt for enter is clicked')
                 console.log('node',event.target.nodeName)
                 $('#item-form').submit();
