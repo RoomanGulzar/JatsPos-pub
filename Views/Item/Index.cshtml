@@ -133,6 +133,7 @@
                     {
                         title: "Action",
                         template: function (n) {
+                            console.log(n)
                             return "<a href='#'  onclick='editItemBarcodesAndPrices(\"" + n.ItemID + "\")'>Barcodes and Prices</a>"
                                 + " | <a href='#'  onclick='editItemImeiCodes(\"" + n.ItemID + "\")'>IMEI Numbers</a>"
                                 + " | <a href='#' onclick='editItem(\"" + n.ItemID + "\")'>Update/Detail</a>"

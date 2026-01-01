@@ -419,4 +419,20 @@
     var $selectItemListing = $("#Item_Listing").selectize();
     $selectItemListing[0].selectize.setValue("@((int)Model.Item.Listing)");
 
+
+
+
+    $("#Item_Listing").on('change', function () {
+        var value = $(this).val();
+        if (value == '10') {
+            $("#Item_Description").attr('disabled', true)
+            $("#Item_DescriptionForSite").attr('disabled', true)
+            $("#Item_SpecialSalePrice").attr('disabled', true)
+        } else {
+            $("#Item_Description").attr('disabled', false)
+            $("#Item_DescriptionForSite").attr('disabled', false)
+            $("#Item_SpecialSalePrice").attr('disabled', false)
+        }
+    })
+    $("#Item_Listing").trigger('change')
 </script>

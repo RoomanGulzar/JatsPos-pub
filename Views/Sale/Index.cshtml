@@ -894,7 +894,7 @@
         var $select1 = $("#Sale_FKLocationID").selectize();
         $select1[0].selectize.setValue("@Model.User.LocationID");
         var $select2 = $("#Sale_FKCustomerID").selectize();
-        $select2[0].selectize.setValue('@Model.getAllCustomers().Where(x=>x.Text.ToLower()=="cash").FirstOrDefault()?.Value');
+        $select2[0].selectize.setValue('@Model.getAllCustomers().Where(x=>x.Text!=null && x.Text.ToLower() == "cash").FirstOrDefault()?.Value');
 
         $select2 = $("#Sale_FKLocationID").selectize();
         $select2[0].selectize.setValue('@POS.Models.Sessions.Util.GetCurrentUserLocationID()');

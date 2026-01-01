@@ -290,9 +290,11 @@
         if (value == '10') {
             $("#Item_Description").attr('disabled', true)
             $("#Item_DescriptionForSite").attr('disabled', true)
+            $("#Item_SpecialSalePrice").attr('disabled', true)
         } else {
             $("#Item_Description").attr('disabled', false)
             $("#Item_DescriptionForSite").attr('disabled', false)
+            $("#Item_SpecialSalePrice").attr('disabled', false)
         }
     })
 
@@ -458,20 +460,43 @@
         },
         sortField: 'text'
     });
-
+    let scanBuffer = '';
+    let lastTime = 0;
     $(document).ready(function () {
         $("#item-form").off('keyup').keyup(function (e) {
-            if (e.key !== 'Enter') {
+
+            const now = Date.now();
+
+            if (e.key === 'Enter') {
+                if (scanBuffer.length >= 6) {
+                    console.log('📦 Scanner Enter detected');
+                    //handleScan(scanBuffer);
+                } else {
+                    console.log('⌨️ Manual Enter detected');
+                    submitForm(e);
+                }
+
+                scanBuffer = '';
                 return;
             }
-            debugger
-            if (!(event.target.nodeName == "TEXTAREA") && !(event.target.nodeName == "SELECT") && !(event.target.parentElement.classList.contains('selectize-input'))) {
-                console.log('submitt for enter is clicked')
-                console.log('node',event.target.nodeName)
-                $('#item-form').submit();
-                return false;
+
+            if (now - lastTime < 30) {
+                scanBuffer += e.key;
+            } else {
+                scanBuffer = e.key;
             }
+
+            lastTime = now;
+            debugger
+            
         })
     });
-
+    function submitForm(event) {
+        if (!(event.target.nodeName == "TEXTAREA") && !(event.target.nodeName == "SELECT") && !(event.target.parentElement.classList.contains('selectize-input'))) {
+            console.log('submitt for enter is clicked')
+            console.log('node', event.target.nodeName)
+            $('#item-form').submit();
+            return false;
+        }
+    }
 </script>
