@@ -386,8 +386,10 @@ const debouncedSearchQueryChange = debounce(searchQueryChange, 1000);
 function searchQueryChange(e) {
     itemSearchKeypadVal = e.value;
     itemSearch = e.value;
-
+    debugger;
     if (itemSearch.length === 9) {
+        showSearchGridContent(false);
+
         var saleFound = false;
         keyPressBeep();
         blockUI();
@@ -434,6 +436,7 @@ function searchQueryChange(e) {
                 handleErrors(textStatus);
             }
         });
+        return;
     }
 
     if (!saleFound && itemSearch) {
