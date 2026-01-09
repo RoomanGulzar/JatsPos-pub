@@ -154,9 +154,17 @@
             return false;
         }
 
-        if (e.which >= 48 && e.which <= 57) {
-            console.log('char push: ',e.which)
-            chars.push(String.fromCharCode(e.which));
+        //if (
+        //    (e.which >= 48 && e.which <= 57) ||   // 0–9
+        //    (e.which >= 65 && e.which <= 90) ||   // A–Z
+        //    (e.which >= 97 && e.which <= 122)     // a–z
+        //) {
+        //    console.log('char push:', e.which);
+        //    chars.push(String.fromCharCode(e.which));
+        //}
+        if (/^[a-zA-Z0-9]$/.test(e.key)) {
+            console.log('char push:', e.key);
+            chars.push(e.key);
         }
         //console.log(e.which + ":" + chars.join("|"));
         
