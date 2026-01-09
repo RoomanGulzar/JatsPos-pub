@@ -460,43 +460,40 @@
         },
         sortField: 'text'
     });
-    let scanBuffer = '';
-    let lastTime = 0;
-    $(document).ready(function () {
-        $("#item-form").off('keyup').keyup(function (e) {
+    //let scanBuffer = '';
+    //let lastTime = 0;
 
-            const now = Date.now();
 
-            if (e.key === 'Enter') {
-                if (scanBuffer.length >= 6) {
-                    console.log('📦 Scanner Enter detected');
-                    //handleScan(scanBuffer);
-                } else {
-                    console.log('⌨️ Manual Enter detected');
-                    submitForm(e);
-                }
-
-                scanBuffer = '';
-                return;
-            }
-
-            if (now - lastTime < 30) {
-                scanBuffer += e.key;
-            } else {
-                scanBuffer = e.key;
-            }
-
-            lastTime = now;
-            debugger
-            
-        })
-    });
-    function submitForm(event) {
-        if (!(event.target.nodeName == "TEXTAREA") && !(event.target.nodeName == "SELECT") && !(event.target.parentElement.classList.contains('selectize-input'))) {
-            console.log('submitt for enter is clicked')
-            console.log('node', event.target.nodeName)
-            $('#item-form').submit();
-            return false;
-        }
-    }
+    //$(document).ready(function () {
+    //    var pressed = false;
+    //    $("#item-form").off('keyup').keyup(function (e) {
+    //        const now = Date.now();
+    //        if (e.key === 'Enter') {
+    //            if (scanBuffer.length >= 8) {
+    //                console.log('📦 Scanner Enter detected');
+    //                //handleScan(scanBuffer);
+    //            } else {
+    //                console.log('⌨️ Manual Enter detected');
+    //                submitForm(e);
+    //            }
+    //            scanBuffer = '';
+    //            return;
+    //        }
+    //        if (now - lastTime < 30) {
+    //            scanBuffer += e.key;
+    //        } else {
+    //            scanBuffer = e.key;
+    //        }
+    //        lastTime = now;
+    //        debugger
+    //    })
+    //});
+    //function submitForm(event) {
+    //    if (!(event.target.nodeName == "TEXTAREA") && !(event.target.nodeName == "SELECT") && !(event.target.parentElement.classList.contains('selectize-input'))) {
+    //        console.log('submitt for enter is clicked')
+    //        console.log('node', event.target.nodeName)
+    //        $('#item-form').submit();
+    //        return false;
+    //    }
+    //}
 </script>

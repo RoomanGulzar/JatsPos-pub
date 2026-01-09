@@ -383,6 +383,52 @@ const debouncedSearchQueryChange = debounce(searchQueryChange, 1000);
 //function onInputChange(e) {
 //    debouncedSearchQueryChange(e);
 //}
+function AddSaleReturn(itemSearch) {
+    $.ajax({
+        type: "GET",
+        contentType: "json",
+        url: '/Pos/GetSaleByNumber?saleNumber=' + itemSearch,
+        async: true,
+        success: function (model) {
+            searchQueryTimer = 0;
+            unblockUI();
+            if (!model) {
+                alert("Receipt not found");
+                return;
+            }
+            saleModel = model;
+            saleModel.SaleDate = new Date();
+            saleModel.update = true;
+            var count = 0;
+            var cart = $("#cartGrid").data("kendoGrid");
+            cartData = [];
+            $.each(model.pItems, function (i, item) {
+                item.Quantity = -item.Quantity;
+                item.Tax = -item.Tax;
+                cartData.push({
+                    Id: item.SaleItemID,
+                    Lock: true,
+                    Index: count + 1,
+                    Description: item.Description,
+                    FKItemID: item.FKItemID,
+                    Qty: item.Quantity,
+                    Cost: item.PurchaseCost,
+                    Profit: ((item.ProfitLoss / item.Total) * 100).toFixed(2),
+                    Price: item.UnitPrice,
+                    Total: item.Total
+                });
+            });
+            updateTotals();
+            cart.dataSource.data(cartData);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            searchQueryTimer = 0;
+            handleErrors(textStatus);
+        }
+    });
+}
+
+
 function searchQueryChange(e) {
     itemSearchKeypadVal = e.value;
     itemSearch = e.value;
@@ -394,48 +440,8 @@ function searchQueryChange(e) {
         keyPressBeep();
         blockUI();
         searchQueryTimer = 1000;
-        $.ajax({
-            type: "GET",
-            contentType: "json",
-            url: '/Pos/GetSaleByNumber?saleNumber=' + itemSearch,
-            async: true,
-            success: function (model) {
-                searchQueryTimer = 0;
-                unblockUI();
-                if (!model) {
-                    alert("Receipt not found");
-                    return;
-                }
-                saleModel = model;
-                saleModel.SaleDate = new Date();
-                saleModel.update = true;
-                var count = 0;
-                var cart = $("#cartGrid").data("kendoGrid");
-                cartData = [];
-                $.each(model.pItems, function (i, item) {
-                    item.Quantity = -item.Quantity;
-                    item.Tax = -item.Tax;
-                    cartData.push({
-                        Id: item.SaleItemID,
-                        Lock: true,
-                        Index: count + 1,
-                        Description: item.Description,
-                        FKItemID: item.FKItemID,
-                        Qty: item.Quantity,
-                        Cost: item.PurchaseCost,
-                        Profit: ((item.ProfitLoss / item.Total) * 100).toFixed(2),
-                        Price: item.UnitPrice,
-                        Total: item.Total
-                    });
-                });
-                updateTotals();
-                cart.dataSource.data(cartData);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                searchQueryTimer = 0;
-                handleErrors(textStatus);
-            }
-        });
+
+        AddSaleReturn(itemSearch)        
         return;
     }
 
@@ -1026,6 +1032,10 @@ var item = null;
 var itemVariant = null;
 function addToCart(barcode) {
     if (!barcode) {
+        return;
+    }
+    if (barcode.length === 9) {
+        AddSaleReturn(barcode)        
         return;
     }
     keyPressBeep();
