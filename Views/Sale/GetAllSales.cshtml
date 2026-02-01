@@ -1,32 +1,91 @@
 ﻿
-
+@using DataAccessLayer.Helpers
 <div class="panel panel-default">
     <div class="panel-heading">
         @POS.Resources.Resource.Sales
     </div>
-    <div class=" container-fluid   container-fixed-lg bg-white">
-        <div class="card card-transparent">
-            <div class="card-block">
-                <div class="row">
-                    <div class="form-row">
-                        <div class="form-lable">
-                            Search
-                        </div>
-                        <div class="form-input">
-                            <input id="searchQuery" type="text" class="form-control" onkeyup="searchSaleList(0)" />
-                        </div>
-                    </div>
-                    <a href="/Home" class="btn btn-primary custombtn">BACK</a>
-                </div>
-                <div class="sr-tab-div">
-                    <div id="salesGrid">
 
+    <div class="panel-body">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <!-- Search -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="searchQuery">Search</label>
+                                <input id="searchQuery" type="text" class="form-control" onkeyup="searchSaleList(0)" />
+                            </div>
+                        </div>
+
+                        <!-- Sale Type Filters -->
+                        <div class="col-md-12 pt-3">
+                            <label>Sale Type</label>
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="searchType" onchange="filterSaleType('')" checked>
+                                    All
+                                </label>
+                            </div>
+
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="searchType" onchange="filterSaleType('@Constants.CashSale')">
+                                    @Constants.CashSale
+                                </label>
+                            </div>
+
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="searchType" onchange="filterSaleType('@Constants.CreditCardSale')">
+                                    @Constants.CreditCardSale
+                                </label>
+                            </div>
+
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="searchType" onchange="filterSaleType('@Constants.DebitCardSale')">
+                                    @Constants.DebitCardSale
+                                </label>
+                            </div>
+
+                            <div class="radio-inline">
+                                <label>
+                                    <input type="radio" name="searchType" onchange="filterSaleType('@Constants.StoreCreditSale')">
+                                    @Constants.StoreCreditSale
+                                </label>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <!-- Back Button -->
+                <div class="col-md-1 text-right">
+                    <a class="btn btn-danger btn-block" onclick="clearSales()">Clear Sales</a>
+                </div>
+                <div class="col-md-1 text-right">
+                    <a class="btn btn-success btn-block" onclick="generateSaleReport()">
+                        Export PDF
+                    </a>
+                </div>
+                <div class="col-md-1 text-right">
+                    <a href="/Home" class="btn btn-primary btn-block">BACK</a>
                 </div>
             </div>
+
+            <hr />
+
+            <!-- Sales Grid -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="salesGrid"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog cus-modal-dialog" role="document">
         <div class="modal-content">
@@ -44,9 +103,17 @@
 </div>
 <script type="text/javascript" charset="utf-8">
     var salesSearch = "";
-
+    var saleType = '';
     function searchSaleList() {
         salesSearch = $("#searchQuery").val();
+        var grid = $("#salesGrid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function filterSaleType(t) {
+        saleType = t;
         var grid = $("#salesGrid").data("kendoGrid");
         if (grid) {
             grid.dataSource.read();
@@ -68,7 +135,7 @@
                         if (type === "read") return JSON.stringify({
                             GridFilters: e,
                             Search: salesSearch,
-
+                            SaleType: saleType
                         })
                     }
                 },
@@ -155,38 +222,77 @@
             ]
         });
     });
-        function deleteSale(id) {
-            if (confirm("Deleting Sales will rollback all the payments and stock. Do you want to continue ?")) {
-                blockUI();
-                $.ajax({
-                    type: "GET",
-                    contentType: "html",
-                    url: '/Sale/DeleteSale?sale=' + id,
-                    async: true,
-                    success: function (data) {
-                        if (data == "true") {
-                            getAllSales();
-                            unblockUI();
-                        }
-                        else {
-                            unblockUI();
-                            return $().toastmessage('showToast', {
-                                text: data,
-                                sticky: false,
-                                position: 'bottom-right',
-                                type: 'error'
 
-                            });
-                        }
 
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        handleErrors(textStatus);
+    function deleteSale(id) {
+        if (confirm("Deleting Sales will rollback all the payments and stock. Do you want to continue ?")) {
+            blockUI();
+            $.ajax({
+                type: "GET",
+                contentType: "html",
+                url: '/Sale/DeleteSale?sale=' + id,
+                async: true,
+                success: function (data) {
+                    if (data == "true") {
+                        getAllSales();
+                        unblockUI();
                     }
-                });
-            }
+                    else {
+                        unblockUI();
+                        return $().toastmessage('showToast', {
+                            text: data,
+                            sticky: false,
+                            position: 'bottom-right',
+                            type: 'error'
 
+                        });
+                    }
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(textStatus);
+                }
+            });
         }
+
+    }
+
+
+    function clearSales() {
+        alert('You have only read permissions!');
+        return;
+        if (confirm("Are u sure to continue this operation? it may take some time!")) {
+            blockUI();
+            $.ajax({
+                type: "GET",
+                contentType: "html",
+                url: `/Sale/ClearSales?salesSearch=${salesSearch}&saleType=${saleType}`,
+                async: true,
+                success: function (data) {
+                    if (data == "true") {
+                        getAllSales();
+                        unblockUI();
+                    }
+                    else {
+                        unblockUI();
+                        return $().toastmessage('showToast', {
+                            text: data,
+                            sticky: false,
+                            position: 'bottom-right',
+                            type: 'error'
+
+                        });
+                    }
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    handleErrors(textStatus);
+                }
+            });
+        }
+
+    }
+
         function getDetail(id) {
             blockUI();
             $.ajax({
@@ -221,5 +327,10 @@
                 }
             });
         }
-
+    function generateSaleReport() {
+        alert('You have only read permissions!');
+        return;
+        var url = '/Sale/GenerateSaleReport?saleType=' + encodeURIComponent(saleType);
+        window.open(url, '_blank');
+    }
 </script>

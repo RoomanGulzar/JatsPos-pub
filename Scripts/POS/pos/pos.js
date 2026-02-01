@@ -405,6 +405,7 @@ function AddSaleReturn(itemSearch) {
             $.each(model.pItems, function (i, item) {
                 item.Quantity = -item.Quantity;
                 item.Tax = -item.Tax;
+
                 cartData.push({
                     Id: item.SaleItemID,
                     Lock: true,
@@ -413,6 +414,7 @@ function AddSaleReturn(itemSearch) {
                     FKItemID: item.FKItemID,
                     Qty: item.Quantity,
                     Cost: item.PurchaseCost,
+                    //Profit: ProfitPercentage(item.Total, item.ProfitLoss),
                     Profit: ((item.ProfitLoss / item.Total) * 100).toFixed(2),
                     Price: item.UnitPrice,
                     Total: item.Total
@@ -441,7 +443,7 @@ function searchQueryChange(e) {
         blockUI();
         searchQueryTimer = 1000;
 
-        AddSaleReturn(itemSearch)        
+        AddSaleReturn(itemSearch)
         return;
     }
 
@@ -578,7 +580,8 @@ $("#searchGrid").kendoGrid({
             field: "Profit",
             title: "Profit",
             template: function (o) {
-                return (((o.SalePrice - o.PurchaseCost) / o.SalePrice) * 100).toFixed(2) + "%";
+                //return (((o.SalePrice - o.PurchaseCost) / o.PurchaseCost) * 100).toFixed(2) + "%";
+                return ProfitPercentage(o.PurchaseCost, o.SalePrice) + "%";
             },
             width: "20%"
         },
@@ -893,7 +896,9 @@ function setCartItemPrice(value) {
             obj.Price = currentCartItem.Price;
             var discount = obj.AllowedDiscount === true ? obj.Price * obj.DiscountAllowed / 100 : 0;
             var tax = obj.IsTaxable === true ? obj.Price * obj.TaxRate / 100 : 0;
-            obj.Profit = ((obj.Cost / obj.Price) * 100).toFixed(2);
+
+            //obj.Profit = ((obj.Cost / obj.Price) * 100).toFixed(2);
+            obj.Profit = ProfitPercentage(obj.Cost, obj.Price);
             obj.Discount = discount * currentCartItem.Qty,
                 obj.Tax = tax * currentCartItem.Qty,
                 obj.Total = ((obj.Price - discount + tax) * obj.Qty);
@@ -1035,7 +1040,7 @@ function addToCart(barcode) {
         return;
     }
     if (barcode.length === 9) {
-        AddSaleReturn(barcode)        
+        AddSaleReturn(barcode)
         return;
     }
     keyPressBeep();
@@ -1109,6 +1114,7 @@ function updateCart(cart, item) {
             FKSaleID: saleModel.SaleID,
             WarrantyCode: item.WarrantyCode
         });
+
         cartData.push({
             Id: id,
             Index: count + 1,
@@ -1120,7 +1126,9 @@ function updateCart(cart, item) {
             Qty: 1,
             Price: item.SalePrice,
             Cost: item.PurchaseCost,
-            Profit: item.SalePrice == 0 ? 0 : (((item.SalePrice - item.PurchaseCost) / item.SalePrice) * 100).toFixed(2),
+
+            //Profit: item.SalePrice == 0 ? 0 : (((item.SalePrice - item.PurchaseCost) / item.PurchaseCost) * 100).toFixed(2),
+            Profit: item.SalePrice == 0 ? 0 : ProfitPercentage(item.PurchaseCost, item.SalePrice),
             AllowedDiscount: item.AllowedDiscount,
             DiscountAllowed: item.Discount,
             Discount: discount,
@@ -2625,6 +2633,9 @@ function addSaleCreditAmount() {
 
     //}
 }
+function ProfitPercentage(costPrice, salePrice) {
+    return (((salePrice - costPrice) / costPrice) * 100).toFixed(2);
+}
 function setCartItemTax(value) {
     keyPressBeep();
     currentCartItem.TaxRate = value ? value : 0;
@@ -2638,10 +2649,12 @@ function setCartItemTax(value) {
             obj.TaxRate = currentCartItem.TaxRate;
             var discount = obj.AllowedDiscount === true ? obj.Price * obj.DiscountAllowed / 100 : 0;
             var tax = obj.IsTaxable === true ? obj.Price * obj.TaxRate / 100 : 0;
-            obj.Profit = ((obj.Cost / obj.Price) * 100).toFixed(2);
-            obj.Discount = discount * currentCartItem.Qty,
-                obj.Tax = tax * currentCartItem.Qty,
-                obj.Total = ((obj.Price - discount + tax) * obj.Qty);
+
+            obj.Profit = ProfitPercentage(obj.Cost, obj.Price);
+            //obj.Profit = ((obj.Cost / obj.Price) * 100).toFixed(2);
+            obj.Discount = discount * currentCartItem.Qty;
+            obj.Tax = tax * currentCartItem.Qty;
+            obj.Total = ((obj.Price - discount + tax) * obj.Qty);
 
             return false;
         }
