@@ -61,7 +61,7 @@
                 </div>
                 <!-- Back Button -->
                 <div class="col-md-1 text-right">
-                    <a class="btn btn-danger btn-block" onclick="clearSales()">Clear Sales</a>
+                    <a class="btn btn-danger bg-danger" style="background-color: #d9534f!important;" onclick="clearSales()">Clear Sales</a>
                 </div>
                 <div class="col-md-1 text-right">
                     <a class="btn btn-success btn-block" onclick="generateSaleReport()">
@@ -259,8 +259,8 @@
 
 
     function clearSales() {
-        alert('You have only read permissions!');
-        return;
+        //alert('You have only read permissions!');
+        //return;
         if (confirm("Are u sure to continue this operation? it may take some time!")) {
             blockUI();
             $.ajax({
@@ -328,8 +328,7 @@
             });
         }
     function generateSaleReport() {
-        alert('You have only read permissions!');
-        return;
+       
         var url = '/Sale/GenerateSaleReport?saleType=' + encodeURIComponent(saleType);
         window.open(url, '_blank');
     }
