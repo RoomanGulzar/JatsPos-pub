@@ -951,6 +951,7 @@ function setItemTax(value) {
 }
 function removeCartItem() {
     if (!currentCartItem) {
+        deleteCurrentCartItem = null;
         return;
     }
     keyPressBeep();
@@ -962,6 +963,8 @@ function removeCartItem() {
         return n.SaleItemID !== currentCartItem.Id;
     });
     cart.dataSource.data(cartData);
+    deleteCurrentCartItem = null;
+
     updateTotals();
     closeCartItemActionWindow();
 }
